@@ -4,7 +4,10 @@ CC = gcc
 CFLAGS = -std=c11 -Werror -Wall -Wextra -pedantic
 CFLAGS += -g
 
-PROGS = main.c
+PROGS = ./scanner/*
 
-main: $(PROGS)
+main: main.c
+	$(CC) $(CFLAGS) $^ -o $@ -lm
+
+scanner_test: $(PROGS)
 	$(CC) $(CFLAGS) $^ -o $@ -lm

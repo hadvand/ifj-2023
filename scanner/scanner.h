@@ -1,5 +1,6 @@
 
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef enum state{
     S_START,
@@ -41,27 +42,28 @@ typedef enum token_type{
     T_ID,
     T_KEYWORD_TYPE_ID,
     T_STRING,
+    T_MORE,
+    T_MORE_EQUAL,
+    T_LESS,
+    T_LESS_EQUAL,
+    T_MINUS,
+    T_ARROW,
+    T_TERN,
+    T_COMMENT_STRING,
+    T_COMMENT_BLOCK,
+    T_NOT_EQUAL,
+    T_DIVISION,
+    //token without state
+    T_COLON,
+    T_PLUS,
+    T_COMMA,
     T_CURVED_BRACKET_OPEN,
     T_CURVED_BRACKET_CLOSE,
     T_SQUARE_BRACKET_OPEN,
     T_SQUARE_BRACKET_CLOSE,
     T_BRACKET_OPEN,
     T_BRACKET_CLOSE,
-    T_MORE,
-    T_MORE_EQUAL,
-    T_LESS,
-    T_LESS_EQUAL,
-    T_COMMA,
-    T_MINUS,
-    T_ARROW,
-    T_PLUS,
-    T_EOL,
-    T_TERN,
-    T_COLON,
-    T_DIVISION,
-    T_COMMENT_STRING,
-    T_COMMENT_BLOCK,
-    T_NOT_EQUAL
+    T_NEW_LINE
 } token_type_t;
 
 typedef struct token
