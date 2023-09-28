@@ -12,9 +12,20 @@ void delete_token(token_t_ptr token){
         free(token);
 }
 
+char *tokens[] = {"T_EXPONENT", "T_DEMICAL", "T_INT", "T_EQUALS",
+                  "T_ASSIGMENT", "T_UNDERLINE", "T_KEYWORD", "T_ID",
+                  "T_KEYWORD_TYPE_ID", "T_STRING", "T_MORE", "T_MORE_EQUAL",
+                  "T_LESS", "T_LESS_EQUAL", "T_MINUS", "T_ARROW",
+                  "T_TERN", "T_COMMENT_STRING", "T_COMMENT_BLOCK",
+                  "T_NOT_EQUAL", "T_DIVISION", "T_COLON",
+                  "T_PLUS", "T_COMMA", "T_CURVED_BRACKET_OPEN",
+                  "T_CURVED_BRACKET_CLOSE", "T_SQUARE_BRACKET_OPEN",
+                  "T_SQUARE_BRACKET_CLOSE", "T_BRACKET_OPEN", "T_BRACKET_CLOSE",
+                  "T_NEW_LINE"};
+
 void single_token(token_t_ptr token ,int line_cnt, token_type_t token_type){
     token->token_type = token_type;
-    printf("Token %d finded in line %i\n",token->token_type, line_cnt);
+    printf("Token %s found in line %i\n", tokens[token->token_type], line_cnt);
 }
 
 token_t_ptr next_token(){
