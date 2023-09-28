@@ -3,6 +3,7 @@
 token_t_ptr create_token(){
     token_t_ptr token;
     token = (token_t_ptr) malloc(sizeof(struct token));
+    token->token_type = T_ITS_NOT_A_TOKEN;
     return token;
 }
 
@@ -32,6 +33,8 @@ token_t_ptr next_token(){
     while((c = getc(stdin)) != EOF){
         switch(state){
             case(S_START):
+                printf("curent sym %c\n",c);
+
                 if(c == '\n'){
                     single_token(token,line_cnt, T_NEW_LINE);
                     line_cnt++;
@@ -44,6 +47,27 @@ token_t_ptr next_token(){
                 }
                 if(c == ','){
                     single_token(token, line_cnt, T_COMMA);
+                }
+                if(c == '{'){
+                    single_token(token, line_cnt, T_CURVED_BRACKET_OPEN);
+                }
+                if(c == '}'){
+                    single_token(token, line_cnt, T_CURVED_BRACKET_CLOSE);
+                }
+                if(c == '['){
+                    single_token(token, line_cnt, T_SQUARE_BRACKET_OPEN);
+                }
+                if(c == ']'){
+                    single_token(token, line_cnt, T_SQUARE_BRACKET_CLOSE);
+                }
+                if(c == '('){
+                    single_token(token, line_cnt, T_BRACKET_OPEN);
+                }
+                if(c == ')'){
+                    single_token(token, line_cnt, T_BRACKET_CLOSE);
+                }
+                else{
+                    continue;
                 }
                 return token;
                 break;
