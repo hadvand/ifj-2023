@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 typedef enum state{
     S_START,
@@ -32,6 +33,7 @@ typedef enum state{
 } state_t;
 
 typedef enum token_type{
+    T_ITS_NOT_A_TOKEN,
     T_EXPONENT,
     T_DEMICAL,
     T_INT,
