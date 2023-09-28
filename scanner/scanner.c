@@ -13,7 +13,7 @@ void delete_token(token_t_ptr token){
         free(token);
 }
 
-char *tokens[] = {"T_EXPONENT", "T_DEMICAL", "T_INT", "T_EQUALS",
+char *tokens[] = {"T_ITS_NOT_A_TOKEN", "T_EXPONENT", "T_DEMICAL", "T_INT", "T_EQUALS",
                   "T_ASSIGMENT", "T_UNDERLINE", "T_KEYWORD", "T_ID",
                   "T_KEYWORD_TYPE_ID", "T_STRING", "T_MORE", "T_MORE_EQUAL",
                   "T_LESS", "T_LESS_EQUAL", "T_MINUS", "T_ARROW",
