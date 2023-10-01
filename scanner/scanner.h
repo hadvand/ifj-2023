@@ -65,13 +65,15 @@ typedef enum token_type{
     T_SQUARE_BRACKET_CLOSE,
     T_BRACKET_OPEN,
     T_BRACKET_CLOSE,
-    T_NEW_LINE
+    T_NEW_LINE,
+    T_EOF
 } token_type_t;
 
 typedef struct token
 {
     token_type_t token_type;
+    int line;
 } *token_t_ptr;
 
 
-token_t_ptr next_token();
+token_t_ptr next_token(int *line_cnt);

@@ -3,6 +3,7 @@ main
 scanner_test
 
 .vscode
+CMakeLists.txt
 
 # Prerequisites
 *.d
