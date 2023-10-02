@@ -34,15 +34,18 @@ void single_token(token_t_ptr token ,int line_cnt, token_type_t token_type){
     printf("Token %s found in line %i\n", tokens[token->token_type], line_cnt);
 }
 
-void cleaning(token_t_ptr token, string_ptr additional_string){
+void scanning_finish_with_error(token_t_ptr token, string_ptr additional_string, error_t* err, error_t error_type){
     delete_token(token);
     string_free(additional_string);
+    (*err) = error_type;
 }
 
-token_t_ptr next_token(int *line_cnt){
+token_t_ptr next_token(int *line_cnt, error_t* err_type){
 
 
     int c;
+    
+    *err_type = ER_NONE;
 
     //актуальное состояние конечного автомата
     state_t state = S_START;
@@ -98,7 +101,7 @@ token_t_ptr next_token(int *line_cnt){
                 break;
             case(S_STRING_START):
                 if((additional_string = string_init()) == NULL){
-                    cleaning(token,additional_string);
+                    scanning_finish_with_error(token,additional_string, err_type, ER_INTERNAL);
                     return NULL;
                 }
                 if(c == '"'){
@@ -109,15 +112,27 @@ token_t_ptr next_token(int *line_cnt){
 
                     return token;
                 }
-                else if(c == '\\')
+                else if(c == '\\'){
                     state = S_STRING_SPEC_SYMBOL;
+                    continue;
+                }
                 else if(c >= PRINTABLE_MIN 
                     && c <= PRINTABLE_MAX){
                         if(!string_append(additional_string,c)){
-                            cleaning(token,additional_string);
+                            scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
                             return NULL;
                         }
                     }
+                break;
+            case(S_STRING_SPEC_SYMBOL):
+                if(c == 'u'){
+                    state = S_STRING_START_HEX;
+                    continue;
+                }
+                else{
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
+                    return NULL;
+                }
                 break;
             default:
                 break;

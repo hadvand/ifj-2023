@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "../structures/string.h"
+#include "../structures/error.h"
 
 
 #define PRINTABLE_MIN 32
@@ -106,4 +107,4 @@ typedef struct token
 } *token_t_ptr;
 
 
-token_t_ptr next_token(int *line_cnt);
+token_t_ptr next_token(int *line_cnt, error_t* error);

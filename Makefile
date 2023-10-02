@@ -6,8 +6,13 @@ CFLAGS += -g
 
 PROGS = ./scanner/* ./structures/*
 
-main: main.c
+all:
+	$(CC) $(CFLAGS) $^ -o $@ -lm
+main:
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 
 scanner_test: $(PROGS)
 	$(CC) $(CFLAGS) $^ -o $@ -lm
+
+clean:
+	rm -rf *.o scanner_test

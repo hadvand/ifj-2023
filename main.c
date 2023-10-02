@@ -2,6 +2,7 @@
 
 int main() {
    // printf() displays the string inside quotation
-   printf("Hello, World!%c\n",66);
+   int ggwp = 66;
+   printf("Hello, World!%c\n",ggwp);
    return 0;
 }
