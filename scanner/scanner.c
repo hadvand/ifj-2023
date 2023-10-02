@@ -87,8 +87,8 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     single_token(token, *line_cnt, T_BRACKET_CLOSE);
                 }
                 else if(c == '\n'){
-                    (*line_cnt)++;
                     single_token(token,*line_cnt, T_NEW_LINE);
+                    (*line_cnt)++;
                 }
                 else if(c == '"'){
                     state = S_STRING_START;
