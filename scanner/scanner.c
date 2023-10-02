@@ -134,6 +134,44 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     return NULL;
                 }
                 break;
+            case(S_STRING_START_HEX):
+                if(c == '{'){
+                    state = S_STRING_HEX_OPEN;
+                    continue;
+                }
+                else {
+                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    return NULL;
+                }
+
+                break;
+            case(S_STRING_HEX_OPEN):
+                if((c >= 48 && c <= 57) /*numbers 0..9*/
+                   || (c >= 65 && c <= 70) /* HEX numbers A..F */
+                   || (c >= 97 && c <= 102)) /* HEX numbers a..f */{
+                        //todo add number
+                        state = S_STRING_HEX_NUMBER;
+                        continue;
+                    } else {
+                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    return NULL;
+                }
+                break;
+            case(S_STRING_HEX_NUMBER):
+                if((c >= 48 && c <= 57) /*numbers 0..9*/
+                    || (c >= 65 && c <= 70) /* HEX numbers A..F */
+                    || (c >= 97 && c <= 102)) /* HEX numbers a..f */{
+                        //todo add number
+                        continue;
+                    }
+                else if(c == '}'){
+                    state = S_STRING_START;
+                    continue;
+                } else {
+                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    return NULL;
+                }
+                break;
             default:
                 break;
                 
