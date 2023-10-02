@@ -2,6 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include "../structures/string.h"
+
+
+#define PRINTABLE_MIN 32
+#define PRINTABLE_MAX 126
 
 typedef enum state{
     S_START,
@@ -69,10 +74,35 @@ typedef enum token_type{
     T_EOF
 } token_type_t;
 
+typedef enum keyword{
+    k_Double,
+    k_else,
+    k_func,
+    k_if,
+    k_Int,
+    k_let,
+    k_nil,
+    k_return,
+    k_String,
+    k_var,
+    k_while,
+    k_qmark_Double,
+    k_qmark_Int,
+    k_qmark_String
+} keyword_t;
+
+typedef union attribute{
+    int integer;
+    double decimal;
+    char *string;
+    keyword_t keyword;
+} attribute_t;
+
 typedef struct token
 {
     token_type_t token_type;
-    int line;
+    attribute_t attribute;
+    unsigned int line;
 } *token_t_ptr;
 
 
