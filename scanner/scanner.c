@@ -55,6 +55,8 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
 
     token_t_ptr token = create_token();
 
+    unsigned hex_count = 0;
+
     while((c = getc(stdin)) != EOF){
         switch(state){
             case(S_START):
@@ -129,6 +131,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     state = S_STRING_START_HEX;
                     continue;
                 }
+                //todo else if for special simbols like \n \t \\ etc.
                 else{
                     scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
@@ -151,6 +154,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                    || (c >= 97 && c <= 102)) /* HEX numbers a..f */{
                         //todo add number
                         state = S_STRING_HEX_NUMBER;
+                        hex_count++;
                         continue;
                     } else {
                     scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
@@ -158,10 +162,16 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 }
                 break;
             case(S_STRING_HEX_NUMBER):
-                if((c >= 48 && c <= 57) /*numbers 0..9*/
+                if(hex_count > 8){
+                    //todo i dont understand what is it error type
+                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    return NULL;
+                }
+                else if((c >= 48 && c <= 57) /*numbers 0..9*/
                     || (c >= 65 && c <= 70) /* HEX numbers A..F */
                     || (c >= 97 && c <= 102)) /* HEX numbers a..f */{
                         //todo add number
+                        hex_count++;
                         continue;
                     }
                 else if(c == '}'){
