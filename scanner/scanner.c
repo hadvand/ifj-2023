@@ -4,6 +4,8 @@
 
 //todo есть проблема, что если мы остаёмся в каком-то ставу и за ним идёт EOF
 // например =EOF, T_ASSIGMENT не будет найден
+// проблема может возникнуть на последней строке файла
+// но больше примеров бужет позже
 
 token_t_ptr create_token(){
     token_t_ptr token;
@@ -230,7 +232,6 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 
         }
     }
-    token->token_type = T_EOF;
-    token->line = *line_cnt;
+    single_token(token,*line_cnt,T_EOF);
     return token;
 }
