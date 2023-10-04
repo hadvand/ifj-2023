@@ -115,11 +115,53 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     state = S_MINUS;
                     continue;
                 }
+                else if(c == '_'){
+                    state = S_UNDERLINE;
+                    continue;
+                }
+                else if((c >= 65 && c <= 90) // a..z
+                        || (c >= 97 && c <= 122) // A..Z
+                        ){
+                    state = S_ID;
+                    continue;
+                }
                 else{
                     continue;
                 }
                 return token;
                 break;
+            case(S_UNDERLINE):
+                if((c >= 48 && c <= 57) // 0..9
+                    || (c >= 65 && c <= 90) // a..z
+                    || (c >= 97 && c <= 122) // A..Z
+                    || c == '_'){
+                    state = S_ID;
+                    continue;
+                } else{
+                    if(ungetc(c, stdin) == EOF){
+                        scanning_finish_with_error(token,additional_string,err_type,ER_INTERNAL);
+                        return NULL;
+                    }
+                    single_token(token,*line_cnt,T_UNDERLINE);
+                    return token;
+                }
+            case(S_ID):
+                if((c >= 48 && c <= 57) // 0..9
+                   || (c >= 65 && c <= 90) // a..z
+                   || (c >= 97 && c <= 122) // A..Z
+                   || c == '_'){
+                    //todo add symbol to string
+                    continue;
+                }
+                else{
+                    if(ungetc(c, stdin) == EOF){
+                        scanning_finish_with_error(token,additional_string,err_type,ER_INTERNAL);
+                        return NULL;
+                    }
+                    //todo controlling ID, is it ID or Keyword
+                    single_token(token,*line_cnt,T_ID);
+                    return token;
+                }
             case(S_MINUS):
                 if(c == '>'){
                     single_token(token,*line_cnt,T_ARROW);
