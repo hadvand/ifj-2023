@@ -1,10 +1,5 @@
 #include "scanner.h"
 
-//todo есть проблема, что если мы остаёмся в каком-то ставу и за ним идёт EOF
-// например =EOF, T_ASSIGMENT не будет найден
-// проблема может возникнуть на последней строке файла
-// но больше примеров бужет позже
-
 token_t_ptr create_token(){
     token_t_ptr token;
     token = (token_t_ptr) malloc(sizeof(struct token));
@@ -65,8 +60,14 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
     while((c = getc(stdin))){
         switch(state){
             case(S_START):
-                //printf("curent sym %c\n",c);
-                if(c == ':'){
+                //printf("current sym %c\n",c);
+                if(c == '\n'){
+                    single_token(token,*line_cnt, T_NEW_LINE);
+                    (*line_cnt)++;
+                }
+                else if(isspace(c))
+                    continue;
+                else if(c == ':'){
                     single_token(token,*line_cnt, T_COLON);
                 }
                 else if(c == '+'){
@@ -93,13 +94,8 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 else if(c == ')'){
                     single_token(token, *line_cnt, T_BRACKET_CLOSE);
                 }
-                else if(c == '\n'){
-                    single_token(token,*line_cnt, T_NEW_LINE);
-                    (*line_cnt)++;
-                }
                 else if(c == '*'){
                     single_token(token,*line_cnt,T_MULTIPLICATION);
-                    return token;
                 }
                 else if(c == '"'){
                     state = S_STRING_START;
@@ -117,6 +113,10 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     state = S_UNDERLINE;
                     continue;
                 }
+                else if(c == '?'){
+                    state = S_POSSIBLY_TERN;
+                    continue;
+                }
                 else if((c >= 65 && c <= 90) // a..z
                         || (c >= 97 && c <= 122) // A..Z
                         ){
@@ -125,13 +125,21 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 }
                 else if (c == EOF){
                     single_token(token, *line_cnt,T_EOF);
-                    return token;
                 }
                 else{
-                    continue;
+                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    return NULL;
                 }
                 return token;
                 break;
+            case(S_POSSIBLY_TERN):
+                if(c == '?'){
+                    single_token(token,*line_cnt,T_TERN);
+                    return token;
+                } else{
+                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    return NULL;
+                }
             case(S_UNDERLINE):
                 if((c >= 48 && c <= 57) // 0..9
                     || (c >= 65 && c <= 90) // a..z
@@ -208,7 +216,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     state = S_STRING_START_HEX;
                     continue;
                 }
-                //todo else if for special simbols like \n \t \\ etc.
+                //todo else if for special symbols like \n \t \\ etc.
                 else{
                     scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
