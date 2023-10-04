@@ -14,7 +14,6 @@ void delete_token(token_t_ptr token){
             free(token->attribute.string);
         free(token);
     }
-        
 }
 
 char *tokens[] = {"T_ITS_NOT_A_TOKEN", "T_EXPONENT", "T_DEMICAL", "T_INT", "T_EQUALS",
@@ -97,6 +96,14 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 else if(c == '*'){
                     single_token(token,*line_cnt,T_MULTIPLICATION);
                 }
+                else if(c == '>'){
+                    state = S_MORE;
+                    continue;
+                }
+                else if(c == '<'){
+                    state = S_LESS;
+                    continue;
+                }
                 else if(c == '"'){
                     state = S_STRING_START;
                     continue;
@@ -140,6 +147,24 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
                     return NULL;
                 }
+            case(S_MORE):
+                if(c == '='){
+                    single_token(token,*line_cnt,T_MORE_EQUAL);
+                    return token;
+                } else{
+                    ungetc(c,stdin);
+                    single_token(token,*line_cnt,T_MORE);
+                    continue;
+                }
+            case(S_LESS):
+                if(c == '='){
+                    single_token(token,*line_cnt,T_LESS_EQUAL);
+                    return token;
+                } else{
+                    ungetc(c,stdin);
+                    single_token(token,*line_cnt,T_LESS);
+                    continue;
+                }
             case(S_UNDERLINE):
                 if((c >= 48 && c <= 57) // 0..9
                     || (c >= 65 && c <= 90) // a..z
@@ -176,7 +201,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     return token;
                 }
                 break;
-            case(S_ASSINGMENT): //todo ===
+            case(S_ASSINGMENT):
                 if(c == '='){
                     single_token(token,*line_cnt,T_EQUALS);
                     return token;
