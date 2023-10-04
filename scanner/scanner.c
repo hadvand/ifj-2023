@@ -1,7 +1,5 @@
 #include "scanner.h"
 
-//todo закинуть функцию ungets в макрос
-
 //todo есть проблема, что если мы остаёмся в каком-то ставу и за ним идёт EOF
 // например =EOF, T_ASSIGMENT не будет найден
 // проблема может возникнуть на последней строке файла
@@ -64,7 +62,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
 
     unsigned hex_count = 0;
 
-    while((c = getc(stdin)) != EOF){
+    while((c = getc(stdin))){
         switch(state){
             case(S_START):
                 //printf("curent sym %c\n",c);
@@ -125,6 +123,10 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     state = S_ID;
                     continue;
                 }
+                else if (c == EOF){
+                    single_token(token, *line_cnt,T_EOF);
+                    return token;
+                }
                 else{
                     continue;
                 }
@@ -138,10 +140,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     state = S_ID;
                     continue;
                 } else{
-                    if(ungetc(c, stdin) == EOF){
-                        scanning_finish_with_error(token,additional_string,err_type,ER_INTERNAL);
-                        return NULL;
-                    }
+                    ungetc(c, stdin);
                     single_token(token,*line_cnt,T_UNDERLINE);
                     return token;
                 }
@@ -154,10 +153,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     continue;
                 }
                 else{
-                    if(ungetc(c, stdin) == EOF){
-                        scanning_finish_with_error(token,additional_string,err_type,ER_INTERNAL);
-                        return NULL;
-                    }
+                    ungetc(c, stdin);
                     //todo controlling ID, is it ID or Keyword
                     single_token(token,*line_cnt,T_ID);
                     return token;
@@ -167,10 +163,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     single_token(token,*line_cnt,T_ARROW);
                     return token;
                 } else{
-                    if(ungetc(c, stdin) == EOF){
-                        scanning_finish_with_error(token,additional_string,err_type,ER_INTERNAL);
-                        return NULL;
-                    }
+                    ungetc(c, stdin);
                     single_token(token, *line_cnt, T_MINUS);
                     return token;
                 }
@@ -180,10 +173,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     single_token(token,*line_cnt,T_EQUALS);
                     return token;
                 } else{
-                    if(ungetc(c, stdin) == EOF){
-                        scanning_finish_with_error(token,additional_string,err_type,ER_INTERNAL);
-                        return NULL;
-                    }
+                    ungetc(c, stdin);
                     single_token(token,*line_cnt,T_ASSIGMENT);
                     return token;
                 }
