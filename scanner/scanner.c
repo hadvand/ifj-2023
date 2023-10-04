@@ -120,6 +120,10 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     state = S_UNDERLINE;
                     continue;
                 }
+                else if(c == '!'){
+                    state = S_NOT_EQUELS_START;
+                    continue;
+                }
                 else if(c == '?'){
                     state = S_POSSIBLY_TERN;
                     continue;
@@ -164,6 +168,14 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     ungetc(c,stdin);
                     single_token(token,*line_cnt,T_LESS);
                     continue;
+                }
+            case(S_NOT_EQUELS_START):
+                if(c == '='){
+                    single_token(token,*line_cnt,T_NOT_EQUAL);
+                    return token;
+                } else{
+                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    return NULL;
                 }
             case(S_UNDERLINE):
                 if((c >= 48 && c <= 57) // 0..9
