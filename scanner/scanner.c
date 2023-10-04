@@ -96,10 +96,23 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     state = S_STRING_START;
                     continue;
                 }
+                else if(c == '='){
+                    state = S_ASSINGMENT;
+                    continue;
+                }
                 else{
                     continue;
                 }
                 return token;
+                break;
+            case(S_ASSINGMENT): //todo ===
+                if(c == '='){
+                    single_token(token,*line_cnt,T_EQUALS);
+                    return token;
+                } else{
+                    single_token(token,*line_cnt,T_ASSIGMENT);
+                    return token;
+                }
                 break;
             case(S_STRING_START):
                 if((additional_string = string_init()) == NULL){
