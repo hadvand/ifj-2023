@@ -1,5 +1,10 @@
 #include "scanner.h"
 
+//todo закинуть функцию ungets в макрос
+
+//todo есть проблема, что если мы остаёмся в каком-то ставу и за ним идёт EOF
+// например =EOF, T_ASSIGMENT не будет найден
+
 token_t_ptr create_token(){
     token_t_ptr token;
     token = (token_t_ptr) malloc(sizeof(struct token));
@@ -26,7 +31,7 @@ char *tokens[] = {"T_ITS_NOT_A_TOKEN", "T_EXPONENT", "T_DEMICAL", "T_INT", "T_EQ
                   "T_PLUS", "T_COMMA", "T_CURVED_BRACKET_OPEN",
                   "T_CURVED_BRACKET_CLOSE", "T_SQUARE_BRACKET_OPEN",
                   "T_SQUARE_BRACKET_CLOSE", "T_BRACKET_OPEN", "T_BRACKET_CLOSE",
-                  "T_NEW_LINE","T_EOF"};
+                  "T_NEW_LINE","T_EOF","T_MULTIPLICATION"};
 
 void single_token(token_t_ptr token ,int line_cnt, token_type_t token_type){
     token->token_type = token_type;
@@ -92,6 +97,10 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     single_token(token,*line_cnt, T_NEW_LINE);
                     (*line_cnt)++;
                 }
+                else if(c == '*'){
+                    single_token(token,*line_cnt,T_MULTIPLICATION);
+                    return token;
+                }
                 else if(c == '"'){
                     state = S_STRING_START;
                     continue;
@@ -100,16 +109,37 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     state = S_ASSINGMENT;
                     continue;
                 }
+                else if(c == '-'){
+                    state = S_MINUS;
+                    continue;
+                }
                 else{
                     continue;
                 }
                 return token;
+                break;
+            case(S_MINUS):
+                if(c == '>'){
+                    single_token(token,*line_cnt,T_ARROW);
+                    return token;
+                } else{
+                    if(ungetc(c, stdin) == EOF){
+                        scanning_finish_with_error(token,additional_string,err_type,ER_INTERNAL);
+                        return NULL;
+                    }
+                    single_token(token, *line_cnt, T_MINUS);
+                    return token;
+                }
                 break;
             case(S_ASSINGMENT): //todo ===
                 if(c == '='){
                     single_token(token,*line_cnt,T_EQUALS);
                     return token;
                 } else{
+                    if(ungetc(c, stdin) == EOF){
+                        scanning_finish_with_error(token,additional_string,err_type,ER_INTERNAL);
+                        return NULL;
+                    }
                     single_token(token,*line_cnt,T_ASSIGMENT);
                     return token;
                 }

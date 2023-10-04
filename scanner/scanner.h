@@ -72,7 +72,8 @@ typedef enum token_type{
     T_BRACKET_OPEN,
     T_BRACKET_CLOSE,
     T_NEW_LINE,
-    T_EOF
+    T_EOF,
+    T_MULTIPLICATION
 } token_type_t;
 
 typedef enum keyword{
