@@ -27,6 +27,7 @@ char *tokens[] = {"T_ITS_NOT_A_TOKEN", "T_EXPONENT", "T_DEMICAL", "T_INT", "T_EQ
                   "T_SQUARE_BRACKET_CLOSE", "T_BRACKET_OPEN", "T_BRACKET_CLOSE",
                   "T_NEW_LINE","T_EOF","T_MULTIPLICATION"};
 
+
 void single_token(token_t_ptr token ,int line_cnt, token_type_t token_type){
     token->token_type = token_type;
     token->line = line_cnt;
@@ -98,6 +99,10 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 }
                 else if(c == '>'){
                     state = S_MORE;
+                    continue;
+                }
+                else if(c >= 48 && c <= 57){
+                    state = S_INT;
                     continue;
                 }
                 else if(c == '<'){
@@ -177,6 +182,79 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
                     return NULL;
                 }
+            case(S_INT):
+                if(c >= 48 && c <= 57){
+                    state = S_INT;
+                    continue;
+                }
+                else if(c == 69 || c == 101){
+                    state = S_EXPONENT_POSSIBLY;
+                    continue;
+                }
+                else if(c == '.'){
+                    state = S_NUMBER_POINT;
+                    continue;
+                }
+                else{
+                    ungetc(c, stdin);
+                    single_token(token,*line_cnt,T_INT);
+                    return token;
+                }
+            case(S_NUMBER_POINT):
+                if(c >=48 && c<= 57){
+                    state = S_DEMICAL;
+                    continue;
+                }
+                else{
+                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    return NULL;
+                }
+            case(S_DEMICAL):
+                if(c >=48 && c<= 57){
+                    state = S_DEMICAL;
+                    continue;
+                }
+                else if(c == 69 || c == 101){
+                    state = S_EXPONENT_POSSIBLY;
+                    continue;
+                }
+                else{
+                    ungetc(c, stdin);
+                    single_token(token,*line_cnt,T_DEMICAL);
+                    return token;
+                }
+            case(S_EXPONENT_POSSIBLY):
+                if(c >=48 && c<= 57){
+                    state = S_EXPONENT;
+                    continue;
+                }
+                else if(c == '+' || c == '-'){
+                    state = S_EXPONENT_SING;
+                    continue;
+                }
+                else{
+                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    return NULL;
+                }
+            case(S_EXPONENT_SING):
+                if(c >=48 && c<= 57){
+                    state = S_EXPONENT;
+                    continue;
+                }
+                else{
+                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    return NULL;
+                }
+            case(S_EXPONENT):
+                if(c >=48 && c<= 57){
+                    state = S_EXPONENT;
+                    continue;
+                }
+                else{
+                    ungetc(c, stdin);
+                    single_token(token,*line_cnt,T_EXPONENT);
+                    return token;
+                }
             case(S_UNDERLINE):
                 if((c >= 48 && c <= 57) // 0..9
                     || (c >= 65 && c <= 90) // a..z
@@ -253,7 +331,46 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     state = S_STRING_START_HEX;
                     continue;
                 }
-                //todo else if for special symbols like \n \t \\ etc.
+                else if(c == '"'){
+                    if(!string_append(additional_string,c)){
+                        scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
+                        return NULL;
+                    }
+                    state = S_STRING_START;
+                    continue;
+                }
+                else if(c == 'n'){
+                    if(!string_append(additional_string,'\n')){
+                        scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
+                        return NULL;
+                    }
+                    state = S_STRING_START;
+                    continue;
+                }
+                else if(c == 'r'){
+                    if(!string_append(additional_string,'\r')){
+                        scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
+                        return NULL;
+                    }
+                    state = S_STRING_START;
+                    continue;
+                }
+                else if(c == 't'){
+                    if(!string_append(additional_string,'\t')){
+                        scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
+                        return NULL;
+                    }
+                    state = S_STRING_START;
+                    continue;
+                }
+                else if(c == '\\'){
+                    if(!string_append(additional_string,'\\')){
+                        scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
+                        return NULL;
+                    }
+                    state = S_STRING_START;
+                    continue;
+                }
                 else{
                     scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
