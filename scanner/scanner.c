@@ -28,9 +28,10 @@ char *tokens[] = {"T_ITS_NOT_A_TOKEN", "T_EXPONENT", "T_DEMICAL", "T_INT", "T_EQ
                   "T_NEW_LINE","T_EOF","T_MULTIPLICATION"};
 
 
-void single_token(token_t_ptr token ,int line_cnt, token_type_t token_type){
+void single_token(token_t_ptr token ,int line_cnt, token_type_t token_type,string_ptr string){
     token->token_type = token_type;
     token->line = line_cnt;
+    string_free(string);
     printf("Token %s found in line %i\n", tokens[token->token_type], line_cnt);
 }
 
@@ -62,40 +63,40 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
             case(S_START):
                 //printf("current sym %c\n",c);
                 if(c == '\n'){
-                    single_token(token,*line_cnt, T_NEW_LINE);
+                    single_token(token,*line_cnt, T_NEW_LINE,additional_string);
                     (*line_cnt)++;
                 }
                 else if(isspace(c))
                     continue;
                 else if(c == ':'){
-                    single_token(token,*line_cnt, T_COLON);
+                    single_token(token,*line_cnt, T_COLON,additional_string);
                 }
                 else if(c == '+'){
-                    single_token(token,*line_cnt, T_PLUS);
+                    single_token(token,*line_cnt, T_PLUS,additional_string);
                 }
                 else if(c == ','){
-                    single_token(token, *line_cnt, T_COMMA);
+                    single_token(token, *line_cnt, T_COMMA,additional_string);
                 }
                 else if(c == '{'){
-                    single_token(token, *line_cnt, T_CURVED_BRACKET_OPEN);
+                    single_token(token, *line_cnt, T_CURVED_BRACKET_OPEN,additional_string);
                 }
                 else if(c == '}'){
-                    single_token(token, *line_cnt, T_CURVED_BRACKET_CLOSE);
+                    single_token(token, *line_cnt, T_CURVED_BRACKET_CLOSE,additional_string);
                 }
                 else if(c == '['){
-                    single_token(token, *line_cnt, T_SQUARE_BRACKET_OPEN);
+                    single_token(token, *line_cnt, T_SQUARE_BRACKET_OPEN,additional_string);
                 }
                 else if(c == ']'){
-                    single_token(token, *line_cnt, T_SQUARE_BRACKET_CLOSE);
+                    single_token(token, *line_cnt, T_SQUARE_BRACKET_CLOSE,additional_string);
                 }
                 else if(c == '('){
-                    single_token(token, *line_cnt, T_BRACKET_OPEN);
+                    single_token(token, *line_cnt, T_BRACKET_OPEN,additional_string);
                 }
                 else if(c == ')'){
-                    single_token(token, *line_cnt, T_BRACKET_CLOSE);
+                    single_token(token, *line_cnt, T_BRACKET_CLOSE,additional_string);
                 }
                 else if(c == '*'){
-                    single_token(token,*line_cnt,T_MULTIPLICATION);
+                    single_token(token,*line_cnt,T_MULTIPLICATION,additional_string);
                 }
                 else if(c == '/'){
                     state = S_DIVISION;
@@ -148,7 +149,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     continue;
                 }
                 else if (c == EOF){
-                    single_token(token, *line_cnt,T_EOF);
+                    single_token(token, *line_cnt,T_EOF,additional_string);
                 }
                 else{
                     scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
@@ -158,7 +159,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 break;
             case(S_POSSIBLY_TERN):
                 if(c == '?'){
-                    single_token(token,*line_cnt,T_TERN);
+                    single_token(token,*line_cnt,T_TERN,additional_string);
                     return token;
                 } else{
                     scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
@@ -174,13 +175,13 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     continue;
                 } else{
                     ungetc(c,stdin);
-                    single_token(token,*line_cnt,T_DIVISION);
+                    single_token(token,*line_cnt,T_DIVISION,additional_string);
                     return token;
                 }
             case (S_COMMENT_STRING):
                 if(c == '\n' || c == EOF){
                     ungetc(c,stdin);
-                    single_token(token,*line_cnt,T_COMMENT_STRING);
+                    single_token(token,*line_cnt,T_COMMENT_STRING,additional_string);
                     return token;
                 }
                 continue;
@@ -197,7 +198,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 continue;
             case(S_COMMENT_BLOCK_BOSSIBLY_FINISHED):
                 if(c == '/'){
-                    single_token(token,*line_cnt,T_COMMENT_BLOCK);
+                    single_token(token,*line_cnt,T_COMMENT_BLOCK,additional_string);
                     return token;
                 }
                 else if (c == EOF){
@@ -210,25 +211,25 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 continue;
             case(S_MORE):
                 if(c == '='){
-                    single_token(token,*line_cnt,T_MORE_EQUAL);
+                    single_token(token,*line_cnt,T_MORE_EQUAL,additional_string);
                     return token;
                 } else{
                     ungetc(c,stdin);
-                    single_token(token,*line_cnt,T_MORE);
+                    single_token(token,*line_cnt,T_MORE,additional_string);
                     continue;
                 }
             case(S_LESS):
                 if(c == '='){
-                    single_token(token,*line_cnt,T_LESS_EQUAL);
+                    single_token(token,*line_cnt,T_LESS_EQUAL,additional_string);
                     return token;
                 } else{
                     ungetc(c,stdin);
-                    single_token(token,*line_cnt,T_LESS);
+                    single_token(token,*line_cnt,T_LESS,additional_string);
                     continue;
                 }
             case(S_NOT_EQUELS_START):
                 if(c == '='){
-                    single_token(token,*line_cnt,T_NOT_EQUAL);
+                    single_token(token,*line_cnt,T_NOT_EQUAL,additional_string);
                     return token;
                 } else{
                     scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
@@ -262,7 +263,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 else{
                     ungetc(c, stdin);
                     token->attribute.integer = atoi(additional_string->string);
-                    single_token(token,*line_cnt,T_INT);
+                    single_token(token,*line_cnt,T_INT,additional_string);
                     return token;
                 }
             case(S_NUMBER_POINT):
@@ -293,7 +294,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 }
                 else{
                     ungetc(c, stdin);
-                    single_token(token,*line_cnt,T_DEMICAL);
+                    single_token(token,*line_cnt,T_DEMICAL,additional_string);
                     token->attribute.decimal = strtod(additional_string->string,NULL);
                     return token;
                 }
@@ -342,7 +343,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 }
                 else{
                     ungetc(c, stdin);
-                    single_token(token,*line_cnt,T_EXPONENT);
+                    single_token(token,*line_cnt,T_EXPONENT,additional_string);
                     token->attribute.decimal = strtod(additional_string->string,NULL);
                     return token;
                 }
@@ -355,7 +356,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     continue;
                 } else{
                     ungetc(c, stdin);
-                    single_token(token,*line_cnt,T_UNDERLINE);
+                    single_token(token,*line_cnt,T_UNDERLINE,additional_string);
                     return token;
                 }
             case(S_ID):
@@ -369,26 +370,26 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 else{
                     ungetc(c, stdin);
                     //todo controlling ID, is it ID or Keyword
-                    single_token(token,*line_cnt,T_ID);
+                    single_token(token,*line_cnt,T_ID,additional_string);
                     return token;
                 }
             case(S_MINUS):
                 if(c == '>'){
-                    single_token(token,*line_cnt,T_ARROW);
+                    single_token(token,*line_cnt,T_ARROW,additional_string);
                     return token;
                 } else{
                     ungetc(c, stdin);
-                    single_token(token, *line_cnt, T_MINUS);
+                    single_token(token, *line_cnt, T_MINUS,additional_string);
                     return token;
                 }
                 break;
             case(S_ASSINGMENT):
                 if(c == '='){
-                    single_token(token,*line_cnt,T_EQUALS);
+                    single_token(token,*line_cnt,T_EQUALS,additional_string);
                     return token;
                 } else{
                     ungetc(c, stdin);
-                    single_token(token,*line_cnt,T_ASSIGMENT);
+                    single_token(token,*line_cnt,T_ASSIGMENT,additional_string);
                     return token;
                 }
                 break;
@@ -398,7 +399,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     return NULL;
                 }
                 if(c == '"'){
-                    single_token(token,*line_cnt,T_STRING);
+                    single_token(token,*line_cnt,T_STRING,additional_string);
                     token->attribute.string = additional_string->string;
 
                     string_free(additional_string);
@@ -517,6 +518,6 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 
         }
     }
-    single_token(token,*line_cnt,T_EOF);
+    single_token(token,*line_cnt,T_EOF,additional_string);
     return token;
 }
