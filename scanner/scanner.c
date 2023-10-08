@@ -107,6 +107,10 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     continue;
                 }
                 else if(c >= 48 && c <= 57){
+                    if((additional_string = string_init()) == NULL){
+                        scanning_finish_with_error(token,additional_string, err_type, ER_INTERNAL);
+                        return NULL;
+                    }
                     if(!string_append(additional_string,c)){
                         scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
                         return NULL;
@@ -294,8 +298,8 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 }
                 else{
                     ungetc(c, stdin);
-                    single_token(token,*line_cnt,T_DEMICAL,additional_string);
                     token->attribute.decimal = strtod(additional_string->string,NULL);
+                    single_token(token,*line_cnt,T_DEMICAL,additional_string);
                     return token;
                 }
             case(S_EXPONENT_POSSIBLY):
@@ -343,8 +347,8 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 }
                 else{
                     ungetc(c, stdin);
-                    single_token(token,*line_cnt,T_EXPONENT,additional_string);
                     token->attribute.decimal = strtod(additional_string->string,NULL);
+                    single_token(token,*line_cnt,T_EXPONENT,additional_string);
                     return token;
                 }
             case(S_UNDERLINE):
