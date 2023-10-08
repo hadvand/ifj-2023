@@ -9,12 +9,26 @@
 #define PRINTABLE_MIN 32
 #define PRINTABLE_MAX 126
 
+// char *keywords[] = {
+//     "move", "createframe", "pushframe", "popframe",
+//     "defvar", "call", "return", "pushs", "pops",
+//     "clears", "add", "sub", "mul", "div", "idiv",
+//     "adds", "subs", "muls", "divs", "idivs", "lt",
+//     "gt", "eq", "lts", "gts", "eqs", "and","or",
+//     "not", "ands", "ors", "nots", "int2float", "float2int",
+//     "int2char", "stri2int", "int2floats", "float2ints", 
+//     "int2chars", "stri2ints", "read", "write", "concat",
+//     "strlen", "getchar", "setchar", "type", "label",
+//     "jump", "jumpifeq", "jumpifneq", "jumpifeqs", "jumpifneqs",
+//     "exit", "dprint", "break"
+// };
+
 typedef enum state{
     S_START,
     S_KEYWORD,
     S_ID,
     S_UNDERLINE,
-    S_KEYWORD_TYPE_ID, //чекнуть правильное название
+    S_KEYWORD_TYPE_ID, //чекнуть правильное название 
     S_STRING_START,
     S_STRING_SPEC_SYMBOL,
     S_STRING_START_HEX,
@@ -24,7 +38,7 @@ typedef enum state{
     S_NUMBER_POINT,
     S_DEMICAL,
     S_EXPONENT_POSSIBLY,
-    S_EXPONNET_SING,
+    S_EXPONENT_SING,
     S_EXPONENT,
     S_ASSINGMENT,
     S_NOT_EQUELS_START,
