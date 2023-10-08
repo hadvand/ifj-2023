@@ -41,6 +41,28 @@ void scanning_finish_with_error(token_t_ptr token, string_ptr additional_string,
     (*err) = error_type;
 }
 
+bool keyword_control(token_t_ptr token, string_ptr add_string){
+    char *keywords[] = {"Double","else","func",
+                        "if","Int","let",
+                        "nil","return","String",
+                        "var","while"};
+    char *keywords_with_qmark[] = {"Double?","Int?","String?"};
+
+    for (size_t i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++) {
+        if (strcmp(add_string->string, keywords[i]) == 0) {
+            token->attribute.keyword = i;
+            return true;
+        }
+    }
+    for (size_t i = 0; i < sizeof(keywords_with_qmark) / sizeof(keywords_with_qmark[0]); i++) {
+        if (strcmp(add_string->string, keywords_with_qmark[i]) == 0) {
+            token->attribute.keyword = i + COUNT_KEYWORDS_BEFORE_QMARK;
+            return true;
+        }
+    }
+    return false;
+}
+
 token_t_ptr next_token(int *line_cnt, error_t* err_type){
 
 
@@ -149,6 +171,14 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 else if((c >= 65 && c <= 90) // a..z
                         || (c >= 97 && c <= 122) // A..Z
                         ){
+                    if((additional_string = string_init()) == NULL){
+                        scanning_finish_with_error(token,additional_string, err_type, ER_INTERNAL);
+                        return NULL;
+                    }
+                    if(!string_append(additional_string,c)){
+                        scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
+                        return NULL;
+                    }
                     state = S_ID;
                     continue;
                 }
@@ -356,6 +386,20 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     || (c >= 65 && c <= 90) // a..z
                     || (c >= 97 && c <= 122) // A..Z
                     || c == '_'){
+
+                    if((additional_string = string_init()) == NULL){
+                        scanning_finish_with_error(token,additional_string, err_type, ER_INTERNAL);
+                        return NULL;
+                    }
+                    //add '_'
+                    if(!string_append(additional_string,'_')){
+                        scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
+                        return NULL;
+                    }
+                    if(!string_append(additional_string,c)){
+                        scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
+                        return NULL;
+                    }
                     state = S_ID;
                     continue;
                 } else{
@@ -368,13 +412,27 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                    || (c >= 65 && c <= 90) // a..z
                    || (c >= 97 && c <= 122) // A..Z
                    || c == '_'){
-                    //todo add symbol to string
+                    if(!string_append(additional_string,c)){
+                        scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
+                        return NULL;
+                    }
                     continue;
+                }
+                else if(c == '?'){
+                    if(!string_append(additional_string,c)){
+                        scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
+                        return NULL;
+                    }
+                    keyword_control(token,additional_string);
+                    single_token(token,*line_cnt,T_KEYWORD_TYPE_ID,additional_string);
+                    return token;
                 }
                 else{
                     ungetc(c, stdin);
-                    //todo controlling ID, is it ID or Keyword
-                    single_token(token,*line_cnt,T_ID,additional_string);
+                    if(keyword_control(token,additional_string))
+                        single_token(token,*line_cnt,T_KEYWORD,additional_string);
+                    else
+                        single_token(token,*line_cnt,T_ID,additional_string);
                     return token;
                 }
             case(S_MINUS):

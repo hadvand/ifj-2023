@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include "../structures/string.h"
 #include "../structures/error.h"
+#include "string.h"
 
 
 #define PRINTABLE_MIN 32
@@ -89,6 +90,8 @@ typedef enum token_type{
     T_EOF,
     T_MULTIPLICATION
 } token_type_t;
+
+#define COUNT_KEYWORDS_BEFORE_QMARK 11;
 
 typedef enum keyword{
     k_Double,
