@@ -96,6 +96,10 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 else if(c == '*'){
                     single_token(token,*line_cnt,T_MULTIPLICATION);
                 }
+                else if(c == '/'){
+                    state = S_DIVISION;
+                    continue;
+                }
                 else if(c == '>'){
                     state = S_MORE;
                     continue;
@@ -151,6 +155,50 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
                     return NULL;
                 }
+            case(S_DIVISION):
+                if(c == '/'){
+                    state = S_COMMENT_STRING;
+                    continue;
+                }
+                else if(c == '*'){
+                    state = S_COMMENT_BLOCK_START;
+                    continue;
+                } else{
+                    ungetc(c,stdin);
+                    single_token(token,*line_cnt,T_DIVISION);
+                    return token;
+                }
+            case (S_COMMENT_STRING):
+                if(c == '\n' || c == EOF){
+                    ungetc(c,stdin);
+                    single_token(token,*line_cnt,T_COMMENT_STRING);
+                    return token;
+                }
+                continue;
+            case(S_COMMENT_BLOCK_START):
+                if(c == '*'){
+                    state = S_COMMENT_BLOCK_BOSSIBLY_FINISHED;
+                }
+                else if (c == EOF){
+                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    return NULL;
+                }
+                else if (c == '\n')
+                    (*line_cnt)++;
+                continue;
+            case(S_COMMENT_BLOCK_BOSSIBLY_FINISHED):
+                if(c == '/'){
+                    single_token(token,*line_cnt,T_COMMENT_BLOCK);
+                    return token;
+                }
+                else if (c == EOF){
+                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    return NULL;
+                }
+                else{
+                    state = S_COMMENT_BLOCK_START;
+                }
+                continue;
             case(S_MORE):
                 if(c == '='){
                     single_token(token,*line_cnt,T_MORE_EQUAL);
