@@ -27,12 +27,37 @@ char *tokens[] = {"T_ITS_NOT_A_TOKEN", "T_EXPONENT", "T_DEMICAL", "T_INT", "T_EQ
                   "T_SQUARE_BRACKET_CLOSE", "T_BRACKET_OPEN", "T_BRACKET_CLOSE",
                   "T_NEW_LINE","T_EOF","T_MULTIPLICATION"};
 
+const char *keywords[] = {"Double","else","func","if","Int","let","nil","return","String","var","while","qm_Double","qm_Int","qm_String"};
+
 
 void single_token(token_t_ptr token ,int line_cnt, token_type_t token_type,string_ptr string){
     token->token_type = token_type;
     token->line = line_cnt;
+    printf("Token %s found in line %i", tokens[token->token_type], line_cnt);
+
+    switch (token->token_type) {
+        case(T_STRING):
+            printf(": contain is %s\n",token->attribute.string);
+            break;
+        case(T_INT):
+            printf(": contain is %i\n",token->attribute.integer);
+            break;
+        case(T_DEMICAL):
+            printf(": contain is %f\n",token->attribute.decimal);
+            break;
+        case(T_KEYWORD):
+            printf(": contain is %s\n",keywords[token->attribute.keyword]);
+            break;
+        case(T_ID):
+            printf(": contain is %s\n",token->attribute.string);
+            break;
+        default:
+            printf("\n");
+            break;
+    }
+
     string_free(string);
-    printf("Token %s found in line %i\n", tokens[token->token_type], line_cnt);
+    string = NULL;
 }
 
 void scanning_finish_with_error(token_t_ptr token, string_ptr additional_string, error_t* err, error_t error_type){
@@ -129,9 +154,11 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     continue;
                 }
                 else if(c >= 48 && c <= 57){
-                    if((additional_string = string_init()) == NULL){
-                        scanning_finish_with_error(token,additional_string, err_type, ER_INTERNAL);
-                        return NULL;
+                    if(additional_string == NULL){
+                        if((additional_string = string_init()) == NULL){
+                            scanning_finish_with_error(token,additional_string, err_type, ER_INTERNAL);
+                            return NULL;
+                        }
                     }
                     if(!string_append(additional_string,c)){
                         scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
@@ -171,9 +198,11 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 else if((c >= 65 && c <= 90) // a..z
                         || (c >= 97 && c <= 122) // A..Z
                         ){
-                    if((additional_string = string_init()) == NULL){
-                        scanning_finish_with_error(token,additional_string, err_type, ER_INTERNAL);
-                        return NULL;
+                    if(additional_string == NULL){
+                        if((additional_string = string_init()) == NULL){
+                            scanning_finish_with_error(token,additional_string, err_type, ER_INTERNAL);
+                            return NULL;
+                        }
                     }
                     if(!string_append(additional_string,c)){
                         scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
@@ -387,9 +416,11 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     || (c >= 97 && c <= 122) // A..Z
                     || c == '_'){
 
-                    if((additional_string = string_init()) == NULL){
-                        scanning_finish_with_error(token,additional_string, err_type, ER_INTERNAL);
-                        return NULL;
+                    if(additional_string == NULL){
+                        if((additional_string = string_init()) == NULL){
+                            scanning_finish_with_error(token,additional_string, err_type, ER_INTERNAL);
+                            return NULL;
+                        }
                     }
                     //add '_'
                     if(!string_append(additional_string,'_')){
@@ -431,8 +462,11 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     ungetc(c, stdin);
                     if(keyword_control(token,additional_string))
                         single_token(token,*line_cnt,T_KEYWORD,additional_string);
-                    else
+                    else{
+                        token->attribute.string = additional_string->string;
                         single_token(token,*line_cnt,T_ID,additional_string);
+                    }
+
                     return token;
                 }
             case(S_MINUS):
@@ -456,15 +490,15 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 }
                 break;
             case(S_STRING_START):
-                if((additional_string = string_init()) == NULL){
-                    scanning_finish_with_error(token,additional_string, err_type, ER_INTERNAL);
-                    return NULL;
+                if(additional_string == NULL){
+                    if((additional_string = string_init()) == NULL){
+                        scanning_finish_with_error(token,additional_string, err_type, ER_INTERNAL);
+                        return NULL;
+                    }
                 }
                 if(c == '"'){
-                    single_token(token,*line_cnt,T_STRING,additional_string);
                     token->attribute.string = additional_string->string;
-
-                    string_free(additional_string);
+                    single_token(token,*line_cnt,T_STRING,additional_string);
 
                     return token;
                 }
