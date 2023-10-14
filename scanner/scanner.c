@@ -71,7 +71,7 @@ bool keyword_control(token_t_ptr token, string_ptr add_string){
                         "if","Int","let",
                         "nil","return","String",
                         "var","while"};
-    char *keywords_with_qmark[] = {"Double?","Int?","String?"};
+    char *keywords_with_qmark[] = {"Double?","Int?","String?", "Double!","Int!","String!"};
 
     for (size_t i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++) {
         if (strcmp(add_string->string, keywords[i]) == 0) {
@@ -449,7 +449,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     }
                     continue;
                 }
-                else if(c == '?'){
+                else if(c == '?' || c == '!'){
                     if(!string_append(additional_string,c)){
                         scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
                         return NULL;
