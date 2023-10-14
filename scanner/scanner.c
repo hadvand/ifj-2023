@@ -37,19 +37,19 @@ void single_token(token_t_ptr token ,int line_cnt, token_type_t token_type,strin
 
     switch (token->token_type) {
         case(T_STRING):
-            printf(": contain is %s\n",token->attribute.string);
+            printf(": content is %s\n",token->attribute.string);
             break;
         case(T_INT):
-            printf(": contain is %i\n",token->attribute.integer);
+            printf(": content is %i\n",token->attribute.integer);
             break;
         case(T_DEMICAL):
-            printf(": contain is %f\n",token->attribute.decimal);
+            printf(": content is %f\n",token->attribute.decimal);
             break;
         case(T_KEYWORD):
-            printf(": contain is %s\n",keywords[token->attribute.keyword]);
+            printf(": content is %s\n",keywords[token->attribute.keyword]);
             break;
         case(T_ID):
-            printf(": contain is %s\n",token->attribute.string);
+            printf(": content is %s\n",token->attribute.string);
             break;
         default:
             printf("\n");
@@ -95,7 +95,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
     
     *err_type = ER_NONE;
 
-    //актуальное состояние конечного автомата
+    //current status of fsm
     state_t state = S_START;
 
     string_ptr additional_string;
@@ -106,6 +106,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
     unsigned hex_count = 0;
 
     while((c = getc(stdin))){
+        //todo 2 more tokens missing
         switch(state){
             case(S_START):
                 //printf("current sym %c\n",c);
@@ -219,7 +220,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     return NULL;
                 }
                 return token;
-                break;
+
             case(S_POSSIBLY_TERN):
                 if(c == '?'){
                     single_token(token,*line_cnt,T_TERN,additional_string);
@@ -478,7 +479,6 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     single_token(token, *line_cnt, T_MINUS,additional_string);
                     return token;
                 }
-                break;
             case(S_ASSINGMENT):
                 if(c == '='){
                     single_token(token,*line_cnt,T_EQUALS,additional_string);
@@ -488,7 +488,6 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     single_token(token,*line_cnt,T_ASSIGMENT,additional_string);
                     return token;
                 }
-                break;
             case(S_STRING_START):
                 if(additional_string == NULL){
                     if((additional_string = string_init()) == NULL){
@@ -563,7 +562,6 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
-                break;
             case(S_STRING_START_HEX):
                 if(c == '{'){
                     state = S_STRING_HEX_OPEN;
@@ -574,7 +572,6 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     return NULL;
                 }
 
-                break;
             case(S_STRING_HEX_OPEN):
                 if((c >= 48 && c <= 57) /*numbers 0..9*/
                    || (c >= 65 && c <= 70) /* HEX numbers A..F */
@@ -587,7 +584,6 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
                     return NULL;
                 }
-                break;
             case(S_STRING_HEX_NUMBER):
                 if(hex_count > 8){
                     //todo i dont understand what is it error type
@@ -608,10 +604,6 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
                     return NULL;
                 }
-                break;
-            default:
-                break;
-                
         }
     }
     single_token(token,*line_cnt,T_EOF,additional_string);

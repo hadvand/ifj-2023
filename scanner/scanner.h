@@ -91,7 +91,7 @@ typedef enum token_type{
     T_MULTIPLICATION
 } token_type_t;
 
-#define COUNT_KEYWORDS_BEFORE_QMARK 11;
+#define COUNT_KEYWORDS_BEFORE_QMARK 11
 
 typedef enum keyword{
     k_Double,

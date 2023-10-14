@@ -1,10 +1,4 @@
-/**       
- * @file error.h
- * @author Murad Mikogaziev (xmikog00)
- * @brief header file for error codes
- */
-
-#ifndef ERROR_HEADER_G  //guard
+#ifndef ERROR_HEADER_G
 #define ERROR_HEADER_G
 
 typedef enum error{
@@ -32,4 +26,4 @@ extern error_t err_type;
  */
 extern unsigned line_cnt;
 
-#endif  //for guard
+#endif

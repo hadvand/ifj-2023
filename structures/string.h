@@ -1,13 +1,4 @@
-/**
- * @file string.h
- * @author Murad Mikogaziev (xmikog00)
- * @brief source code for string functions
- *
- * @date 02.10.2023
- * 
- */
-
-#ifndef STRING_HEADER_G   //guard
+#ifndef STRING_HEADER_G
 #define STRING_HEADER_G
 
 #include <stdlib.h>
@@ -48,4 +39,4 @@ void string_free(string_ptr string);
  */
 bool string_append(string_ptr string, char c);
 
-#endif    //for guard
+#endif
