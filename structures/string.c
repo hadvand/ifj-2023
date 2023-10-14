@@ -1,12 +1,3 @@
-/**
- * @file string.h
- * @author Murad Mikogaziev (xmikog00)
- * @brief source code for string functions
- *
- * @date 02.10.2023
- * 
- */
-
 #include "string.h"
 
 string_ptr string_init()
@@ -46,7 +37,7 @@ bool string_append(string_ptr string, char c)
         }
         
         if((string->string = (char *) realloc(string->string, string->mem_allocated)) == NULL){
-            //aloc failed
+            //alloc failed
             return false;
         }
     }
