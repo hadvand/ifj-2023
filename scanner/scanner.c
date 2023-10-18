@@ -280,7 +280,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 } else{
                     ungetc(c,stdin);
                     single_token(token,*line_cnt,T_MORE,additional_string);
-                    continue;
+                    return token;
                 }
             case(S_LESS):
                 if(c == '='){
@@ -289,7 +289,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 } else{
                     ungetc(c,stdin);
                     single_token(token,*line_cnt,T_LESS,additional_string);
-                    continue;
+                    return token;
                 }
             case(S_NOT_EQUELS_START):
                 if(c == '='){
@@ -604,6 +604,8 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
                     return NULL;
                 }
+            default:
+                break;
         }
     }
     single_token(token,*line_cnt,T_EOF,additional_string);
