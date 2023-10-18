@@ -10,19 +10,6 @@
 #define PRINTABLE_MIN 32
 #define PRINTABLE_MAX 126
 
-// char *keywords[] = {
-//     "move", "createframe", "pushframe", "popframe",
-//     "defvar", "call", "return", "pushs", "pops",
-//     "clears", "add", "sub", "mul", "div", "idiv",
-//     "adds", "subs", "muls", "divs", "idivs", "lt",
-//     "gt", "eq", "lts", "gts", "eqs", "and","or",
-//     "not", "ands", "ors", "nots", "int2float", "float2int",
-//     "int2char", "stri2int", "int2floats", "float2ints", 
-//     "int2chars", "stri2ints", "read", "write", "concat",
-//     "strlen", "getchar", "setchar", "type", "label",
-//     "jump", "jumpifeq", "jumpifneq", "jumpifeqs", "jumpifneqs",
-//     "exit", "dprint", "break"
-// };
 
 typedef enum state{
     S_START,
