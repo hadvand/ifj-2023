@@ -1,0 +1,32 @@
+<program> -> <stm> EOF
+<stm> -> ε
+<stm> -> <stm_not_nul>
+
+<stm_not_null> -> var/let id: <var_type> = <assignment_value> <stm>
+<stm_not_null> -> var/let id = <assignment_value> <stm>
+<stm_not_null> -> var/let id: <var_type>  <stm>
+<stm_not_null> -> id = <assignment_value>  <stm>
+
+<assigment_value> -> <expression>
+<assigment_value> -> <func...>
+//todo ебучие  -> форум
+<stm_not_null> -> if <condition> {  <stm_not_null> } <stm>
+<stm_not_null> -> if <condition> {  <stm_not_null> } else  {  <stm_not_null> }  <stm>
+
+<stm_not_null> -> while <condition> {  <stm_not_null> }  <stm>
+
+<condition> -> let id
+<condition> -> <expression>
+
+<func> -> func func_id(func_<params>) -> <var_type> { <stm_not_null> return <expression> }  <stm>
+<func> -> func func_id(func_<params>) { <stm_not_null> <return> }  <stm>
+<func_params> -> ε
+<func_params> -> var_name var_id: <var_type> <func_params_not_null>
+<func_params_not_null> -> , <func_params>
+<func_params_not_null> -> ε
+
+<return> -> return
+<return> -> ε
+
+
+
