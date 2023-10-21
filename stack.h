@@ -16,7 +16,7 @@ typedef struct stack_elem
 
 typedef struct stack
 {
-    stack_elem *dataArray[BRACKET_STACK_MAX];
+    stack_elem *data_array[BRACKET_STACK_MAX];
     int top;
 } stack;
 

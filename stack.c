@@ -18,7 +18,7 @@ void stack_push(stack *s, char *stack_str) {
         s->top++;
         stack_elem *elem = (stack_elem *)malloc(sizeof(stack_elem));
         elem->stack_str = stack_str;
-        s->dataArray[s->top] = elem;
+        s->data_array[s->top] = elem;
     }
 }
 
@@ -29,7 +29,7 @@ void stack_pop(stack *s) {
 
 
 stack_elem *get_top(stack *s) {
-    return s->dataArray[s->top];
+    return s->data_array[s->top];
 }
 
 
