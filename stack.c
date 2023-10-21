@@ -33,14 +33,6 @@ stack_elem *get_top(stack *s) {
 }
 
 
-void print_and_pop(stack *s) {
-    while (!stack_is_empty(s)) {
-        printf("%s\n", get_top(s)->stack_str);
-        stack_pop(s);
-    }
-}
-
-
 void stack_dispose(stack *s) {
     while (!stack_is_empty(s)) {
         free(get_top(s));
