@@ -1,6 +1,7 @@
 <program> -> <stm> EOF
 <stm> -> ε
 <stm> -> <stm_not_nul>
+<stm> -> \n|; <stm>
 
 <stm_not_null> -> var/let id: <var_type> = <assignment_value> <stm>
 <stm_not_null> -> var/let id = <assignment_value> <stm>
