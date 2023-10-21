@@ -332,6 +332,10 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 }
             case(S_NUMBER_POINT):
                 if(c >=48 && c<= 57){
+                    if(!string_append(additional_string,c)){
+                        scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
+                        return NULL;
+                    }
                     state = S_DEMICAL;
                     continue;
                 }
