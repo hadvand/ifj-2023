@@ -38,6 +38,7 @@ typedef enum state{
     S_MINUS,
     S_LESS,
     S_MORE,
+    S_NESTED_COMMENT
 } state_t;
 
 typedef enum token_type{

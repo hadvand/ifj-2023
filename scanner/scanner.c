@@ -25,7 +25,7 @@ char *tokens[] = {"T_ITS_NOT_A_TOKEN", "T_EXPONENT", "T_DEMICAL", "T_INT", "T_EQ
                   "T_PLUS", "T_COMMA", "T_CURVED_BRACKET_OPEN",
                   "T_CURVED_BRACKET_CLOSE", "T_SQUARE_BRACKET_OPEN",
                   "T_SQUARE_BRACKET_CLOSE", "T_BRACKET_OPEN", "T_BRACKET_CLOSE",
-                  "T_NEW_LINE","T_EOF","T_MULTIPLICATION"};
+                  "T_NEW_LINE","T_EOF","T_MULTIPLICATION","S_NESTED_COMMENT"};
 
 const char *keywords[] = {"Double","else","func","if","Int","let","nil","return","String","var","while","qm_Double","qm_Int","qm_String"};
 
@@ -92,6 +92,8 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
 
 
     int c;
+
+    int comment_count = 0;
     
     *err_type = ER_NONE;
 
@@ -236,6 +238,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 }
                 else if(c == '*'){
                     state = S_COMMENT_BLOCK_START;
+                    comment_count++;
                     continue;
                 } else{
                     ungetc(c,stdin);
@@ -253,6 +256,9 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 if(c == '*'){
                     state = S_COMMENT_BLOCK_BOSSIBLY_FINISHED;
                 }
+                else if(c == '/'){
+                    state = S_NESTED_COMMENT;
+                }
                 else if (c == EOF){
                     scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
                     return NULL;
@@ -260,10 +266,24 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                 else if (c == '\n')
                     (*line_cnt)++;
                 continue;
+            case (S_NESTED_COMMENT):
+                if(c == '*'){
+                    comment_count++;
+                }
+                if(c == EOF){
+                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    return NULL;
+                }
+                state = S_COMMENT_BLOCK_START;
+                continue;
             case(S_COMMENT_BLOCK_BOSSIBLY_FINISHED):
                 if(c == '/'){
-                    single_token(token,*line_cnt,T_COMMENT_BLOCK,additional_string);
-                    return token;
+                    comment_count--;
+                    if(comment_count == 0){
+                        single_token(token,*line_cnt,T_COMMENT_BLOCK,additional_string);
+                        return token;
+                    } else
+                        state = S_COMMENT_BLOCK_START;
                 }
                 else if (c == EOF){
                     scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
