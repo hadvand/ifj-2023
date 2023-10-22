@@ -13,7 +13,7 @@ main:
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 
 scanner_test: $(PROGS)
-	$(CC) $(CFLAGS) $^ -o $@ -lmt
+	$(CC) $(CFLAGS) $^ -o $@ -lm
 
 test: $(TESTS)
 	$(CC) $(CFLAGS) -o $@ $^ -lm
