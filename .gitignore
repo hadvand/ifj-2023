@@ -1,3 +1,6 @@
+[.idea]
+[.vscode]
+
 # Created Binary files
 main
 scanner_test
@@ -57,6 +60,3 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
-
-.idea/
-.vscode/
