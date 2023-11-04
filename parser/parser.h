@@ -22,10 +22,7 @@ typedef struct Data{
 <program> -> <stm> EOF
 <stm> -> ε
 <stm> -> <stm_not_null>
-<stm> -> <stm_not_null> <ws> <stm>
-
-<ws> -> \n
-<ws_opt> -> \n + ε
+<stm> -> <stm_not_null> <stm>
 
 <stm_not_null> -> var/let id: <var_type> = <expression>
 <stm_not_null> -> var/let id = <expression>
@@ -39,8 +36,8 @@ typedef struct Data{
 <condition> -> let id
 <condition> -> <expression>
 
-<func> -> func func_id(<func_params>) -> <var_type> { <stm> <return> <ws_opt> }
-<func> -> func func_id(<func_params>) { <stm> <return_void> <ws_opt> }
+<func> -> func func_id(<func_params>) -> <var_type> { <stm> <return> }
+<func> -> func func_id(<func_params>) { <stm> <return_void> }
 
 <func_params> -> ε
 <func_params> -> var_name var_id: <var_type> <func_params_not_null>
