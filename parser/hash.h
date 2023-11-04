@@ -14,10 +14,15 @@ typedef struct HashTable {
 } HashTable;
 
 HashTable* createHashTable();
+
 void destroyHashTable(HashTable* ht);
+
 unsigned int hash(char* str, int size);
+
 Symbol* insertSymbol(HashTable* ht, char* name);
+
 Symbol* findSymbol(HashTable* ht, char* name);
+
 void removeSymbol(HashTable* ht, char* name);
 
 #endif

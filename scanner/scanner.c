@@ -26,7 +26,7 @@ char *tokens[] = {"T_ITS_NOT_A_TOKEN", "T_EXPONENT", "T_DEMICAL", "T_INT", "T_EQ
                   "T_CURVED_BRACKET_CLOSE", "T_SQUARE_BRACKET_OPEN",
                   "T_SQUARE_BRACKET_CLOSE", "T_BRACKET_OPEN", "T_BRACKET_CLOSE",
                   "T_NEW_LINE","T_EOF","T_MULTIPLICATION","S_NESTED_COMMENT"};
-
+// todo: add "by" and "of"
 const char *keywords[] = {"Double","else","func","if","Int","let","nil","return","String","var","while","qm_Double","qm_Int","qm_String"};
 
 
