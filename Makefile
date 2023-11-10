@@ -5,7 +5,7 @@ CFLAGS = -std=c11 -Werror -Wall -Wextra -pedantic
 CFLAGS += -g
 
 PROGS = ./scanner/* ./structures/*
-PARSER_PROGS = ./parser/*
+PARSER_PROGS = ./parser/* stack.c stack.h
 TESTS = ./tests/* ./scanner/scanner.c ./structures/*
 
 all:
