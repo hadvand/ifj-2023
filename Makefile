@@ -5,6 +5,7 @@ CFLAGS = -std=c11 -Werror -Wall -Wextra -pedantic
 CFLAGS += -g
 
 PROGS = ./scanner/* ./structures/*
+PARSER_PROGS = ./parser/*
 TESTS = ./tests/* ./scanner/scanner.c ./structures/*
 
 all:
@@ -17,6 +18,9 @@ scanner_test: $(PROGS)
 
 test: $(TESTS)
 	$(CC) $(CFLAGS) -o $@ $^ -lm
+
+parser: $(PROGS) $(PARSER_PROGS)
+	$(CC) $(CFLAGS) $^ -o $@ -lm
 
 clean:
 	rm -rf *.o scanner_test

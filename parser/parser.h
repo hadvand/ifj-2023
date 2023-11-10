@@ -23,28 +23,28 @@ typedef struct Data{
 }TData;
 
 
-bool init_data();
+TData* init_data();
 
-bool free_data(Data *data);
+void free_data(TData *data);
 
-int analyse()
+int analyse();
 
-int program(Data *data);
+int program(TData *data);
 
-int stm(Data *data);
+int stm(TData *data);
 
-int stm_not_null(Data *data);
+int stm_not_null(TData *data);
 
-int condition(Data *data);
+int condition(TData *data);
 
-int func(Data *data);
+int func(TData *data);
 
-int func_params(Data *data);
+int func_params(TData *data);
 
-int func_params_not_null(Data *data);
+int func_params_not_null(TData *data);
 
-int var_type(Data *data);
+int var_type(TData *data);
 
-int return_rule(Data *data);
+int return_rule(TData *data);
 
 #endif //IFJ_2023_PARSER_H
