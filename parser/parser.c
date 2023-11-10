@@ -1,12 +1,16 @@
 #include "parser.h"
 
+
+static int stm(TData* data);
+
+
 #define GET_TOKEN()                                                     \
-    if ((data->token_ptr = next_token(&line_cnt, &ret_code)) == NULL) {\
+    if ((data->token_ptr = next_token(&(data->line_cnt),&ret_code)) == NULL) {\
         return ret_code;                                               \
     }   \
 
-#define CHECK_RULE(_rule)           \
-    if (ret_code = (_rule(data))) { \
+#define CHECK_RULE(rule)           \
+    if (ret_code = rule(data)) { \
         return ret_code;            \
     }                               \
 
@@ -58,7 +62,7 @@ void free_data(TData *data) {
 }
 
 int analyse() {
-    error_t ret_code = ER_NONE;
+    int ret_code = ER_NONE;
     TData *parser_data;
 
     if((parser_data = init_data()) == NULL){
@@ -73,7 +77,7 @@ int analyse() {
 }
 
 int program(TData *data) {
-    error_t ret_code = ER_NONE;
+    int ret_code = ER_NONE;
     GET_TOKEN()
 
     CHECK_RULE(stm);
@@ -86,64 +90,75 @@ int program(TData *data) {
     return ret_code;
 }
 
-int stm(TData *data) {
-    error_t ret_code = ER_NONE;
+static int stm(TData *data) {
+    int ret_code = ER_NONE;
 
-
+    //clean this
+    data->ret_code = ret_code;
     return ret_code;
 }
 
 int stm_not_null(TData *data) {
-    error_t ret_code = ER_NONE;
+    int ret_code = ER_NONE;
 
-
+    //clean this
+    data->ret_code = ret_code;
     return ret_code;
 }
 
 int assignment_value(TData *data) {
-    error_t ret_code = ER_NONE;
+    int ret_code = ER_NONE;
 
-
+    //clean this
+    data->ret_code = ret_code;
     return ret_code;
 }
 
 int condition(TData *data) {
-    error_t ret_code = ER_NONE;
+    int ret_code = ER_NONE;
 
-
+    //clean this
+    data->ret_code = ret_code;
     return ret_code;
 }
 
 int func(TData *data) {
-    error_t ret_code = ER_NONE;
+    int ret_code = ER_NONE;
 
-
+    //clean this
+    data->ret_code = ret_code;
     return ret_code;
 }
 
 int func_params(TData *data) {
-    error_t ret_code = ER_NONE;
+    int ret_code = ER_NONE;
 
-
+    //clean this
+    data->ret_code = ret_code;
     return ret_code;
 }
 
 int func_params_not_null(TData *data) {
-    error_t ret_code = ER_NONE;
+    int ret_code = ER_NONE;
 
+        //clean this
+    data->ret_code = ret_code;
 
     return ret_code;
 }
 
 int return_rule(TData *data) {
-    error_t ret_code = ER_NONE;
+    int ret_code = ER_NONE;
+
+    //clean this
+    data->ret_code = ret_code;
 
 
     return ret_code;
 }
 
 int var_type(TData *data) {
-    error_t ret_code = ER_NONE;
+    int ret_code = ER_NONE;
 
     GET_TOKEN()
 
@@ -172,4 +187,5 @@ int var_type(TData *data) {
 
 
     }
+    return ER_NONE;
 }

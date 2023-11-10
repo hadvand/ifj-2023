@@ -31,7 +31,6 @@ int analyse();
 
 int program(TData *data);
 
-int stm(TData *data);
 
 int stm_not_null(TData *data);
 

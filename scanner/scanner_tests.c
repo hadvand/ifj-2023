@@ -4,7 +4,7 @@
 int main() {
     // printf() displays the string inside quotation
     token_t_ptr token;
-    error_t error_code;
+    int error_code;
     error_code = ER_NONE;
     int line_cnt = 1;
     while (1)
