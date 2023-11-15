@@ -34,13 +34,13 @@ unsigned int hash(char* str, int size) {
     return hashValue % size;
 }
 
-Symbol* insertSymbol(HashTable* ht, char* name) {
+item_data* insertSymbol(HashTable* ht, char* name) {
     unsigned int index = hash(name, ht->size);
     Symbol* newSymbol = (Symbol*)malloc(sizeof(Symbol));
     newSymbol->name = strdup(name);
     newSymbol->next = ht->table[index];
     ht->table[index] = newSymbol;
-    return newSymbol;
+    return newSymbol->data;
 }
 
 Symbol* findSymbol(HashTable* ht, char* name) {

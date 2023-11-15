@@ -8,43 +8,48 @@
 #include "../scanner/scanner.h"
 #include "hash.h"
 
-typedef struct Data{
-    // stack for local (maybe add and delete local variables if needed)
-    int line_cnt;
-    error_t ret_code;
+typedef struct {
+    int line_cnt;               // line counter
+    int param_index;            // counter of parameters in a function
 
-    bool is_in_function;
-    bool is_void_function;
+    bool is_in_function;        // is in void or non-void function
+    bool is_void_function;      // is in void function
+    bool is_in_declaration;     // is in ID declaration
+    bool is_in_condition;       // is in if/while/then construction
 
     HashTable *global_table;
     HashTable *local_table;
 
-    token_t_ptr token_ptr;
-}TData;
+    token_t_ptr token_ptr;      // current token
+
+    TData id;                   // current id that is being processed
+    TData id_type;              // left side (variable)
+    TData exp_type;             // right side (expression)
+} parser_data_t;
 
 
-TData* init_data();
+parser_data_t *init_data();
 
-void free_data(TData *data);
+void free_data(parser_data_t *data);
 
 int analyse();
 
-int program(TData *data);
+int program(parser_data_t *data);
 
-int stm(TData *data);
+int stm(parser_data_t *data);
 
-int stm_not_null(TData *data);
+int stm_not_null(parser_data_t *data);
 
-int condition(TData *data);
+int condition(parser_data_t *data);
 
-int func(TData *data);
+int func(parser_data_t *data);
 
-int func_params(TData *data);
+int func_params(parser_data_t *data);
 
-int func_params_not_null(TData *data);
+int func_params_not_null(parser_data_t *data);
 
-int var_type(TData *data);
+int var_type(parser_data_t *data);
 
-int return_rule(TData *data);
+int return_rule(parser_data_t *data);
 
 #endif //IFJ_2023_PARSER_H
