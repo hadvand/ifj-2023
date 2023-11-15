@@ -1,12 +1,16 @@
 #include "parser.h"
 
+
+static int stm(TData* data);
+
+
 #define GET_TOKEN()                                                     \
-    if ((data->token_ptr = next_token(&line_cnt, &ret_code)) == NULL) {\
+    if ((data->token_ptr = next_token(&(data->line_cnt),&ret_code)) == NULL) {\
         return ret_code;                                               \
     }   \
 
-#define CHECK_RULE(_rule)           \
-    if (ret_code = (_rule(data))) { \
+#define CHECK_RULE(rule)           \
+    if (ret_code = rule(data)) { \
         return ret_code;            \
     }                               \
 
@@ -173,7 +177,7 @@ void free_data(parser_data_t *data) {
 }
 
 int analyse() {
-    error_t ret_code = ER_NONE;
+    int ret_code = ER_NONE;
 
     string_ptr string;
     if ((string = string_init()) == NULL) return ER_INTERNAL;
@@ -196,12 +200,27 @@ int analyse() {
     return ret_code;
 }
 
+int program(TData *data) {
+    int ret_code = ER_NONE;
+    GET_TOKEN()
 int program(parser_data_t *data) {
     error_t ret_code = ER_NONE;
 
+    CHECK_RULE(stm);
+
+    GET_TOKEN()
     else if (data->token_ptr->token_type != T_EOF) {
         return ER_SEMAN;
     }
+
+    return ret_code;
+}
+
+static int stm(TData *data) {
+    int ret_code = ER_NONE;
+
+    //clean this
+    data->ret_code = ret_code;
         // <statement> -> ε
     else if (data->token.type == T_NEW_LINE)
     {
@@ -335,6 +354,8 @@ int return_rule(parser_data_t *data) {
     return ret_code;
 }
 
+int var_type(TData *data) {
+    error_t ret_code = ER_NONE;
 
 static int var_type(parser_data_t* data)
 {
@@ -409,5 +430,5 @@ static int var_type(parser_data_t* data)
     else
         return ER_SYNTAX;
 
-    return ER_NONE;
+    }
 }

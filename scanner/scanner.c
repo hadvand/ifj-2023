@@ -60,7 +60,7 @@ void single_token(token_t_ptr token ,int line_cnt, token_type_t token_type,strin
     string = NULL;
 }
 
-void scanning_finish_with_error(token_t_ptr token, string_ptr additional_string, error_t* err, error_t error_type){
+void scanning_finish_with_error(token_t_ptr token, string_ptr additional_string, int* err, int error_type){
     delete_token(token);
     string_free(additional_string);
     (*err) = error_type;
@@ -88,7 +88,7 @@ bool keyword_control(token_t_ptr token, string_ptr add_string){
     return false;
 }
 
-token_t_ptr next_token(int *line_cnt, error_t* err_type){
+token_t_ptr next_token(int *line_cnt, int* err_type){
 
 
     int c;
