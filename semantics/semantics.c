@@ -1,6 +1,8 @@
 #include "semantics.h"
 #include 'stack.h'
 #include "scanner.h"
+#include <stdlib.h>
+#include <stdbool.h>
 
 #define TABLE_SIZE 16
 
@@ -49,6 +51,53 @@ int precedence_table[TABLE_SIZE][TABLE_SIZE] =
             {'<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', '<', ' '}   // |$|
 
 };
+
+
+static Precedence_table_symbol convert_token_into_symbol(token* token){
+
+    switch(token -> token_type){
+
+        case T_PLUS:
+            return PLUS;
+        case T_MINUS:
+            return MINUS;
+        case T_MULTIPLICATION:
+            return MUL;
+        case T_DIVISION:
+            return DIV;
+        case T_EQUAL:
+            return EQUAL;
+        case T_NOT_EQUAL:
+            return N_EQUAL;
+        case T_LESS:
+            return LESS;
+        case T_MORE:
+            return GREATER;
+        case T_LESS_EQUAL:
+            return L_EQUAL;
+        case T_MORE_EQUAL:
+            return G_EQUAL;
+        case T_QMARK:
+            return DQ_MARK;
+        case T_EXMARK:
+            return EX_MARK;
+        case T_BRACKET_OPEN:
+            return LEFT_BRACKET;
+        case T_BRACKET_CLOSE:
+            return RIGHT_BRACKET;
+        case T_ID:
+            return IDENTIFIER;
+        case T_INT:
+            return INT_NUMBER;
+        case T_DECIMAL:
+            return DOUBLE_NUMBER;
+        case T_STRING:
+            return STRING;
+
+        default:
+            return DOLLAR;
+    }
+}
 
 /*
  *
@@ -105,9 +154,50 @@ static Precedence_table_indices get_index(Precedence_table_symbol symbol){
     }
 }
 
-static Precedence_table_symbol convert_token_into_symbol(token* token){
+
+static Data_type get_data_type(Token* token, PData* data){
+
+    TData* symbol;
 
     switch(token -> token_type){
 
+        case T_ID:
+            symbol = sym_table_search(&data->local_table, token->attribute.string->str);
+            if (symbol == NULL)
+                return TYPE_UNDEFINED;
+            return symbol->token_type;
+        case T_INT:
+            return TYPE_UNDEFINED;
+        case T_DECIMAL:
+            return TYPE_DOUBLE;
+        case T_STRING:
+            return TYPE_STRING;
+        default:
+            return TYPE_UNDEFINED;
     }
 }
+
+
+int number_of_symbols_after_stop(bool* found_stop){
+
+    stack_elem item = get_top(&s);
+    int counter = 0;
+
+    while (item != NULL){
+
+        if (item -> stack_item != STOP){
+            *found_stop = false;
+            counter += 1;
+        }
+
+        else {
+            *found_stop = true;
+            break;
+        }
+        // item = item -> next ???;
+    }
+
+    return counter;
+}
+
+
