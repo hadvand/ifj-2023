@@ -37,6 +37,6 @@ void string_free(string_ptr string);
  * @param c char to be appended
  * @return true if success, false if alloc failed
  */
-bool string_append(string_ptr string, char c);
+bool string_append(string_ptr *string, char c);
 
 #endif

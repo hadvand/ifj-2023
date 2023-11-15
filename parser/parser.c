@@ -29,7 +29,7 @@
 	) return SYNTAX_ERR
 
 
-parser_data_t p *init_data()
+parser_data_t *init_data()
 {
     parser_data_t *parser_data;
     // init parser data
@@ -175,27 +175,19 @@ void free_data(parser_data_t *data) {
 int analyse() {
     error_t ret_code = ER_NONE;
 
-    Dynamic_string string;
-    if (!dynamic_string_init(&string)) return ER_INTERNAL;
-    set_dynamic_string(&string);
+    string_ptr string;
+    if ((string = string_init()) == NULL) return ER_INTERNAL;
 
     parser_data_t parser_data;
-    if (!init_variables(&parser_data))
+    if ((parser_data = init_data) == NULL)
     {
         dynamic_string_free(&string);
         return ER_INTERNAL;
     }
 
-    if ((ret_code = next_token(&parser_data.token_ptr)) == SCANNER_TOKEN_OK)
+    if ((ret_code = next_token(&parser_data.token_ptr)) != NULL)
     {
-        if (!code_generator_start())
-        {
-            dynamic_string_free(&string);
-            free_variables(&parser_data);
-            return ER_INTERNAL;
-        }
-
-        result = prog(&parser_data);
+        ret_code = program(&parser_data);
     }
 
     dynamic_string_free(&string);
@@ -213,7 +205,6 @@ int program(parser_data_t *data) {
         // <statement> -> ε
     else if (data->token.type == T_NEW_LINE)
     {
-
         return statement(data);
     }
 
