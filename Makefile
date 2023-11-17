@@ -19,7 +19,7 @@ scanner_test: $(PROGS)
 test: $(TESTS)
 	$(CC) $(CFLAGS) -o $@ $^ -lm
 
-parser: $(PROGS) $(PARSER_PROGS)
+parser-build: $(PARSER_PROGS)
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 
 clean:

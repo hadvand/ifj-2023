@@ -6,13 +6,13 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
-#include "../scanner/scanner.h"
+#include "scanner/scanner.h"
 
 #define BRACKET_STACK_MAX 1000
 
 typedef struct stack_elem
 {
-    token_t_ptr stack_item;
+    token_t_ptr *stack_item;
 } stack_elem;
 
 typedef struct stack
@@ -25,7 +25,7 @@ stack *stack_init();
 
 bool stack_is_empty(stack *s);
 
-void stack_push(stack *s, char *stack_str);
+void stack_push(stack *s, token_t_ptr *stack_item);
 
 void stack_pop(stack *s);
 

@@ -24,6 +24,6 @@ extern error_t err_type;
  * @brief external variable for line counter
  * 
  */
-extern unsigned line_cnt;
+extern int line_cnt;
 
 #endif

@@ -16,8 +16,8 @@ typedef struct
 } item_data;
 
 typedef struct Symbol {
-    char* name;
-    item_data data;
+    char *name;
+    item_data *data;
     struct Symbol* next;
 } Symbol;
 

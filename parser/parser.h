@@ -20,11 +20,11 @@ typedef struct {
     HashTable *global_table;
     HashTable *local_table;
 
-    token_t_ptr token_ptr;      // current token
+    token_t_ptr token_ptr;           // current token
 
-    TData id;                   // current id that is being processed
-    TData id_type;              // left side (variable)
-    TData exp_type;             // right side (expression)
+item_data *id;                   // current id that is being processed
+    item_data *id_type;              // left side (variable)
+    item_data *exp_type;             // right side (expression)
 } parser_data_t;
 
 
