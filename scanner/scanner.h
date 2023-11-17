@@ -1,8 +1,10 @@
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <ctype.h>
+#include "../structures/string.h"
 #include "../structures/error.h"
-#include "../parser/hash.h"
+#include "string.h"
 
 
 #define PRINTABLE_MIN 32
@@ -27,7 +29,7 @@ typedef enum state{
     S_EXPONENT_SING,
     S_EXPONENT,
     S_ASSINGMENT,
-    S_EXCLAMATION_MARK,
+    S_NOT_EQUELS_START,
     S_DIVISION,
     S_COMMENT_STRING,
     S_COMMENT_BLOCK_START,
@@ -49,8 +51,7 @@ typedef enum token_type{
     T_UNDERLINE,
     T_KEYWORD,
     T_ID,
-    T_KEYWORD_NIL_POSSIBILITY,
-    T_EXCLAMATION_MARK,
+    T_KEYWORD_TYPE_ID,
     T_STRING,
     T_MORE,
     T_MORE_EQUAL,
