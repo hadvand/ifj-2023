@@ -9,6 +9,9 @@ void print_token(token_t_ptr token) {
     }
 
     switch (token->token_type) {
+        case T_EXCLAMATION_MARK:
+            printf("T_EXCLAMATION_MARK\n");
+            break;
         case T_NEW_LINE:
             printf("T_NEW_LINE\n");
             break;
@@ -113,8 +116,8 @@ void print_token(token_t_ptr token) {
             printf("T_ID\n");
             printf("Attribute: %s\n", token->attribute.string);
             break;
-        case T_KEYWORD_TYPE_ID:
-            printf("T_KEYWORD_TYPE_ID\n");
+        case T_KEYWORD_NIL_POSSIBILITY:
+            printf("T_KEYWORD_NIL_POSSIBILITY\n");
             switch (token->attribute.keyword) {
                 case k_qmark_Double:
                     printf("k_qmark_Double\n");
@@ -223,7 +226,7 @@ bool assert_token(token_t_ptr token, token_t_ptr test_token){
         }
     }
 
-    if(token->token_type == T_KEYWORD_TYPE_ID){
+    if(token->token_type == T_KEYWORD_NIL_POSSIBILITY){
         if(token->attribute.keyword != test_token->attribute.keyword){
             printf("Except:\n");
             print_token(test_token);
