@@ -186,7 +186,7 @@ ENDTEST
 
 TEST(keyword_type_id, "Keyword type ID")
     stdin_emulate("Int?");
-    test_token->token_type = T_KEYWORD_TYPE_ID;
+    test_token->token_type = T_KEYWORD_NIL_POSSIBILITY;
     test_token->attribute.keyword = k_qmark_Int;
     token = next_token(&line_count, &test_error);
     if(assert_token(token, test_token)){
@@ -196,7 +196,7 @@ ENDTEST
 
 TEST(keyword_type_id_1, "Keyword type ID 1")
     stdin_emulate("Double?");
-    test_token->token_type = T_KEYWORD_TYPE_ID;
+    test_token->token_type = T_KEYWORD_NIL_POSSIBILITY;
     test_token->attribute.keyword = k_qmark_Double;
     token = next_token(&line_count, &test_error);
     if(assert_token(token, test_token)){
@@ -206,7 +206,7 @@ ENDTEST
 
 TEST(keyword_type_id_2, "Keyword type ID 2")
     stdin_emulate("String?");
-    test_token->token_type = T_KEYWORD_TYPE_ID;
+    test_token->token_type = T_KEYWORD_NIL_POSSIBILITY;
     test_token->attribute.keyword = k_qmark_String;
     token = next_token(&line_count, &test_error);
     if(assert_token(token, test_token)){

@@ -1,14 +1,14 @@
 <program> -> <stm> EOF
+
 <stm> -> ε
 <stm> -> <stm_not_null>
 <stm> -> <stm_not_null> <stm>
 
-<stm_not_null> -> var + let id: <var_type> = <expression>
+<stm_not_null> -> var + let id : <var_type> = <expression>
 <stm_not_null> -> var + let id = <expression>
-<stm_not_null> -> var + let id: <var_type>
+<stm_not_null> -> var + let id : <var_type>
 <stm_not_null> -> id = <expression>
 <stm_not_null> -> <func>
-
 <stm_not_null> -> if ( <condition> ) { <stm> } \n
 <stm_not_null> -> if ( <condition> ) { <stm> } \n else { <stm> } \n
 <stm_not_null> -> while <condition> { <stm> } \n

@@ -8,7 +8,7 @@
 #define TEST(NAME, DESCRIPTION) \
 void NAME(void) { \
     printf("\n[%s] %s\n", #NAME, DESCRIPTION); \
-    error_t test_error = ER_NONE;              \
+    int test_error = ER_NONE;              \
     token_t_ptr test_token = (token_t_ptr) malloc(sizeof(struct token)); \
     token_t_ptr token = (token_t_ptr) malloc(sizeof(struct token));      \
     int line_count = 1;

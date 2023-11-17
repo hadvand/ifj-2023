@@ -1,5 +1,3 @@
-#include <stdlib.h>
-#include <string.h>
 #include "hash.h"
 
 HashTable* createHashTable() {
@@ -34,13 +32,33 @@ unsigned int hash(char* str, int size) {
     return hashValue % size;
 }
 
-Symbol* insertSymbol(HashTable* ht, char* name) {
+item_data* insertSymbol(HashTable* ht, char* name, bool *internal_error) {
+    if (findSymbol(ht, name)) {
+        *internal_error = false;
+        return NULL;
+    }
+
     unsigned int index = hash(name, ht->size);
+
     Symbol* newSymbol = (Symbol*)malloc(sizeof(Symbol));
-    newSymbol->name = strdup(name);
+
+    if (newSymbol == NULL) {
+        *internal_error = true;
+        return NULL;
+    }
+
+    newSymbol->name = (char*)malloc(strlen(name) + 1);
+    if (newSymbol->name == NULL) {
+        *internal_error = true;
+        free(newSymbol);
+        return NULL;
+    }
+
+    strcpy(newSymbol->name, name);
+
     newSymbol->next = ht->table[index];
     ht->table[index] = newSymbol;
-    return newSymbol;
+    return newSymbol->data;
 }
 
 Symbol* findSymbol(HashTable* ht, char* name) {

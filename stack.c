@@ -13,11 +13,11 @@ bool stack_is_empty(stack *s) {
 }
 
 
-void stack_push(stack *s, char *stack_str) {
+void stack_push(stack *s, token_t_ptr *stack_item) {
     if (s->top < BRACKET_STACK_MAX) {
         s->top++;
         stack_elem *elem = (stack_elem *)malloc(sizeof(stack_elem));
-        elem->stack_str = stack_str;
+        elem->stack_item = stack_item;
         s->data_array[s->top] = elem;
     }
 }

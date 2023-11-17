@@ -12,8 +12,8 @@
  */
 typedef struct string_t{
     char *string;
-    unsigned last_index;
-    unsigned mem_allocated;
+    int last_index;
+    int mem_allocated;
 } *string_ptr;
 
 /**
