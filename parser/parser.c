@@ -24,13 +24,6 @@
 	if (data->token_ptr.token_type != (_type)) return SYNTAX_ERR
 
 
-#define CHECK_KEYWORD(_keyword)										\
-	if (															\
-		data->token_ptr.token_type != TOKEN_TYPE_KEYWORD						\
-		|| data->token_ptr.attribute.keyword != (_keyword)				\
-	) return SYNTAX_ERR
-
-
 parser_data_t *init_data()
 {
     parser_data_t *parser_data;
@@ -70,27 +63,28 @@ parser_data_t *init_data()
     // predefined functions
 
     item_data *tmp;
+    bool internal_error;
 
     // readString() -> str?
-    tmp = insertSymbol(parser_data->global_table, "readString");
+    tmp = insertSymbol(parser_data->global_table, "readString", &internal_error);
     tmp->defined = true;
     tmp->type = 's';
     tmp->qmark = true;
 
     // readInt() -> int?
-    tmp = insertSymbol(parser_data->global_table, "readInt");
+    tmp = insertSymbol(parser_data->global_table, "readInt", &internal_error);
     tmp->defined = true;
     tmp->type = 'i';
     tmp->qmark = true;
 
     // readDouble() -> double?
-    tmp = insertSymbol(parser_data->global_table, "readDouble");
+    tmp = insertSymbol(parser_data->global_table, "readDouble", &internal_error);
     tmp->defined = true;
     tmp->type = 'd';
     tmp->qmark = true;
 
     // write(...)
-    tmp = insertSymbol(parser_data->global_table, "write");
+    tmp = insertSymbol(parser_data->global_table, "write", &internal_error);
     tmp->defined = true;
     tmp->type = 'n';
     tmp->qmark = false;
@@ -100,7 +94,7 @@ parser_data_t *init_data()
     }
 
     // Int2Double(int) -> double
-    tmp = insertSymbol(parser_data->global_table, "Int2Double");
+    tmp = insertSymbol(parser_data->global_table, "Int2Double", &internal_error);
     tmp->defined = true;
     tmp->type = 'd';
     tmp->qmark = false;
@@ -110,7 +104,7 @@ parser_data_t *init_data()
     }
 
     // Double2Int(double) -> int
-    tmp = insertSymbol(parser_data->global_table, "Double2Int");
+    tmp = insertSymbol(parser_data->global_table, "Double2Int", &internal_error);
     tmp->defined = true;
     tmp->type = 'i';
     tmp->qmark = false;
@@ -120,7 +114,7 @@ parser_data_t *init_data()
     }
 
     // ord(str) -> int
-    tmp = insertSymbol(parser_data->global_table, "ord");
+    tmp = insertSymbol(parser_data->global_table, "ord", &internal_error);
     tmp->defined = true;
     tmp->type = 'i';
     tmp->qmark = false;
@@ -130,7 +124,7 @@ parser_data_t *init_data()
     }
 
     // chr(int) -> str
-    tmp = insertSymbol(parser_data->global_table, "chr");
+    tmp = insertSymbol(parser_data->global_table, "chr", &internal_error);
     tmp->defined = true;
     tmp->type = 's';
     tmp->qmark = false;
@@ -140,7 +134,7 @@ parser_data_t *init_data()
     }
 
     // length(str) -> int
-    tmp = insertSymbol(parser_data->global_table, "length");
+    tmp = insertSymbol(parser_data->global_table, "length", &internal_error);
     tmp->defined = true;
     tmp->type = 'i';
     tmp->qmark = false;
@@ -150,7 +144,7 @@ parser_data_t *init_data()
     }
 
     // substring(str, int, int) -> str?
-    tmp = insertSymbol(parser_data->global_table, "substring");
+    tmp = insertSymbol(parser_data->global_table, "substring", &internal_error);
     tmp->defined = true;
     tmp->type = 's';
     tmp->qmark = true;
@@ -187,7 +181,7 @@ int analyse() {
         return ER_INTERNAL;
     }
 
-    if ((parser_data->token_ptr = next_token(&line_cnt, &ret_code)) != NULL)
+    if ((parser_data->token_ptr = next_token(&(parser_data->line_cnt), &ret_code)) != NULL)
     {
         ret_code = program(parser_data);
     }
@@ -198,14 +192,15 @@ int analyse() {
     return ret_code;
 }
 
-
+// <program> -> <stm> EOF
 int program(parser_data_t *data) {
     int ret_code = ER_NONE;
 
+    GET_TOKEN()
     CHECK_RULE(stm)
     GET_TOKEN()
 
-    else if (data->token_ptr->token_type != T_EOF) {
+    if (data->token_ptr->token_type != T_EOF) {
         return ER_SEMAN;
     }
 
@@ -215,7 +210,7 @@ int program(parser_data_t *data) {
 int stm(parser_data_t *data) {
     int ret_code = ER_NONE;
 
-    if ((data->token_ptr = next_token(&line_cnt, &ret_code)) == NULL) {
+    if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code)) == NULL) {
         return ret_code;
     }
 
@@ -259,35 +254,42 @@ int func(parser_data_t *data) {
 }
 
 int func_params(parser_data_t *data) {
+    int ret_code = ER_NONE;
+
     data->param_index = 0;
 
-    // <params> -> ID AS <type> <param_n>
-    if (data->token_ptr->token_type == T_KEYWORD_TYPE_ID)
-    {
+    // <func_params> -> var_name var_id : <var_type> <func_params_not_null>
+    if (data->token_ptr->token_type != T_ID) return ER_SYNTAX;
+
+    GET_TOKEN()
+
+    if (data->token_ptr->token_type == T_ID) {
         // if there is function named as parameter
         if (findSymbol(data->global_table, data->token_ptr->attribute.string))
             return ER_UNDEF_VAR;
 
-        // if we are in defintion, we need to add parameters to the local symbol table
-        if (!data->is_in_declaration)
-        {
-            if (!(data->exp_type = insertSymbol(data->local_table, data->token_ptr->attribute.string)))
-            {
-                return ER_UNDEF_VAR;
+        // if we are in definition, we need to add parameters to the local symbol table
+        if (!data->is_in_declaration) {
+            bool internal_error;
+            if (!(data->exp_type = insertSymbol(data->local_table, data->token_ptr->attribute.string, &internal_error))) {
+                if (internal_error) return ER_INTERNAL;
+                else return ER_UNDEF_VAR;
             }
         }
 
-        GET_TOKEN_AND_CHECK_KEYWORD(KEYWORD_AS);
-        GET_TOKEN_AND_CHECK_RULE(var_type);
-        GET_TOKEN_AND_CHECK_RULE(func_params_not_null);
+        GET_TOKEN()
+        if (data->token_ptr->token_type != T_COLON) return ER_SYNTAX;
 
-        if (data->param_index + 1 != (*data->id->params)->last_index)
-            return ER_UNDEF_VAR;
+        GET_TOKEN()
+        var_type(data);
+
+        func_params_not_null(data);
+
+        if (data->param_index + 1 != (*data->id->params)->last_index) return ER_UNDEF_VAR;
     }
-    else if (!data->is_in_declaration && (*data->id->params)->last_index)
-        return ER_UNDEF_VAR;
+    else if (!data->is_in_declaration && (*data->id->params)->last_index) return ER_UNDEF_VAR;
 
-    // <params> -> ε
+    // <func_params> -> ε
 
     return ER_NONE;
 }
@@ -302,22 +304,22 @@ int func_params_not_null(parser_data_t *data) {
         if (!data->is_in_declaration && data->param_index == (*data->id->params)->last_index)
             return ER_UNDEF_VAR;
 
-        GET_TOKEN_AND_CHECK_TYPE(T_ID);
+//        GET_TOKEN_AND_CHECK_TYPE(T_ID);
 
         if (!data->is_in_declaration)
         {
             bool internal_error;
-            if (!(data->exp_type = insertSymbol(data->local_table, data->token_ptr->attribute.string)))
+            if (!(data->exp_type = insertSymbol(data->local_table, data->token_ptr->attribute.string, &internal_error)))
             {
                 if (internal_error) return ER_INTERNAL;
                 else return ER_UNDEF_VAR;
             }
         }
 
-        GET_TOKEN_AND_CHECK_KEYWORD(KEYWORD_AS);
-        GET_TOKEN_AND_CHECK_RULE(var_type);
+//        GET_TOKEN_AND_CHECK_KEYWORD(KEYWORD_AS);
+//        GET_TOKEN_AND_CHECK_RULE(var_type);
 
-        GET_TOKEN();
+        GET_TOKEN()
         return func_params_not_null(data);
     }
 
@@ -327,10 +329,10 @@ int func_params_not_null(parser_data_t *data) {
 }
 
 int return_rule(parser_data_t *data) {
-    error_t ret_code = ER_NONE;
+
     UNUSED(data);
 
-    return ret_code;
+    return 0;
 }
 
 int var_type(parser_data_t* data) {

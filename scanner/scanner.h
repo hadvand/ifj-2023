@@ -1,10 +1,8 @@
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <ctype.h>
-#include "../structures/string.h"
 #include "../structures/error.h"
-#include "string.h"
+#include "../parser/hash.h"
 
 
 #define PRINTABLE_MIN 32

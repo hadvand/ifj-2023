@@ -5,8 +5,7 @@
 #ifndef IFJ_2023_PARSER_H
 #define IFJ_2023_PARSER_H
 
-#include "../scanner/scanner.h"
-#include "hash.h"
+#include "../stack.h"
 
 typedef struct {
     int line_cnt;               // line counter

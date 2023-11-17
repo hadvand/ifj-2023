@@ -1,3 +1,4 @@
+#include <string.h>
 #include "../structures/string.h"
 
 #ifndef HASH_H
@@ -32,7 +33,7 @@ void destroyHashTable(HashTable* ht);
 
 unsigned int hash(char* str, int size);
 
-item_data* insertSymbol(HashTable* ht, char* name);
+item_data* insertSymbol(HashTable* ht, char* name, bool *internal_error);
 
 Symbol* findSymbol(HashTable* ht, char* name);
 

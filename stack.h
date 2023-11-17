@@ -1,11 +1,6 @@
 #ifndef IFJ_2023_STACK_H
 #define IFJ_2023_STACK_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdbool.h>
 #include "scanner/scanner.h"
 
 #define BRACKET_STACK_MAX 1000
