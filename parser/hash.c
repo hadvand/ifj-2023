@@ -35,11 +35,27 @@ unsigned int hash(char* str, int size) {
 }
 
 Symbol* insertSymbol(HashTable* ht, char* name) {
+
     unsigned int index = hash(name, ht->size);
+
     Symbol* newSymbol = (Symbol*)malloc(sizeof(Symbol));
-    newSymbol->name = strdup(name);
+
+    if (newSymbol == NULL) {
+        return NULL;
+    }
+
+    newSymbol->name = (char*)malloc(strlen(name) + 1);
+    if (newSymbol->name == NULL) {
+
+        free(newSymbol);
+        return NULL;
+    }
+
+    strcpy(newSymbol->name, name);
+
     newSymbol->next = ht->table[index];
     ht->table[index] = newSymbol;
+
     return newSymbol;
 }
 
