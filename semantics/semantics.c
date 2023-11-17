@@ -1,6 +1,6 @@
 #include "semantics.h"
-#include 'stack.h'
-#include "scanner.h"
+#include "../stack.h"
+#include "../scanner/scanner.h"
 #include <stdlib.h>
 #include <stdbool.h>
 
@@ -65,7 +65,7 @@ static Precedence_table_symbol convert_token_into_symbol(token* token){
             return MUL;
         case T_DIVISION:
             return DIV;
-        case T_EQUAL:
+        case T_EQUALS:
             return EQUAL;
         case T_NOT_EQUAL:
             return N_EQUAL;

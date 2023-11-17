@@ -2,6 +2,7 @@
 #ifndef IFJ_NEW_BEGINNING_SEMANTICS_H
 #define IFJ_NEW_BEGINNING_SEMANTICS_H
 
+#include "../parser/parser.h"
 
 typedef enum
 {
