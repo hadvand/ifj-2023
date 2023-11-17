@@ -18,7 +18,7 @@ void delete_token(token_t_ptr token){
 
 char *tokens[] = {"T_ITS_NOT_A_TOKEN", "T_EXPONENT", "T_DEMICAL", "T_INT", "T_EQUALS",
                   "T_ASSIGMENT", "T_UNDERLINE", "T_KEYWORD", "T_ID",
-                  "T_KEYWORD_TYPE_ID", "T_STRING", "T_MORE", "T_MORE_EQUAL",
+                  "T_KEYWORD_NIL_POSSIBILITY", "T_EXCLAMATION_MARK", "T_STRING", "T_MORE", "T_MORE_EQUAL",
                   "T_LESS", "T_LESS_EQUAL", "T_MINUS", "T_ARROW",
                   "T_TERN", "T_COMMENT_STRING", "T_COMMENT_BLOCK",
                   "T_NOT_EQUAL", "T_DIVISION", "T_COLON",
@@ -71,7 +71,7 @@ bool keyword_control(token_t_ptr token, string_ptr add_string){
                         "if","Int","let",
                         "nil","return","String",
                         "var","while"};
-    char *keywords_with_qmark[] = {"Double?","Int?","String?", "Double!","Int!","String!"};
+    char *keywords_with_qmark[] = {"Double?","Int?","String?"};
 
     for (size_t i = 0; i < sizeof(keywords) / sizeof(keywords[0]); i++) {
         if (strcmp(add_string->string, keywords[i]) == 0) {
@@ -191,7 +191,7 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     continue;
                 }
                 else if(c == '!'){
-                    state = S_NOT_EQUELS_START;
+                    state = S_EXCLAMATION_MARK;
                     continue;
                 }
                 else if(c == '?'){
@@ -311,13 +311,14 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     single_token(token,*line_cnt,T_LESS,additional_string);
                     return token;
                 }
-            case(S_NOT_EQUELS_START):
+            case(S_EXCLAMATION_MARK):
                 if(c == '='){
                     single_token(token,*line_cnt,T_NOT_EQUAL,additional_string);
                     return token;
                 } else{
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
-                    return NULL;
+                    ungetc(c,stdin);
+                    single_token(token,*line_cnt,T_EXCLAMATION_MARK,additional_string);
+                    return token;
                 }
             case(S_INT):
                 if(c >= 48 && c <= 57){
@@ -474,13 +475,13 @@ token_t_ptr next_token(int *line_cnt, error_t* err_type){
                     }
                     continue;
                 }
-                else if(c == '?' || c == '!'){
+                else if(c == '?'){
                     if(!string_append(additional_string,c)){
                         scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
                         return NULL;
                     }
                     keyword_control(token,additional_string);
-                    single_token(token,*line_cnt,T_KEYWORD_TYPE_ID,additional_string);
+                    single_token(token,*line_cnt,T_KEYWORD_NIL_POSSIBILITY,additional_string);
                     return token;
                 }
                 else{
