@@ -112,4 +112,4 @@ typedef struct token
 } *token_t_ptr;
 
 
-token_t_ptr next_token(int *line_cnt, int* error);
+token_t_ptr next_token(int *line_cnt, int* error, bool *flag);

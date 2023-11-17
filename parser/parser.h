@@ -21,7 +21,7 @@ typedef struct {
 
     token_t_ptr token_ptr;           // current token
 
-item_data *id;                   // current id that is being processed
+    item_data *id;                   // current id that is being processed
     item_data *id_type;              // left side (variable)
     item_data *exp_type;             // right side (expression)
 } parser_data_t;

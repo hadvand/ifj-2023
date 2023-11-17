@@ -12,16 +12,8 @@
         return ret_code;            \
     }                               \
 
-#define IS_VALUE(token)												\
-	(token).token_type == TOKEN_TYPE_DOUBLE_NUMBER						\
-	|| (token).token_type == TOKEN_TYPE_INT_NUMBER						\
-	|| (token).token_type == TOKEN_TYPE_INT_NUMBER						\
-	|| (token).token_type == TOKEN_TYPE_STRING							\
-	|| (token).token_type == TOKEN_TYPE_IDENTIFIER
-
-
 #define CHECK_TYPE(_type)											\
-	if (data->token_ptr.token_type != (_type)) return SYNTAX_ERR
+	if (data->token_ptr.token_type != (_type)) return ER_SYNTAX
 
 
 parser_data_t *init_data()
@@ -210,24 +202,220 @@ int program(parser_data_t *data) {
 int stm(parser_data_t *data) {
     int ret_code = ER_NONE;
 
-    if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code)) == NULL) {
-        return ret_code;
+    GET_TOKEN()
+
+    // <stm> -> var + let id : <var_type> = <expression> \n <stm>
+    // <stm> -> var + let id : <var_type> \n <stm>
+    // <stm> -> var + let id = <expression> \n <stm>
+    if (data->token_ptr->token_type == T_KEYWORD && (data->token_ptr->attribute.keyword == k_var || data->token_ptr->attribute.keyword == k_let)) {
+        GET_TOKEN()
+        if (data->token_ptr->token_type != T_ID) return ER_SYNTAX;
+
+        GET_TOKEN()
+        if (data->token_ptr->token_type == T_COLON) {
+            GET_TOKEN()
+            var_type(data);
+
+            GET_TOKEN()
+            if (data->token_ptr->token_type == T_EQUALS) {
+                GET_TOKEN()
+                // expression(data);
+
+                GET_TOKEN()
+                if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
+
+                GET_TOKEN()
+                return stm(data);
+            }
+            else if (data->token_ptr->token_type == T_NEW_LINE) {
+                GET_TOKEN()
+                return stm(data);
+            }
+            else return ER_SYNTAX;
+        }
+        else if (data->token_ptr->token_type == T_EQUALS) {
+            GET_TOKEN()
+            // expression();
+
+            GET_TOKEN()
+            if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
+
+            GET_TOKEN()
+            stm(data);
+
+        }
+        else return ER_SYNTAX;
+
+        GET_TOKEN()
     }
 
-    if (data->token_ptr->token_type == T_EOF) {}
+    // <stm> -> func_id( <func_params> ) \n <stm>
+    // <stm> -> id = <expression> \n <stm>
+    if (data->token_ptr->token_type == T_ID) {
+        GET_TOKEN()
+        if (data->token_ptr->token_type == T_BRACKET_OPEN) {
+            GET_TOKEN()
+            func_params(data);
 
-    if (data->token_ptr->token_type == T_KEYWORD) {
-        if (data->token_ptr->attribute.keyword == k_var || data->token_ptr->attribute.keyword == k_let) {
-            stm_not_null(data);
+            GET_TOKEN()
+            if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
+
+            GET_TOKEN()
+            if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
+
+            return stm(data);
+        }
+        else if (data->token_ptr->token_type == T_EQUALS) {
+            GET_TOKEN()
+            // expression(data);
+
+            GET_TOKEN()
+            if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
+
+            GET_TOKEN()
+            return stm(data);
         }
     }
 
-    return ret_code;
-}
+    // <stm> -> func func_id( <func_params> ) -> <var_type> { <stm> <return> } \n <stm>
+    // <stm> -> func func_id( <func_params> ) { <stm> <return_void> } \n <stm>
+    if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute == k_func) {
+        GET_TOKEN()
+        if (data->token_ptr->token_type != T_ID) return ER_SYNTAX;
 
-int stm_not_null(parser_data_t *data) {
-    int ret_code = ER_NONE;
-    UNUSED(data);
+        GET_TOKEN()
+        if (data->token_ptr->token_type != T_BRACKET_OPEN) return ER_SYNTAX;
+
+        GET_TOKEN()
+        func_params(data);
+
+        GET_TOKEN()
+        if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
+
+        GET_TOKEN()
+        if (data->token_ptr->token_type == T_ARROW) {
+            GET_TOKEN()
+            var_type(data);
+
+            GET_TOKEN()
+            if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
+
+            GET_TOKEN()
+            stm(data);
+
+            GET_TOKEN()
+            return_rule(data);
+
+            GET_TOKEN()
+            if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+
+            GET_TOKEN()
+            if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
+
+            GET_TOKEN()
+            return stm(data);
+
+        }
+        else if (data->token_ptr->token_type == T_CURVED_BRACKET_OPEN) {
+            GET_TOKEN()
+            if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
+
+            GET_TOKEN()
+            stm(data);
+
+            GET_TOKEN()
+            return_rule(data);
+
+            GET_TOKEN()
+            if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+
+            GET_TOKEN()
+            if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
+
+            GET_TOKEN()
+            return stm(data);
+        }
+        else return ER_SYNTAX;
+    }
+
+    // <stm> -> if ( <condition> ) { <stm> } \n else { <stm> } \n <stm>
+    // <stm> -> if ( <condition> ) { <stm> } \n <stm>
+    if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute == k_if) {
+        GET_TOKEN()
+        if (data->token_ptr->token_type != T_BRACKET_OPEN) return ER_SYNTAX;
+
+        GET_TOKEN()
+        condition(data);
+
+        GET_TOKEN()
+        if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+
+        GET_TOKEN()
+        if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
+
+        GET_TOKEN()
+        stm(data);
+
+        GET_TOKEN()
+        if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+
+        GET_TOKEN()
+        if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
+
+        GET_TOKEN()
+        if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute == k_else) {
+            GET_TOKEN()
+            if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
+
+            GET_TOKEN()
+            stm(data);
+
+            GET_TOKEN()
+            if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+
+            GET_TOKEN()
+            if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
+
+            GET_TOKEN()
+            return stm(data);
+        }
+        else {
+            GET_TOKEN()
+            return stm(data);
+        }
+    }
+
+    // <stm> -> while ( <condition> ) { <stm> } \n <stm>
+    if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute == k_while) {
+        GET_TOKEN()
+        if (data->token_ptr->token_type != T_BRACKET_OPEN) return ER_SYNTAX;
+
+        GET_TOKEN()
+        condition(data);
+
+        GET_TOKEN()
+        if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+
+        GET_TOKEN()
+        if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
+
+        GET_TOKEN()
+        stm(data);
+
+        GET_TOKEN()
+        if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+
+        GET_TOKEN()
+        if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
+
+        GET_TOKEN()
+        return stm(data);
+
+    // <statement> -> ε
+    else if (data->token.type == T_EOF)
+    {
+        return ER_NONE;
+    }
 
     return ret_code;
 }
@@ -240,13 +428,6 @@ int assignment_value(parser_data_t *data) {
 }
 
 int condition(parser_data_t *data) {
-    int ret_code = ER_NONE;
-    UNUSED(data);
-
-    return ret_code;
-}
-
-int func(parser_data_t *data) {
     int ret_code = ER_NONE;
     UNUSED(data);
 
