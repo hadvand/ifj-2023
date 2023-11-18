@@ -6,11 +6,20 @@
 
 #define MAX_TABLE_SIZE 101
 
+typedef enum {
+    Double,
+    Int,
+    String,
+    Any,
+    Undef
+} item_type;
+
+
 typedef struct
 {
     string_ptr *params;
     char* id;
-    char type;
+    item_type type;
     bool qmark;
     bool defined;
     bool global;

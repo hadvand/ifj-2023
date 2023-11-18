@@ -211,7 +211,28 @@ int expression(parser_data_t* data){
 
     stack = stack_init();
     item_data item;
+    item.type = Undef;
     stack_push(stack, item, DOLLAR);
+
+    bool success = false;
+
+    t_stack_elem top_terminal;
+    Precedence_table_symbol actual_symbol;
+
+    do {
+        switch (precedence_table[get_index(top_terminal.symbol)][get_index(actual_symbol)]) {
+            case '<':
+                stack_push(stack,item,STOP);
+                break;
+            case '>':
+                break;
+            case ' ':
+                break;
+            default:
+                break;
+        }
+
+    }while(!success);
 
     return error_code;
 }
