@@ -88,8 +88,8 @@ bool keyword_control(token_t_ptr token, string_ptr add_string){
     }
     return false;
 }
-
-token_t_ptr next_token(int *line_cnt, int* err_type){
+// TODO: changes in scanner (flag for EOL)
+token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
 
 
     int c;
@@ -115,15 +115,16 @@ token_t_ptr next_token(int *line_cnt, int* err_type){
     token_t_ptr token = create_token();
 
     unsigned hex_count = 0;
-
+    *flag = false;
     while((c = getc(stdin))){
         //todo 2 more tokens missing
         switch(state){
             case(S_START):
                 //printf("current sym %c\n",c);
                 if(c == '\n'){
-                    single_token(token,*line_cnt, T_NEW_LINE,additional_string);
                     (*line_cnt)++;
+                    *flag = true;
+                    continue;
                 }
                 else if(isspace(c))
                     continue;

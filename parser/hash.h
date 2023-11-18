@@ -1,5 +1,6 @@
 #include <string.h>
 #include "../structures/string.h"
+#include "stdio.h"
 
 #ifndef HASH_H
 #define HASH_H
@@ -17,7 +18,7 @@ typedef enum {
 
 typedef struct
 {
-    string_ptr *params;
+    string_ptr params;
     char* id;
     item_type type;
     bool qmark;
@@ -27,7 +28,7 @@ typedef struct
 
 typedef struct Symbol {
     char *name;
-    item_data *data;
+    item_data data;
     struct Symbol* next;
 } Symbol;
 

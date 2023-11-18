@@ -20,10 +20,4 @@ typedef enum error{
  */
 extern error_t err_type;
 
-/**
- * @brief external variable for line counter
- * 
- */
-extern int line_cnt;
-
 #endif
