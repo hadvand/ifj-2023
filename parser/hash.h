@@ -8,11 +8,11 @@
 #define MAX_TABLE_SIZE 101
 
 typedef enum {
-    Double,
-    Int,
-    String,
-    Any,
-    Undef
+    IT_DOUBLE,
+    IT_INT,
+    IT_STRING,
+    IT_ANY,
+    IT_UNDEF
 } item_type;
 
 

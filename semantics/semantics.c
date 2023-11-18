@@ -159,27 +159,26 @@ Precedence_table_indices get_index(Precedence_table_symbol symbol){
 }
 
 
-//item_data get_data_type(struct token* token, parser_data_t * data){
-//
-//    TData* symbol;
-//
-//    switch(token -> token_type){
-//
-//        case T_ID:
-//            symbol = sym_table_search(&data->local_table, token->attribute.string->str);
-//            if (symbol == NULL)
-//                return TYPE_UNDEFINED;
-//            return symbol->token_type;
-//        case T_INT:
-//            return TYPE_UNDEFINED;
-//        case T_DEMICAL:
-//            return TYPE_DOUBLE;
-//        case T_STRING:
-//            return TYPE_STRING;
-//        default:
-//            return TYPE_UNDEFINED;
-//    }
-//}
+item_type get_type(struct token* token, parser_data_t * data){
+
+    Symbol* symbol;
+
+    switch(token -> token_type){
+        case T_ID:
+            symbol = findSymbol(data->local_table, token->attribute.string);
+            if (symbol == NULL)
+                return IT_UNDEF;
+            return symbol->data.type;
+        case T_INT:
+            return IT_UNDEF;
+        case T_DEMICAL:
+            return IT_DOUBLE;
+        case T_STRING:
+            return IT_STRING;
+        default:
+            return IT_UNDEF;
+    }
+}
 
 
 int number_of_symbols_after_stop(bool* found_stop){
@@ -210,9 +209,9 @@ int expression(parser_data_t* data){
     data->line_cnt = 10;
 
     stack_init(stack);
-    item_data item;
-    item.type = Undef;
-    stack_push(stack, item, DOLLAR);
+    item_data tmp_item;
+    tmp_item.type = IT_UNDEF;
+    stack_push(stack, tmp_item, DOLLAR);
 
     bool success = false;
 
@@ -228,12 +227,16 @@ int expression(parser_data_t* data){
 
 
         switch (precedence_table[get_index(top_terminal->symbol)][get_index(actual_symbol)]) {
+            case ' ':
+                break;
             case '<':
-                stack_push(stack,item,STOP);
+                if(!stack_push_after_top_term(stack,tmp_item,STOP))
+                    FREE(ER_INTERNAL);
+                tmp_item.type = get_type(data->token_ptr,data);
+                if(!stack_push(stack, tmp_item,actual_symbol))
+                    FREE(ER_INTERNAL);
                 break;
             case '>':
-                break;
-            case ' ':
                 break;
             default:
                 break;
