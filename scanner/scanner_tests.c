@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "scanner.h"
+#include "../structures/error.h"
 
 int main() {
     // printf() displays the string inside quotation

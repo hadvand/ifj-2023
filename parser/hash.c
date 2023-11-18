@@ -2,9 +2,9 @@
 
 HashTable* createHashTable() {
     HashTable* ht = (HashTable*)malloc(sizeof(HashTable));
-    ht->size = TABLE_SIZE;
-    ht->table = (Symbol**)malloc(sizeof(Symbol*) * TABLE_SIZE);
-    for (int i = 0; i < TABLE_SIZE; ++i) {
+    ht->size = MAX_TABLE_SIZE;
+    ht->table = (Symbol**)malloc(sizeof(Symbol*) * MAX_TABLE_SIZE);
+    for (int i = 0; i < MAX_TABLE_SIZE; ++i) {
         ht->table[i] = NULL;
     }
     return ht;

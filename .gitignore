@@ -5,6 +5,9 @@
 # Created Binary files
 main
 scanner_test
+scanner-build
+parser-build
+semantic-build
 
 .vscode
 CMakeLists.txt
