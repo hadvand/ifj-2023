@@ -4,8 +4,8 @@ CC = gcc
 CFLAGS = -std=c11 -Werror -Wall -Wextra -pedantic
 CFLAGS += -g
 
-PROGS = ./scanner/* ./structures/*
-PARSER_PROGS = ./parser/* stack.c stack.h
+PROGS = ./scanner/scanner.c ./scanner/scanner.h ./structures/*
+PARSER_PROGS = ./parser/* stack.c stack.h main.c
 SEMANTIC_PROGS = ./semantics/*
 TESTS = ./tests/* ./scanner/scanner.c ./structures/*
 

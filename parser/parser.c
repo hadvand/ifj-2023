@@ -17,9 +17,6 @@
         return ret_code;            \
     }                               \
 
-#define CHECK_TYPE(_type)											\
-	if (data->token_ptr.token_type != (_type)) return ER_SYNTAX
-
 
 parser_data_t *init_data()
 {
@@ -63,8 +60,12 @@ parser_data_t *init_data()
     bool internal_error;
 
     // readString() -> str?
-    tmp = insertSymbol(parser_data->global_table, "readString", &internal_error);
+
+    printf("st start\n");
+    if ((tmp = insertSymbol(parser_data->global_table, "readString", &internal_error)) == NULL) return NULL;
     tmp->defined = true;
+    printf("st finish\n");
+
     tmp->type = 's';
     tmp->qmark = true;
 
@@ -86,7 +87,7 @@ parser_data_t *init_data()
     tmp->type = 'n';
     tmp->qmark = false;
 
-    if (!string_append(*tmp->params, 'a')) {
+    if (!string_append(tmp->params, 'a')) {
         return NULL;
     }
 
@@ -96,7 +97,7 @@ parser_data_t *init_data()
     tmp->type = 'd';
     tmp->qmark = false;
 
-    if (!string_append(*tmp->params, 'i')) {
+    if (!string_append(tmp->params, 'i')) {
         return NULL;
     }
 
@@ -106,7 +107,7 @@ parser_data_t *init_data()
     tmp->type = 'i';
     tmp->qmark = false;
 
-    if (!string_append(*tmp->params, 'd')) {
+    if (!string_append(tmp->params, 'd')) {
         return NULL;
     }
 
@@ -116,7 +117,7 @@ parser_data_t *init_data()
     tmp->type = 'i';
     tmp->qmark = false;
 
-    if (!string_append(*tmp->params, 's')) {
+    if (!string_append(tmp->params, 's')) {
         return NULL;
     }
 
@@ -126,7 +127,7 @@ parser_data_t *init_data()
     tmp->type = 's';
     tmp->qmark = false;
 
-    if (!string_append(*tmp->params, 'i')) {
+    if (!string_append(tmp->params, 'i')) {
         return NULL;
     }
 
@@ -136,7 +137,7 @@ parser_data_t *init_data()
     tmp->type = 'i';
     tmp->qmark = false;
 
-    if (!string_append(*tmp->params, 's')) {
+    if (!string_append(tmp->params, 's')) {
         return NULL;
     }
 
@@ -146,13 +147,13 @@ parser_data_t *init_data()
     tmp->type = 's';
     tmp->qmark = true;
 
-    if (!string_append(*tmp->params, 's')) {
+    if (!string_append(tmp->params, 's')) {
         return NULL;
     }
-    if (!string_append(*tmp->params, 'i')) {
+    if (!string_append(tmp->params, 'i')) {
         return NULL;
     }
-    if (!string_append(*tmp->params, 'i')) {
+    if (!string_append(tmp->params, 'i')) {
         return NULL;
     }
 
@@ -178,6 +179,8 @@ int analyse() {
         string_free(string);
         return ER_INTERNAL;
     }
+
+    parser_data->line_cnt = 1;
 
     if ((parser_data->token_ptr = next_token(&(parser_data->line_cnt), &ret_code, &flag)) != NULL)
     {
@@ -465,9 +468,9 @@ int func_params(parser_data_t *data) {
 
         func_params_not_null(data);
 
-        if (data->param_index + 1 != (*data->id->params)->last_index) return ER_UNDEF_VAR;
+        if (data->param_index + 1 != data->id->params->last_index) return ER_UNDEF_VAR;
     }
-    else if (!data->is_in_declaration && (*data->id->params)->last_index) return ER_UNDEF_VAR;
+    else if (!data->is_in_declaration && data->id->params->last_index) return ER_UNDEF_VAR;
 
     // <func_params> -> ε
 
@@ -481,7 +484,7 @@ int func_params_not_null(parser_data_t *data) {
     {
         data->param_index++;
 
-        if (!data->is_in_declaration && data->param_index == (*data->id->params)->last_index)
+        if (!data->is_in_declaration && data->param_index == data->id->params->last_index)
             return ER_UNDEF_VAR;
 
 //        GET_TOKEN_AND_CHECK_TYPE(T_ID);
@@ -521,37 +524,37 @@ int var_type(parser_data_t* data) {
         switch (data->token_ptr->attribute.keyword)
         {
             case k_Int:
-                if ((*data->id->params)->string[data->param_index] != 'i') return ER_UNDEF_VAR;
+                if (data->id->params->string[data->param_index] != 'i') return ER_UNDEF_VAR;
 
                 if (!data->is_in_declaration) data->exp_type->type = 'i';
                 break;
 
             case k_Double:
-                if ((*data->id->params)->string[data->param_index] != 'd') return ER_UNDEF_VAR;
+                if (data->id->params->string[data->param_index] != 'd') return ER_UNDEF_VAR;
 
                 if (!data->is_in_declaration) data->exp_type->type = 'd';
                 break;
 
             case k_String:
-                if ((*data->id->params)->string[data->param_index] != 's') return ER_UNDEF_VAR;
+                if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
 
                 if (!data->is_in_declaration) data->exp_type->type = 's';
                 break;
 
             case k_qmark_Int:
-                if ((*data->id->params)->string[data->param_index] != 's') return ER_UNDEF_VAR;
+                if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
 
                 if (!data->is_in_declaration) data->exp_type->type = 's';
                 break;
 
             case k_qmark_Double:
-                if ((*data->id->params)->string[data->param_index] != 's') return ER_UNDEF_VAR;
+                if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
 
                 if (!data->is_in_declaration) data->exp_type->type = 's';
                 break;
 
             case k_qmark_String:
-                if ((*data->id->params)->string[data->param_index] != 's') return ER_UNDEF_VAR;
+                if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
 
                 if (!data->is_in_declaration) data->exp_type->type = T_STRING;
                 break;
