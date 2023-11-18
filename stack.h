@@ -10,12 +10,12 @@ typedef struct stack_elem
 {
     Precedence_table_symbol symbol;
     item_data item;
-    //stack_elem *next;
-} stack_elem;
+    struct stack_elem *next;
+} t_stack_elem;
 
 typedef struct stack
 {
-    stack_elem *data_array[BRACKET_STACK_MAX];
+    t_stack_elem *data_array[BRACKET_STACK_MAX];
     int top;
 } t_stack;
 
@@ -27,7 +27,7 @@ void stack_push(t_stack *s, item_data stack_item);
 
 void stack_pop(t_stack *s);
 
-stack_elem *get_top(t_stack *s);
+t_stack_elem *get_top(t_stack *s);
 
 void print_and_pop(t_stack *s);
 

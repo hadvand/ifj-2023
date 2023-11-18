@@ -178,7 +178,7 @@ Precedence_table_indices get_index(Precedence_table_symbol symbol){
 
 int number_of_symbols_after_stop(bool* found_stop){
 
-    stack_elem* item = get_top(&stack);
+    t_stack_elem* item = get_top(&stack);
     int counter = 0;
     while (item != NULL){
 
@@ -191,10 +191,84 @@ int number_of_symbols_after_stop(bool* found_stop){
             *found_stop = true;
             break;
         }
-        // item = item -> next ???;
+        item = item->next;
     }
 
     return counter;
+}
+
+
+Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3){
+
+    switch (number){
+
+        case(1):
+
+            if (operand_1->symbol == IDENTIFIER || operand_1 == INT_NUMBER || operand_1 == DOUBLE_NUMBER ||
+            operand_1 == STRING){
+                return OPERAND;
+            }
+
+            return NOT_A_RULE;
+
+        case(3):
+
+            if (operand_1->symbol == LEFT_BRACKET && operand_2->symbol == N_TERMINAL
+            && operand_3->symbol == RIGHT_BRACKET) {
+                return LBR_NT_RBR;
+            }
+
+            if (operand_1->symbol == N_TERMINAL && operand_3->symbol == N_TERMINAL){
+
+                switch(operand_2->symbol){
+
+                    case PLUS:
+                        return NT_PLUS_NT;
+
+                    case MINUS:
+                        return NT_MINUS_NT;
+
+                    case MUL:
+                        return NT_MUL_NT;
+
+                    case DIV:
+                        return NT_DIV_NT;
+
+                    case EQUAL:
+                        return NT_EQ_NT;
+
+                    case N_EQUAL:
+                        return NT_NEQ_NT;
+
+                    case LESS:
+                        return NT_LTN_NT;
+
+                    case GREATER:
+                        return NT_MTN_NT;
+
+                    case L_EQUAL:
+                        return NT_LEQ_NT;
+
+                    case G_EQUAL:
+                        return NT_MTN_NT;
+
+                    case DQ_MARK:
+                        return NT_COALESCE_NT;
+
+                    case EX_MARK:
+                        return NT_NOT_NT;
+
+                    default:
+                        return NOT_A_RULE;
+
+                }
+
+            }
+
+            return NOT_A_RULE;
+    }
+
+    return NOT_A_RULE;
 }
 
 
