@@ -16,7 +16,7 @@ bool stack_is_empty(t_stack *s) {
 void stack_push(t_stack *s, item_data stack_item) {
     if (s->top < BRACKET_STACK_MAX) {
         s->top++;
-        stack_elem *elem = (stack_elem *)malloc(sizeof(stack_elem));
+        t_stack_elem *elem = (t_stack_elem *)malloc(sizeof(struct stack_elem));
         elem->item = stack_item;
         s->data_array[s->top] = elem;
     }
@@ -28,7 +28,7 @@ void stack_pop(t_stack *s) {
 }
 
 
-stack_elem *get_top(t_stack *s) {
+t_stack_elem *get_top(t_stack *s) {
     return s->data_array[s->top];
 }
 

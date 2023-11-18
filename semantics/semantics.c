@@ -178,7 +178,7 @@ Precedence_table_indices get_index(Precedence_table_symbol symbol){
 
 int number_of_symbols_after_stop(bool* found_stop){
 
-    stack_elem* item = get_top(&stack);
+    t_stack_elem* item = get_top(&stack);
     int counter = 0;
     while (item != NULL){
 
