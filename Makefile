@@ -27,4 +27,4 @@ semantic-build: $(SEMANTIC_PROGS) $(PARSER_PROGS) $(PROGS)
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 
 clean:
-	rm -rf *.o scanner-build parser-build scanner_test
+	rm -rf *.o scanner-build parser-build scanner_test semantic-build

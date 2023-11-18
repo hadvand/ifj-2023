@@ -1,5 +1,6 @@
 #include "semantics.h"
-
+#include "../stack.h"
+#include "../structures/error.h"
 
 #define TABLE_SIZE 16
 
@@ -50,7 +51,7 @@ int precedence_table[TABLE_SIZE][TABLE_SIZE] =
 };
 
 
-static Precedence_table_symbol convert_token_into_symbol(struct token* token){
+Precedence_table_symbol convert_token_into_symbol(struct token* token){
 
     switch(token -> token_type){
 
@@ -101,7 +102,7 @@ static Precedence_table_symbol convert_token_into_symbol(struct token* token){
  * getting the indices of the precedence table
  *
  */
-static Precedence_table_indices get_index(Precedence_table_symbol symbol){
+Precedence_table_indices get_index(Precedence_table_symbol symbol){
 
     switch(symbol){
 
@@ -152,37 +153,36 @@ static Precedence_table_indices get_index(Precedence_table_symbol symbol){
 }
 
 
-static struct item_data get_data_type(struct token* token, parser_data_t * data){
-
-    TData* symbol;
-
-    switch(token -> token_type){
-
-        case T_ID:
-            symbol = sym_table_search(&data->local_table, token->attribute.string->str);
-            if (symbol == NULL)
-                return TYPE_UNDEFINED;
-            return symbol->token_type;
-        case T_INT:
-            return TYPE_UNDEFINED;
-        case T_DEMICAL:
-            return TYPE_DOUBLE;
-        case T_STRING:
-            return TYPE_STRING;
-        default:
-            return TYPE_UNDEFINED;
-    }
-}
+//item_data get_data_type(struct token* token, parser_data_t * data){
+//
+//    TData* symbol;
+//
+//    switch(token -> token_type){
+//
+//        case T_ID:
+//            symbol = sym_table_search(&data->local_table, token->attribute.string->str);
+//            if (symbol == NULL)
+//                return TYPE_UNDEFINED;
+//            return symbol->token_type;
+//        case T_INT:
+//            return TYPE_UNDEFINED;
+//        case T_DEMICAL:
+//            return TYPE_DOUBLE;
+//        case T_STRING:
+//            return TYPE_STRING;
+//        default:
+//            return TYPE_UNDEFINED;
+//    }
+//}
 
 
 int number_of_symbols_after_stop(bool* found_stop){
 
-    stack_elem item = get_top(&s);
+    stack_elem* item = get_top(&stack);
     int counter = 0;
-
     while (item != NULL){
 
-        if (item -> stack_item != STOP){
+        if (item->symbol != STOP){
             *found_stop = false;
             counter += 1;
         }

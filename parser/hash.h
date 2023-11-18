@@ -4,7 +4,7 @@
 #ifndef HASH_H
 #define HASH_H
 
-#define TABLE_SIZE 101
+#define MAX_TABLE_SIZE 101
 
 typedef struct
 {

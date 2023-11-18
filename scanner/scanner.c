@@ -1,3 +1,4 @@
+#include "../structures/error.h"
 #include "scanner.h"
 
 token_t_ptr create_token(){

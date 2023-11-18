@@ -1,3 +1,6 @@
+#include "../structures/string.h"
+#include "../structures/error.h"
+#include "hash.h"
 #include "parser.h"
 
 #define UNUSED(x) (void)(x)
