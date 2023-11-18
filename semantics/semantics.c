@@ -7,7 +7,7 @@
 #define TABLE_SIZE 16
 
 
-stack stack;
+t_stack stack;
 
 
 typedef enum {
@@ -53,7 +53,7 @@ int precedence_table[TABLE_SIZE][TABLE_SIZE] =
 };
 
 
-static Precedence_table_symbol convert_token_into_symbol(token* token){
+static Precedence_table_symbol convert_token_into_symbol(struct token* token){
 
     switch(token -> token_type){
 
@@ -77,9 +77,9 @@ static Precedence_table_symbol convert_token_into_symbol(token* token){
             return L_EQUAL;
         case T_MORE_EQUAL:
             return G_EQUAL;
-        case T_QMARK:
+        case T_KEYWORD_NIL_POSSIBILITY:
             return DQ_MARK;
-        case T_EXMARK:
+        case T_EXCLAMATION_MARK:
             return EX_MARK;
         case T_BRACKET_OPEN:
             return LEFT_BRACKET;
@@ -89,7 +89,7 @@ static Precedence_table_symbol convert_token_into_symbol(token* token){
             return IDENTIFIER;
         case T_INT:
             return INT_NUMBER;
-        case T_DECIMAL:
+        case T_DEMICAL:
             return DOUBLE_NUMBER;
         case T_STRING:
             return STRING;
@@ -155,7 +155,7 @@ static Precedence_table_indices get_index(Precedence_table_symbol symbol){
 }
 
 
-static Data_type get_data_type(Token* token, PData* data){
+static struct item_data get_data_type(struct token* token, struct parser_data_t * data){
 
     TData* symbol;
 
@@ -168,7 +168,7 @@ static Data_type get_data_type(Token* token, PData* data){
             return symbol->token_type;
         case T_INT:
             return TYPE_UNDEFINED;
-        case T_DECIMAL:
+        case T_DEMICAL:
             return TYPE_DOUBLE;
         case T_STRING:
             return TYPE_STRING;

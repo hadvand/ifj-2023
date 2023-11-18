@@ -14,20 +14,20 @@ typedef struct stack
 {
     stack_elem *data_array[BRACKET_STACK_MAX];
     int top;
-} stack;
+} t_stack;
 
-stack *stack_init();
+t_stack *stack_init();
 
-bool stack_is_empty(stack *s);
+bool stack_is_empty(t_stack *s);
 
-void stack_push(stack *s, token_t_ptr *stack_item);
+void stack_push(t_stack *s, token_t_ptr *stack_item);
 
-void stack_pop(stack *s);
+void stack_pop(t_stack *s);
 
-stack_elem *get_top(stack *s);
+stack_elem *get_top(t_stack *s);
 
-void print_and_pop(stack *s);
+void print_and_pop(t_stack *s);
 
-void stack_dispose(stack *s);
+void stack_dispose(t_stack *s);
 
 #endif //IFJ_2023_STACK_H
