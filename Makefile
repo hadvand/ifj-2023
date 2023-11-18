@@ -23,4 +23,4 @@ parser-build: $(PARSER_PROGS) $(PROGS)
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 
 clean:
-	rm -rf *.o scanner_test
+	rm -rf *.o scanner_test parser_build

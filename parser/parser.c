@@ -2,11 +2,13 @@
 
 #define UNUSED(x) (void)(x)
 
-#define GET_TOKEN()                                                     \
-    if ((data->token_ptr = next_token(&(data->line_cnt),&ret_code)) == NULL) {\
-        return ret_code;                                               \
-    }   \
-
+#define GET_TOKEN() \
+    do {            \
+        bool flag;\
+        if ((data->token_ptr = next_token(&(data->line_cnt),&ret_code, &flag)) == NULL) {\
+            return ret_code;                                               \
+        }           \
+    } while(0);
 #define CHECK_RULE(rule)           \
     if ((ret_code = rule(data))) { \
         return ret_code;            \
@@ -162,6 +164,7 @@ void free_data(parser_data_t *parser_data) {
 
 int analyse() {
     int ret_code = ER_NONE;
+    bool flag;
 
     string_ptr string;
     if ((string = string_init()) == NULL) return ER_INTERNAL;
@@ -173,7 +176,7 @@ int analyse() {
         return ER_INTERNAL;
     }
 
-    if ((parser_data->token_ptr = next_token(&(parser_data->line_cnt), &ret_code)) != NULL)
+    if ((parser_data->token_ptr = next_token(&(parser_data->line_cnt), &ret_code, &flag)) != NULL)
     {
         ret_code = program(parser_data);
     }
@@ -279,7 +282,7 @@ int stm(parser_data_t *data) {
 
     // <stm> -> func func_id( <func_params> ) -> <var_type> { <stm> <return> } \n <stm>
     // <stm> -> func func_id( <func_params> ) { <stm> <return_void> } \n <stm>
-    if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute == k_func) {
+    if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_func) {
         GET_TOKEN()
         if (data->token_ptr->token_type != T_ID) return ER_SYNTAX;
 
@@ -340,7 +343,7 @@ int stm(parser_data_t *data) {
 
     // <stm> -> if ( <condition> ) { <stm> } \n else { <stm> } \n <stm>
     // <stm> -> if ( <condition> ) { <stm> } \n <stm>
-    if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute == k_if) {
+    if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_if) {
         GET_TOKEN()
         if (data->token_ptr->token_type != T_BRACKET_OPEN) return ER_SYNTAX;
 
@@ -363,7 +366,7 @@ int stm(parser_data_t *data) {
         if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
 
         GET_TOKEN()
-        if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute == k_else) {
+        if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_else) {
             GET_TOKEN()
             if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
 
@@ -386,7 +389,7 @@ int stm(parser_data_t *data) {
     }
 
     // <stm> -> while ( <condition> ) { <stm> } \n <stm>
-    if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute == k_while) {
+    if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_while) {
         GET_TOKEN()
         if (data->token_ptr->token_type != T_BRACKET_OPEN) return ER_SYNTAX;
 
@@ -410,19 +413,12 @@ int stm(parser_data_t *data) {
 
         GET_TOKEN()
         return stm(data);
-
+    }
     // <statement> -> ε
-    else if (data->token.type == T_EOF)
+    else if (data->token_ptr->token_type == T_EOF)
     {
         return ER_NONE;
     }
-
-    return ret_code;
-}
-
-int assignment_value(parser_data_t *data) {
-    int ret_code = ER_NONE;
-    UNUSED(data);
 
     return ret_code;
 }
@@ -449,7 +445,7 @@ int func_params(parser_data_t *data) {
         if (findSymbol(data->global_table, data->token_ptr->attribute.string))
             return ER_UNDEF_VAR;
 
-        // if we are in definition, we need to add parameters to the local symbol table
+        // if we are in definition, we need to add parameters to the local symtable
         if (!data->is_in_declaration) {
             bool internal_error;
             if (!(data->exp_type = insertSymbol(data->local_table, data->token_ptr->attribute.string, &internal_error))) {

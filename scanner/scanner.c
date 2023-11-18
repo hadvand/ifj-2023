@@ -1,5 +1,5 @@
 #include "scanner.h"
-#include <stdbool.h>
+
 token_t_ptr create_token(){
     token_t_ptr token;
     token = (token_t_ptr) malloc(sizeof(struct token));
