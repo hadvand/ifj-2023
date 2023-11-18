@@ -125,7 +125,7 @@ static Precedence_table_indices get_index(Precedence_table_symbol symbol){
         case L_EQUAL:
             return I_L_EQUAL;
         case G_EQUAL:
-            return G_EQUAL;
+            return I_G_EQUAL;
 
         case DQ_MARK:
             return I_D_QMARK;
@@ -152,7 +152,7 @@ static Precedence_table_indices get_index(Precedence_table_symbol symbol){
 }
 
 
-static struct item_data get_data_type(struct token* token, struct parser_data_t * data){
+static struct item_data get_data_type(struct token* token, parser_data_t * data){
 
     TData* symbol;
 
