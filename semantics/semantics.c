@@ -5,8 +5,14 @@
 #define TABLE_SIZE 16
 
 
-t_stack stack;
+t_stack *stack;
 
+#define FREE(_error_code) \
+    do{                   \
+        stack_dispose(stack); \
+        return _error_code;   \
+        }\
+    while(0)
 
 typedef enum {
     I_PLUS,
@@ -178,7 +184,7 @@ Precedence_table_indices get_index(Precedence_table_symbol symbol){
 
 int number_of_symbols_after_stop(bool* found_stop){
 
-    t_stack_elem* item = get_top(&stack);
+    t_stack_elem* item = get_top(stack);
     int counter = 0;
     while (item != NULL){
 
@@ -195,6 +201,40 @@ int number_of_symbols_after_stop(bool* found_stop){
     }
 
     return counter;
+}
+
+int expression(parser_data_t* data){
+    int error_code = ER_SYNTAX;
+
+    //TODO: delete this
+    data->line_cnt = 10;
+
+    stack = stack_init();
+    item_data item;
+    item.type = Undef;
+    stack_push(stack, item, DOLLAR);
+
+    bool success = false;
+
+    t_stack_elem top_terminal;
+    Precedence_table_symbol actual_symbol;
+
+    do {
+        switch (precedence_table[get_index(top_terminal.symbol)][get_index(actual_symbol)]) {
+            case '<':
+                stack_push(stack,item,STOP);
+                break;
+            case '>':
+                break;
+            case ' ':
+                break;
+            default:
+                break;
+        }
+
+    }while(!success);
+
+    return error_code;
 }
 
 
