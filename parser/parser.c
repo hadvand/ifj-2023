@@ -526,31 +526,31 @@ int var_type(parser_data_t* data) {
             case k_Int:
                 if (data->id->params->string[data->param_index] != 'i') return ER_UNDEF_VAR;
 
-                if (!data->is_in_declaration) data->exp_type->type = 'i';
+                if (!data->is_in_declaration) data->exp_type->type = Int;
                 break;
 
             case k_Double:
                 if (data->id->params->string[data->param_index] != 'd') return ER_UNDEF_VAR;
 
-                if (!data->is_in_declaration) data->exp_type->type = 'd';
+                if (!data->is_in_declaration) data->exp_type->type = Double;
                 break;
 
             case k_String:
                 if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
 
-                if (!data->is_in_declaration) data->exp_type->type = 's';
+                if (!data->is_in_declaration) data->exp_type->type = String;
                 break;
 
             case k_qmark_Int:
                 if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
 
-                if (!data->is_in_declaration) data->exp_type->type = 's';
+                if (!data->is_in_declaration) data->exp_type->type = String;
                 break;
 
             case k_qmark_Double:
                 if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
 
-                if (!data->is_in_declaration) data->exp_type->type = 's';
+                if (!data->is_in_declaration) data->exp_type->type = String;
                 break;
 
             case k_qmark_String:
