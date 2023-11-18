@@ -24,13 +24,13 @@ stack *stack_init();
 
 bool stack_is_empty(stack *s);
 
-void stack_push(stack *s, char *stack_str);
+bool stack_push(stack *s, char *stack_str);
 
-void stack_pop(stack *s);
+bool stack_pop(stack *s);
 
 stack_elem *get_top(stack *s);
 
-void print_and_pop(stack *s);
+bool print_and_pop(stack *s);
 
 void stack_dispose(stack *s);
 
