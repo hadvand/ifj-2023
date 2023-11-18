@@ -21,7 +21,7 @@ scanner_tests: $(TESTS)
 	$(CC) $(CFLAGS) -o $@ $^ -lm
 
 parser-build: $(PARSER_PROGS) $(PROGS)
-	$(CC) $(CFLAGS) $^ -o $@ -lm
+	$(CC) $(CFLAGS) $^ -o $@ -lm -DPARS_DEBUG
 
 semantic-build: $(SEMANTIC_PROGS) $(PARSER_PROGS) $(PROGS)
 	$(CC) $(CFLAGS) $^ -o $@ -lm

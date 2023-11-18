@@ -167,6 +167,11 @@ void free_data(parser_data_t *parser_data) {
 }
 
 int analyse() {
+
+#ifdef PARS_DEBUG
+    printf("Sample of debug");
+#endif
+
     int ret_code = ER_NONE;
     bool flag;
 
