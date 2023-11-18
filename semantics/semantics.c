@@ -204,8 +204,8 @@ Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* o
 
         case(1):
 
-            if (operand_1->symbol == IDENTIFIER || operand_1 == INT_NUMBER || operand_1 == DOUBLE_NUMBER ||
-            operand_1 == STRING){
+            if (operand_1->symbol == IDENTIFIER || operand_1->symbol == INT_NUMBER || operand_1->symbol == DOUBLE_NUMBER ||
+            operand_1->symbol == STRING){
                 return OPERAND;
             }
 
