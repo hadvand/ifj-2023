@@ -9,7 +9,7 @@ t_stack *stack;
 
 #define FREE(_error_code) \
     do{                   \
-        stack_dispose(stack); \
+        stack_free(stack); \
         return _error_code;   \
         }\
     while(0)
@@ -209,18 +209,25 @@ int expression(parser_data_t* data){
     //TODO: delete this
     data->line_cnt = 10;
 
-    stack = stack_init();
+    stack_init(stack);
     item_data item;
     item.type = Undef;
     stack_push(stack, item, DOLLAR);
 
     bool success = false;
 
-    t_stack_elem top_terminal;
+    t_stack_elem* top_terminal;
     Precedence_table_symbol actual_symbol;
 
     do {
-        switch (precedence_table[get_index(top_terminal.symbol)][get_index(actual_symbol)]) {
+        actual_symbol = convert_token_into_symbol(data->token_ptr);
+        top_terminal = stack_top_terminal(stack);
+
+        if(top_terminal == NULL)
+            FREE(ER_INTERNAL);
+
+
+        switch (precedence_table[get_index(top_terminal->symbol)][get_index(actual_symbol)]) {
             case '<':
                 stack_push(stack,item,STOP);
                 break;
