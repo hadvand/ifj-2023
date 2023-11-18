@@ -517,10 +517,34 @@ int func_params_not_null(parser_data_t *data) {
 }
 
 int return_rule(parser_data_t *data) {
+    int ret_code;
 
-    UNUSED(data);
-
-    return 0;
+    if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return) {
+        GET_TOKEN();
+        if (data->is_void_function) {
+            if (data->token_ptr->token_type == T_NEW_LINE) {
+                return ER_NONE;
+            }
+            else {
+                return ER_SYNTAX;
+            }
+        }
+        else {
+            GET_TOKEN();
+            if (data->token_ptr->token_type == T_NEW_LINE) {
+                return ER_NONE;
+            }
+            else {
+                return ER_SYNTAX;
+            }
+        }
+    }
+    else if (data->token_ptr->token_type == T_NEW_LINE) {
+        return ER_NONE;
+    }
+    else {
+        return ER_SYNTAX;
+    }
 }
 
 int var_type(parser_data_t* data) {
@@ -571,5 +595,20 @@ int var_type(parser_data_t* data) {
     else {
         return ER_SYNTAX;
     }
+    return ER_NONE;
+}
+
+int var_value(parser_data_t *data) {
+    if (data->token_ptr->token_type == T_INT) {
+        if (data->id->type != IT_INT) return ER_SEMAN;
+    }
+    else if (data->token_ptr->token_type == T_DEMICAL) {
+        if (data->id->type != IT_DOUBLE) return ER_SEMAN;
+    }
+    else if (data->token_ptr->token_type == T_STRING) {
+        if (data->id->type != IT_STRING) return ER_SEMAN;
+    }
+    else return ER_SYNTAX;
+
     return ER_NONE;
 }
