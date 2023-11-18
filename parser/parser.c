@@ -556,7 +556,7 @@ int var_type(parser_data_t* data) {
             case k_qmark_String:
                 if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
 
-                if (!data->is_in_declaration) data->exp_type->type = T_STRING;
+                if (!data->is_in_declaration) data->exp_type->type = String;
                 break;
 
             default:
