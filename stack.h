@@ -1,13 +1,16 @@
 #ifndef IFJ_2023_STACK_H
 #define IFJ_2023_STACK_H
 
-#include "scanner/scanner.h"
+#include "semantics/semantics.h"
+#include "parser/hash.h"
 
 #define BRACKET_STACK_MAX 1000
 
 typedef struct stack_elem
 {
-    token_t_ptr *stack_item;
+    Precedence_table_symbol symbol;
+    item_data item;
+    //stack_elem *next;
 } stack_elem;
 
 typedef struct stack
@@ -20,7 +23,7 @@ t_stack *stack_init();
 
 bool stack_is_empty(t_stack *s);
 
-void stack_push(t_stack *s, token_t_ptr *stack_item);
+void stack_push(t_stack *s, item_data stack_item);
 
 void stack_pop(t_stack *s);
 

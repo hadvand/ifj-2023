@@ -6,6 +6,7 @@ CFLAGS += -g
 
 PROGS = ./scanner/* ./structures/*
 PARSER_PROGS = ./parser/* stack.c stack.h
+SEMANTIC_PROGS = ./semantics/*
 TESTS = ./tests/* ./scanner/scanner.c ./structures/*
 
 all:
@@ -13,14 +14,17 @@ all:
 main:
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 
-scanner_test: $(PROGS)
+scanner-build: $(PROGS)
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 
-test: $(TESTS)
+scanner_tests: $(TESTS)
 	$(CC) $(CFLAGS) -o $@ $^ -lm
 
 parser-build: $(PARSER_PROGS) $(PROGS)
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 
+semantic-build: $(SEMANTIC_PROGS) $(PARSER_PROGS) $(PROGS)
+	$(CC) $(CFLAGS) $^ -o $@ -lm
+
 clean:
-	rm -rf *.o scanner_test
+	rm -rf *.o scanner-build parser-build scanner_test

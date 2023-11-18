@@ -1,8 +1,5 @@
 #include "semantics.h"
-#include "../stack.h"
-#include "../scanner/scanner.h"
-#include <stdlib.h>
-#include <stdbool.h>
+
 
 #define TABLE_SIZE 16
 

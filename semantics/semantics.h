@@ -3,6 +3,8 @@
 #define IFJ_NEW_BEGINNING_SEMANTICS_H
 
 #include "../parser/parser.h"
+#include <stdlib.h>
+#include <stdbool.h>
 
 typedef enum
 {
@@ -49,7 +51,7 @@ typedef enum
 } Precedence_rules;
 
 
-int expression(PData* data);
+int expression(parser_data_t* data);
 
 
 #endif //IFJ_NEW_BEGINNING_SEMANTICS_H
