@@ -13,11 +13,13 @@ bool stack_is_empty(t_stack *s) {
 }
 
 
-void stack_push(t_stack *s, item_data stack_item) {
+void stack_push(t_stack *s, item_data stack_item, Precedence_table_symbol  symbol) {
     if (s->top < BRACKET_STACK_MAX) {
         s->top++;
         t_stack_elem *elem = (t_stack_elem *)malloc(sizeof(struct stack_elem));
         elem->item = stack_item;
+        elem->symbol = symbol;
+        elem->next = s->data_array[s->top];
         s->data_array[s->top] = elem;
     }
 }

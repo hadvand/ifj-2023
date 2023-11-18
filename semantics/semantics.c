@@ -5,8 +5,14 @@
 #define TABLE_SIZE 16
 
 
-t_stack stack;
+t_stack *stack;
 
+#define FREE(_error_code) \
+    do{                   \
+        stack_dispose(stack); \
+        return _error_code;   \
+        }\
+    while(0)
 
 typedef enum {
     I_PLUS,
@@ -178,7 +184,7 @@ Precedence_table_indices get_index(Precedence_table_symbol symbol){
 
 int number_of_symbols_after_stop(bool* found_stop){
 
-    t_stack_elem* item = get_top(&stack);
+    t_stack_elem* item = get_top(stack);
     int counter = 0;
     while (item != NULL){
 
@@ -197,6 +203,19 @@ int number_of_symbols_after_stop(bool* found_stop){
     return counter;
 }
 
+int expression(parser_data_t* data){
+    int error_code = ER_SYNTAX;
+
+    //TODO: delete this
+    data->line_cnt = 10;
+
+    stack = stack_init();
+    item_data item;
+    stack_push(stack, item, DOLLAR);
+
+    return error_code;
+}
+
 
 Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3){
 
@@ -204,8 +223,8 @@ Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* o
 
         case(1):
 
-            if (operand_1->symbol == IDENTIFIER || operand_1 == INT_NUMBER || operand_1 == DOUBLE_NUMBER ||
-            operand_1 == STRING){
+            if (operand_1->symbol == IDENTIFIER || operand_1->symbol == INT_NUMBER || operand_1->symbol == DOUBLE_NUMBER ||
+            operand_1->symbol == STRING){
                 return OPERAND;
             }
 
