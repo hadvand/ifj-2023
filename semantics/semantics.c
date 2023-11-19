@@ -203,40 +203,6 @@ int number_of_symbols_after_stop(bool* found_stop){
     return counter;
 }
 
-int expression(parser_data_t* data){
-    int error_code = ER_SYNTAX;
-
-    //TODO: delete this
-    data->line_cnt = 10;
-
-    stack = stack_init();
-    item_data item;
-    item.type = Undef;
-    stack_push(stack, item, DOLLAR);
-
-    bool success = false;
-
-    t_stack_elem top_terminal;
-    Precedence_table_symbol actual_symbol;
-
-    do {
-        switch (precedence_table[get_index(top_terminal.symbol)][get_index(actual_symbol)]) {
-            case '<':
-                stack_push(stack,item,STOP);
-                break;
-            case '>':
-                break;
-            case ' ':
-                break;
-            default:
-                break;
-        }
-
-    }while(!success);
-
-    return error_code;
-}
-
 
 Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3){
 
@@ -245,7 +211,7 @@ Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* o
         case(1):
 
             if (operand_1->symbol == IDENTIFIER || operand_1->symbol == INT_NUMBER || operand_1->symbol == DOUBLE_NUMBER ||
-            operand_1->symbol == STRING){
+                operand_1->symbol == STRING){
                 return OPERAND;
             }
 
@@ -254,7 +220,7 @@ Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* o
         case(3):
 
             if (operand_1->symbol == LEFT_BRACKET && operand_2->symbol == N_TERMINAL
-            && operand_3->symbol == RIGHT_BRACKET) {
+                && operand_3->symbol == RIGHT_BRACKET) {
                 return LBR_NT_RBR;
             }
 
@@ -310,5 +276,69 @@ Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* o
 
     return NOT_A_RULE;
 }
+
+
+int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3,
+                    item_type type_final){
+
+    bool operand_1_to_int = false;
+    bool operand_3_to_int = false;
+    bool operand_1_to_double = false;
+    bool operand_3_to_double = false;
+
+    if (rule == OPERAND){
+        if (operand_1->data_type == Undef){
+            return ER_UNDEF_VAR;
+        }
+    }
+
+    if (rule == LBR_NT_RBR){
+        if (operand_2->data_type == Undef){
+            return ER_UNDEF_VAR;
+        }
+    }
+
+    if (rule != OPERAND && rule != LBR_NT_RBR){
+
+    }
+
+}
+
+int expression(parser_data_t* data){
+    int error_code = ER_SYNTAX;
+
+    //TODO: delete this
+    data->line_cnt = 10;
+
+    stack = stack_init();
+    item_data item;
+    item.type = Undef;
+    stack_push(stack, item, DOLLAR);
+
+    bool success = false;
+
+    t_stack_elem top_terminal;
+    Precedence_table_symbol actual_symbol;
+
+    do {
+        switch (precedence_table[get_index(top_terminal.symbol)][get_index(actual_symbol)]) {
+            case '<':
+                stack_push(stack,item,STOP);
+                break;
+            case '>':
+                break;
+            case ' ':
+                break;
+            default:
+                break;
+        }
+
+    }while(!success);
+
+    return error_code;
+}
+
+
+
 
 

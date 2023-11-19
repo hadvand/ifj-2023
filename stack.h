@@ -10,6 +10,7 @@ typedef struct stack_elem
 {
     Precedence_table_symbol symbol;
     item_data item;
+    item_type data_type;
     struct stack_elem *next;
 } t_stack_elem;
 
