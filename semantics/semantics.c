@@ -12,6 +12,7 @@ static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_
 #define FREE(_error_code) \
     do{                   \
         stack_free(&stack); \
+        \
         return _error_code;   \
         }\
     while(0)
@@ -247,6 +248,9 @@ int reduce(){
 int expression(parser_data_t* data){
     int error_code = ER_SYNTAX;
 
+#ifdef SEM_DEBUG
+    printf("semantic analysis starts\n");
+#endif
 
     stack_init(&stack);
     //TODO init item_data
@@ -263,43 +267,80 @@ int expression(parser_data_t* data){
         actual_symbol = convert_token_into_symbol(data->token_ptr);
         top_terminal = stack_top_terminal(&stack);
 
-        if(top_terminal == NULL)
+        if(top_terminal == NULL){
+#ifdef SEM_DEBUG
+            printf("semantic analysis finish with error\n");
+#endif
             FREE(ER_INTERNAL);
+        }
+
         bool flag;
 
         switch (precedence_table[get_index(top_terminal->symbol)][get_index(actual_symbol)]) {
             case '=':
                 tmp_item.type = get_type(data->token_ptr,data);
                 if(!stack_push(&stack, tmp_item,actual_symbol))
+                {
+#ifdef SEM_DEBUG
+                    printf("semantic analysis finish with error\n");
+#endif
                     FREE(ER_INTERNAL);
-
-                data->token_ptr = next_token(&(data->line_cnt),&error_code, &flag);
-                if(error_code != ER_NONE)
-                    FREE(error_code);
+                }
 
 #ifdef SEM_DEBUG
                 stack_print_all_symbols(&stack);
 #endif
+
+                data->token_ptr = next_token(&(data->line_cnt),&error_code, &flag);
+                if(error_code != ER_NONE)
+                {
+#ifdef SEM_DEBUG
+                    printf("semantic analysis finish with error\n");
+#endif
+                    FREE(ER_INTERNAL);
+                }
+
+
                 break;
             case '<':
                 if(!stack_push_after_top_term(&stack,tmp_item,STOP))
+                {
+#ifdef SEM_DEBUG
+                    printf("semantic analysis finish with error\n");
+#endif
                     FREE(ER_INTERNAL);
+                }
                 tmp_item.type = get_type(data->token_ptr,data);
                 if(!stack_push(&stack, tmp_item,actual_symbol))
+                {
+#ifdef SEM_DEBUG
+                    printf("semantic analysis finish with error\n");
+#endif
                     FREE(ER_INTERNAL);
+                }
                 //TODO generatecode
-
-                data->token_ptr = next_token(&(data->line_cnt),&error_code, &flag);
-                if(error_code != ER_NONE)
-                    FREE(error_code);
 
 #ifdef SEM_DEBUG
                 stack_print_all_symbols(&stack);
 #endif
+
+                data->token_ptr = next_token(&(data->line_cnt),&error_code, &flag);
+                if(error_code != ER_NONE)
+                {
+#ifdef SEM_DEBUG
+                    printf("semantic analysis finish with error\n");
+#endif
+                    FREE(ER_INTERNAL);
+                }
                 break;
             case '>':
                 if(reduce())
-                    FREE(ER_SYNTAX);
+                {
+#ifdef SEM_DEBUG
+                    printf("semantic analysis finish with error\n");
+#endif
+                    FREE(ER_INTERNAL);
+                }
 
 #ifdef SEM_DEBUG
                 stack_print_all_symbols(&stack);
@@ -309,11 +350,20 @@ int expression(parser_data_t* data){
                 if(actual_symbol == DOLLAR && top_terminal->symbol == DOLLAR)
                     success = true;
                 else
-                    FREE(ER_SYNTAX);
+                {
+#ifdef SEM_DEBUG
+                    printf("semantic analysis finish with error\n");
+#endif
+                    FREE(ER_INTERNAL);
+                }
                 break;
         }
 
     }while(!success);
+
+#ifdef SEM_DEBUG
+    printf("semantic analysis finish\n");
+#endif
 
     return error_code;
 }
