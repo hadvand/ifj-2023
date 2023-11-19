@@ -1,4 +1,5 @@
 #include "stack.h"
+#include "stdio.h"
 
 void stack_init(t_stack* s)
 {
@@ -104,4 +105,61 @@ t_stack_elem *get_top(t_stack *s)
 void stack_free(t_stack* s)
 {
     while (stack_pop(s));
+}
+
+char* get_string_to_table_symbol(Precedence_table_symbol symbol){
+    switch (symbol) {
+        case PLUS:
+            return "+";
+        case MINUS:
+            return "-";
+        case MUL:
+            return "*";
+        case DIV:
+            return "/";
+        case EQUAL:
+            return "=";
+        case N_EQUAL:
+            return "!=";
+        case L_EQUAL:
+            return "<=";
+        case LESS:
+            return "<";
+        case G_EQUAL:
+            return ">=";
+        case GREATER:
+            return ">";
+        case DQ_MARK:
+            return "??";
+        case EX_MARK:
+            return "!";
+        case LEFT_BRACKET:
+            return "(";
+        case RIGHT_BRACKET:
+            return ")";
+        case IDENTIFIER:
+            return "I";
+        case INT_NUMBER:
+            return "i";
+        case DOUBLE_NUMBER:
+            return "d";
+        case STRING:
+            return "s";
+        case DOLLAR:
+            return "$";
+        case STOP:
+            return ">";
+        case N_TERMINAL:
+            return "E";
+    }
+    return "";
+}
+
+void stack_print_all_symbols(t_stack *s){
+    t_stack_elem *tmp = s->top;
+    while (tmp != NULL){
+        printf("%s", get_string_to_table_symbol(tmp->symbol));
+        tmp = tmp->next;
+    }
+    printf("\n");
 }

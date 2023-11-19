@@ -277,6 +277,9 @@ int expression(parser_data_t* data){
                 if(error_code != ER_NONE)
                     FREE(error_code);
 
+#ifdef SEM_DEBUG
+                stack_print_all_symbols(&stack);
+#endif
                 break;
             case '<':
                 if(!stack_push_after_top_term(&stack,tmp_item,STOP))
@@ -289,10 +292,18 @@ int expression(parser_data_t* data){
                 data->token_ptr = next_token(&(data->line_cnt),&error_code, &flag);
                 if(error_code != ER_NONE)
                     FREE(error_code);
+
+#ifdef SEM_DEBUG
+                stack_print_all_symbols(&stack);
+#endif
                 break;
             case '>':
                 if(reduce())
                     FREE(ER_SYNTAX);
+
+#ifdef SEM_DEBUG
+                stack_print_all_symbols(&stack);
+#endif
                 break;
             default:
                 if(actual_symbol == DOLLAR && top_terminal->symbol == DOLLAR)
