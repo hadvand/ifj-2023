@@ -19,6 +19,7 @@ typedef enum {
 typedef struct
 {
     string_ptr params;
+    char **id_names; // lenght = params.mem_aloceted
     char* id;
     item_type type;
     bool nil_possibility;
