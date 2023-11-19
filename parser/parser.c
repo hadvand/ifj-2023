@@ -16,8 +16,12 @@
 #define CHECK_RULE(rule)           \
     if ((ret_code = rule(data))) { \
         return ret_code;            \
-    }                               \
+    }                              \
 
+#define VERIFY_TOKEN(t_token)  \
+    GET_TOKEN()                \
+    if (data->token_ptr->token_type != t_token) return ER_SYNTAX;\
+    \
 
 parser_data_t *init_data()
 {
@@ -204,11 +208,8 @@ int program(parser_data_t *data) {
 
     //GET_TOKEN()
     CHECK_RULE(stm)
-    GET_TOKEN()
 
-    if (data->token_ptr->token_type != T_EOF) {
-        return ER_SEMAN;
-    }
+    VERIFY_TOKEN(T_EOF)
 
     return ret_code;
 }
@@ -222,21 +223,19 @@ int stm(parser_data_t *data) {
     // <stm> -> var + let id : <var_type> \n <stm>
     // <stm> -> var + let id = <expression> \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && (data->token_ptr->attribute.keyword == k_var || data->token_ptr->attribute.keyword == k_let)) {
-        GET_TOKEN()
-        if (data->token_ptr->token_type != T_ID) return ER_SYNTAX;
+        VERIFY_TOKEN(T_ID)
 
         GET_TOKEN()
         if (data->token_ptr->token_type == T_COLON) {
             GET_TOKEN()
-            var_type(data);
+            CHECK_RULE(var_type)
 
             GET_TOKEN()
             if (data->token_ptr->token_type == T_ASSIGMENT) {
                 GET_TOKEN()
-                // expression(data);
+                CHECK_RULE(expression)
 
-                GET_TOKEN()
-                if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
+                VERIFY_TOKEN(T_NEW_LINE)
 
                 GET_TOKEN()
                 return stm(data);
@@ -251,8 +250,7 @@ int stm(parser_data_t *data) {
             GET_TOKEN()
             // expression();
 
-            GET_TOKEN()
-            if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
+            VERIFY_TOKEN(T_NEW_LINE)
 
             GET_TOKEN()
             stm(data);
@@ -269,22 +267,19 @@ int stm(parser_data_t *data) {
         GET_TOKEN()
         if (data->token_ptr->token_type == T_BRACKET_OPEN) {
             GET_TOKEN()
-            func_params(data);
+            CHECK_RULE(call_params)
 
-            GET_TOKEN()
-            if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
+            VERIFY_TOKEN(T_BRACKET_CLOSE)
 
-            GET_TOKEN()
-            if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
+            VERIFY_TOKEN(T_NEW_LINE)
 
             return stm(data);
         }
         else if (data->token_ptr->token_type == T_ASSIGMENT) {
             GET_TOKEN()
-            expression(data);
+            CHECK_RULE(expression)
 
-            GET_TOKEN()
-            if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
+            VERIFY_TOKEN(T_NEW_LINE)
 
             GET_TOKEN()
             return stm(data);
@@ -294,57 +289,47 @@ int stm(parser_data_t *data) {
     // <stm> -> func func_id( <func_params> ) -> <var_type> { <stm> <return> } \n <stm>
     // <stm> -> func func_id( <func_params> ) { <stm> <return_void> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_func) {
-        GET_TOKEN()
-        if (data->token_ptr->token_type != T_ID) return ER_SYNTAX;
+        VERIFY_TOKEN(T_ID)
+
+        VERIFY_TOKEN(T_BRACKET_OPEN)
 
         GET_TOKEN()
-        if (data->token_ptr->token_type != T_BRACKET_OPEN) return ER_SYNTAX;
+        CHECK_RULE(func_params)
 
-        GET_TOKEN()
-        func_params(data);
-
-        GET_TOKEN()
-        if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
+        VERIFY_TOKEN(T_BRACKET_CLOSE)
 
         GET_TOKEN()
         if (data->token_ptr->token_type == T_ARROW) {
             GET_TOKEN()
-            var_type(data);
+            CHECK_RULE(var_type)
+
+            VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
 
             GET_TOKEN()
-            if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
+            CHECK_RULE(stn)
 
             GET_TOKEN()
-            stm(data);
+            CHECK_RULE(return_rule)
 
-            GET_TOKEN()
-            return_rule(data);
+            VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
 
-            GET_TOKEN()
-            if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
-
-            GET_TOKEN()
-            if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
+            VERIFY_TOKEN(T_NEW_LINE)
 
             GET_TOKEN()
             return stm(data);
 
         }
         else if (data->token_ptr->token_type == T_CURVED_BRACKET_OPEN) {
-            GET_TOKEN()
-            if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
 
             GET_TOKEN()
-            stm(data);
+            CHECK_RULE(stm)
 
             GET_TOKEN()
-            return_rule(data);
+            CHECK_RULE(return_rule)
 
-            GET_TOKEN()
-            if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+            VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
 
-            GET_TOKEN()
-            if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
+            VERIFY_TOKEN(T_NEW_LINE)
 
             GET_TOKEN()
             return stm(data);
@@ -355,40 +340,32 @@ int stm(parser_data_t *data) {
     // <stm> -> if ( <condition> ) { <stm> } \n else { <stm> } \n <stm>
     // <stm> -> if ( <condition> ) { <stm> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_if) {
-        GET_TOKEN()
-        if (data->token_ptr->token_type != T_BRACKET_OPEN) return ER_SYNTAX;
+        VERIFY_TOKEN(T_BRACKET_OPEN)
 
         GET_TOKEN()
-        condition(data);
+        CHECK_RULE(condition)
+
+        VERIFY_TOKEN(T_BRACKET_CLOSE)
+
+        VERIFY_TOKEN(T_BRACKET_OPEN)
 
         GET_TOKEN()
-        if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+        CHECK_RULE(stm)
 
-        GET_TOKEN()
-        if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
+        VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
 
-        GET_TOKEN()
-        stm(data);
-
-        GET_TOKEN()
-        if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
-
-        GET_TOKEN()
-        if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
+        VERIFY_TOKEN(T_NEW_LINE)
 
         GET_TOKEN()
         if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_else) {
-            GET_TOKEN()
-            if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
+            VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
 
             GET_TOKEN()
-            stm(data);
+            CHECK_RULE(stm)
 
-            GET_TOKEN()
-            if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+            VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
 
-            GET_TOKEN()
-            if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
+            VERIFY_TOKEN(T_NEW_LINE)
 
             GET_TOKEN()
             return stm(data);
@@ -401,26 +378,21 @@ int stm(parser_data_t *data) {
 
     // <stm> -> while ( <condition> ) { <stm> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_while) {
-        GET_TOKEN()
-        if (data->token_ptr->token_type != T_BRACKET_OPEN) return ER_SYNTAX;
+        VERIFY_TOKEN(T_BRACKET_OPEN)
 
         GET_TOKEN()
-        condition(data);
+        CHECK_RULE(condition)
+
+        VERIFY_TOKEN(T_BRACKET_CLOSE)
+
+        VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
 
         GET_TOKEN()
-        if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+        CHECK_RULE(stm)
 
-        GET_TOKEN()
-        if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
+        VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
 
-        GET_TOKEN()
-        stm(data);
-
-        GET_TOKEN()
-        if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
-
-        GET_TOKEN()
-        if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
+        VERIFY_TOKEN(T_NEW_LINE)
 
         GET_TOKEN()
         return stm(data);
@@ -432,6 +404,13 @@ int stm(parser_data_t *data) {
     }
 
     return ret_code;
+}
+
+int call_params(parser_data_t *data){
+    int ret_code = ER_NONE;
+    //TODO semantic
+
+    return  ret_code;
 }
 
 int condition(parser_data_t *data) {
@@ -465,13 +444,12 @@ int func_params(parser_data_t *data) {
             }
         }
 
-        GET_TOKEN()
-        if (data->token_ptr->token_type != T_COLON) return ER_SYNTAX;
+        VERIFY_TOKEN(T_COLON)
 
         GET_TOKEN()
-        var_type(data);
+        CHECK_RULE(var_type)
 
-        func_params_not_null(data);
+        CHECK_RULE(func_params_not_null)
 
         if (data->param_index + 1 != data->id->params->last_index) return ER_UNDEF_VAR;
     }
