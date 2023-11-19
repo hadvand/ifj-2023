@@ -61,10 +61,8 @@ parser_data_t *init_data()
 
     // readString() -> str?
 
-    printf("st start\n");
     if ((tmp = insertSymbol(parser_data->global_table, "readString", &internal_error)) == NULL) return NULL;
     tmp->defined = true;
-    printf("st finish\n");
 
     tmp->type = 's';
     tmp->qmark = true;
@@ -226,7 +224,7 @@ int stm(parser_data_t *data) {
             var_type(data);
 
             GET_TOKEN()
-            if (data->token_ptr->token_type == T_EQUALS) {
+            if (data->token_ptr->token_type == T_ASSIGMENT) {
                 GET_TOKEN()
                 // expression(data);
 
@@ -242,7 +240,7 @@ int stm(parser_data_t *data) {
             }
             else return ER_SYNTAX;
         }
-        else if (data->token_ptr->token_type == T_EQUALS) {
+        else if (data->token_ptr->token_type == T_ASSIGMENT) {
             GET_TOKEN()
             // expression();
 
@@ -274,7 +272,7 @@ int stm(parser_data_t *data) {
 
             return stm(data);
         }
-        else if (data->token_ptr->token_type == T_EQUALS) {
+        else if (data->token_ptr->token_type == T_ASSIGMENT) {
             GET_TOKEN()
             // expression(data);
 
