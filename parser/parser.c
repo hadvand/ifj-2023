@@ -440,29 +440,29 @@ int func_params(parser_data_t *data) {
     if ((data->id->id_names = (char**)malloc(sizeof(char*)))==NULL)
         return ER_INTERNAL;
     GET_TOKEN()
-    if(data->token_ptr->token_type == T_UNDERLINE){
-        if((data->id->id_names[data->param_index] = (char*)malloc(sizeof(char))) == NULL)
-            return ER_INTERNAL;
-        strcpy(data->id->id_names[data->param_index],"_");
-    }
-    else if(data->token_ptr->token_type == T_ID){
+
+    //T_ID its var_name. it is NOOOOT a var_id
+    if(data->token_ptr->token_type == T_UNDERLINE || data->token_ptr->token_type == T_ID){
+
+        // if there is function named as parameter
+        if (findSymbol(data->global_table, data->token_ptr->attribute.string))
+            return ER_UNDEF_VAR;
+
         if((data->id->id_names[data->param_index] = (char*)realloc(data->id->id_names[data->param_index],strlen(data->token_ptr->attribute.string))) == NULL)
             return ER_INTERNAL;
-        strcpy(data->id->id_names[data->param_index],data->token_ptr->attribute.string);
-    }
+        if(data->token_ptr->token_type == T_UNDERLINE)
+            strcpy(data->id->id_names[data->param_index],"_");
+        else
+            strcpy(data->id->id_names[data->param_index],data->token_ptr->attribute.string);
 
-    //harmim
-    if (data->token_ptr->token_type != T_ID) return ER_SYNTAX;
+        VERIFY_TOKEN(T_ID)
 
-    GET_TOKEN()
-
-    if (data->token_ptr->token_type == T_ID) {
         // if there is function named as parameter
         if (findSymbol(data->global_table, data->token_ptr->attribute.string))
             return ER_UNDEF_VAR;
 
         // if we are in definition, we need to add parameters to the local symtable
-        if (!data->is_in_declaration) {
+        if (data->is_in_declaration) {
             bool internal_error;
             if (!(data->exp_type = insertSymbol(data->local_table, data->token_ptr->attribute.string, &internal_error))) {
                 if (internal_error) return ER_INTERNAL;
@@ -476,6 +476,16 @@ int func_params(parser_data_t *data) {
         CHECK_RULE(var_type)
 
         CHECK_RULE(func_params_not_null)
+
+    }
+    else{
+        //TODO empty params func
+    }
+
+    //harmim
+
+    if (data->token_ptr->token_type == T_ID) {
+
 
         if (data->param_index + 1 != data->id->params->last_index) return ER_UNDEF_VAR;
     }
