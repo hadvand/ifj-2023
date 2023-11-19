@@ -289,8 +289,18 @@ int stm(parser_data_t *data) {
     // <stm> -> func func_id( <func_params> ) -> <var_type> { <stm> <return> } \n <stm>
     // <stm> -> func func_id( <func_params> ) { <stm> <return_void> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_func) {
-        VERIFY_TOKEN(T_ID)
 
+        VERIFY_TOKEN(T_ID)
+        data->is_in_declaration = true;
+
+
+
+        bool internal_error;
+        data->id = insertSymbol(data->global_table,data->token_ptr->attribute.string,&internal_error);
+        if(!data->id){
+            if(internal_error) return ER_INTERNAL;
+            else return ER_UNDEF_VAR;
+        }
         VERIFY_TOKEN(T_BRACKET_OPEN)
 
         CHECK_RULE(func_params)
@@ -305,7 +315,7 @@ int stm(parser_data_t *data) {
             VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
 
             GET_TOKEN()
-            CHECK_RULE(stn)
+            CHECK_RULE(stm)
 
             GET_TOKEN()
             CHECK_RULE(return_rule)
@@ -408,7 +418,7 @@ int stm(parser_data_t *data) {
 int call_params(parser_data_t *data){
     int ret_code = ER_NONE;
     //TODO semantic
-
+    UNUSED(data);
     return  ret_code;
 }
 
@@ -419,12 +429,29 @@ int condition(parser_data_t *data) {
     return ret_code;
 }
 
+//<func_params> -> ε
+//<func_params> -> var_name var_id: <var_type> <func_params_not_null>
+//<func_params> -> _ var_id: <var_type> <func_params_not_null>
 int func_params(parser_data_t *data) {
     int ret_code = ER_NONE;
 
     data->param_index = 0;
 
-    // <func_params> -> var_name var_id : <var_type> <func_params_not_null>
+    if ((data->id->id_names = (char**)malloc(sizeof(char*)))==NULL)
+        return ER_INTERNAL;
+    GET_TOKEN()
+    if(data->token_ptr->token_type == T_UNDERLINE){
+        if((data->id->id_names[data->param_index] = (char*)malloc(sizeof(char))) == NULL)
+            return ER_INTERNAL;
+        strcpy(data->id->id_names[data->param_index],"_");
+    }
+    else if(data->token_ptr->token_type == T_ID){
+        if((data->id->id_names[data->param_index] = (char*)realloc(data->id->id_names[data->param_index],strlen(data->token_ptr->attribute.string))) == NULL)
+            return ER_INTERNAL;
+        strcpy(data->id->id_names[data->param_index],data->token_ptr->attribute.string);
+    }
+
+    //harmim
     if (data->token_ptr->token_type != T_ID) return ER_SYNTAX;
 
     GET_TOKEN()
