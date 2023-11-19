@@ -2,6 +2,7 @@
 #include "../structures/error.h"
 #include "hash.h"
 #include "parser.h"
+#include "../semantics/semantics.h"
 
 #define UNUSED(x) (void)(x)
 
@@ -67,25 +68,25 @@ parser_data_t *init_data()
     printf("st finish\n");
 
     tmp->type = 's';
-    tmp->qmark = true;
+    tmp->nil_possibility = true;
 
     // readInt() -> int?
     tmp = insertSymbol(parser_data->global_table, "readInt", &internal_error);
     tmp->defined = true;
     tmp->type = 'i';
-    tmp->qmark = true;
+    tmp->nil_possibility = true;
 
     // readDouble() -> double?
     tmp = insertSymbol(parser_data->global_table, "readDouble", &internal_error);
     tmp->defined = true;
     tmp->type = 'd';
-    tmp->qmark = true;
+    tmp->nil_possibility = true;
 
     // write(...)
     tmp = insertSymbol(parser_data->global_table, "write", &internal_error);
     tmp->defined = true;
     tmp->type = 'n';
-    tmp->qmark = false;
+    tmp->nil_possibility = false;
 
     if (!string_append(tmp->params, 'a')) {
         return NULL;
@@ -95,7 +96,7 @@ parser_data_t *init_data()
     tmp = insertSymbol(parser_data->global_table, "Int2Double", &internal_error);
     tmp->defined = true;
     tmp->type = 'd';
-    tmp->qmark = false;
+    tmp->nil_possibility = false;
 
     if (!string_append(tmp->params, 'i')) {
         return NULL;
@@ -105,7 +106,7 @@ parser_data_t *init_data()
     tmp = insertSymbol(parser_data->global_table, "Double2Int", &internal_error);
     tmp->defined = true;
     tmp->type = 'i';
-    tmp->qmark = false;
+    tmp->nil_possibility = false;
 
     if (!string_append(tmp->params, 'd')) {
         return NULL;
@@ -115,7 +116,7 @@ parser_data_t *init_data()
     tmp = insertSymbol(parser_data->global_table, "ord", &internal_error);
     tmp->defined = true;
     tmp->type = 'i';
-    tmp->qmark = false;
+    tmp->nil_possibility = false;
 
     if (!string_append(tmp->params, 's')) {
         return NULL;
@@ -125,7 +126,7 @@ parser_data_t *init_data()
     tmp = insertSymbol(parser_data->global_table, "chr", &internal_error);
     tmp->defined = true;
     tmp->type = 's';
-    tmp->qmark = false;
+    tmp->nil_possibility = false;
 
     if (!string_append(tmp->params, 'i')) {
         return NULL;
@@ -135,7 +136,7 @@ parser_data_t *init_data()
     tmp = insertSymbol(parser_data->global_table, "length", &internal_error);
     tmp->defined = true;
     tmp->type = 'i';
-    tmp->qmark = false;
+    tmp->nil_possibility = false;
 
     if (!string_append(tmp->params, 's')) {
         return NULL;
@@ -145,7 +146,7 @@ parser_data_t *init_data()
     tmp = insertSymbol(parser_data->global_table, "substring", &internal_error);
     tmp->defined = true;
     tmp->type = 's';
-    tmp->qmark = true;
+    tmp->nil_possibility = true;
 
     if (!string_append(tmp->params, 's')) {
         return NULL;
@@ -202,7 +203,7 @@ int analyse() {
 int program(parser_data_t *data) {
     int ret_code = ER_NONE;
 
-    GET_TOKEN()
+    //GET_TOKEN()
     CHECK_RULE(stm)
     GET_TOKEN()
 
@@ -216,7 +217,7 @@ int program(parser_data_t *data) {
 int stm(parser_data_t *data) {
     int ret_code = ER_NONE;
 
-    GET_TOKEN()
+    //GET_TOKEN()
 
     // <stm> -> var + let id : <var_type> = <expression> \n <stm>
     // <stm> -> var + let id : <var_type> \n <stm>
@@ -279,7 +280,7 @@ int stm(parser_data_t *data) {
 
             return stm(data);
         }
-        else if (data->token_ptr->token_type == T_EQUALS) {
+        else if (data->token_ptr->token_type == T_ASSIGMENT) {
             GET_TOKEN()
             // expression(data);
 

@@ -21,7 +21,7 @@ typedef struct
     string_ptr params;
     char* id;
     item_type type;
-    bool qmark;
+    bool nil_possibility;
     bool defined;
     bool global;
 } item_data;
