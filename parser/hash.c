@@ -63,7 +63,6 @@ item_data* insertSymbol(HashTable* ht, char* name, bool *internal_error) {
         *internal_error = true;
         return NULL;
     }
-//    if (!newSymbol->data) printf("inside\n");
 
     if (!(newSymbol->data.params = (string_ptr)malloc(sizeof(string_ptr))))
     {
