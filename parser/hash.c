@@ -1,4 +1,5 @@
 #include "hash.h"
+#include <string.h>
 
 HashTable* createHashTable() {
     HashTable* ht = (HashTable*)malloc(sizeof(HashTable));
@@ -48,17 +49,51 @@ item_data* insertSymbol(HashTable* ht, char* name, bool *internal_error) {
     }
 
     newSymbol->name = (char*)malloc(strlen(name) + 1);
+
     if (newSymbol->name == NULL) {
+
         *internal_error = true;
         free(newSymbol);
         return NULL;
     }
 
+    if (!(newSymbol->name = (char *)malloc((strlen(name) + 1) * sizeof(char))))
+    {
+        free(newSymbol);
+        *internal_error = true;
+        return NULL;
+    }
+//    if (!newSymbol->data) printf("inside\n");
+
+    if (!(newSymbol->data.params = (string_ptr)malloc(sizeof(string_ptr))))
+    {
+        free(newSymbol->name);
+        free(newSymbol);
+        *internal_error = true;
+        return NULL;
+    }
+    if ((newSymbol->data.params = string_init()) == NULL)
+    {
+        free(newSymbol->name);
+        free(newSymbol);
+        free(newSymbol->data.params);
+        *internal_error = true;
+        return NULL;
+    }
+
+
     strcpy(newSymbol->name, name);
+
+    newSymbol->data.id = newSymbol->name;
+    newSymbol->data.type = 'u';
+    newSymbol->data.defined = false;
+    newSymbol->data.global = false;
+    newSymbol->next = NULL;
 
     newSymbol->next = ht->table[index];
     ht->table[index] = newSymbol;
-    return newSymbol->data;
+
+    return &newSymbol->data;
 }
 
 Symbol* findSymbol(HashTable* ht, char* name) {

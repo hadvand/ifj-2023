@@ -44,7 +44,7 @@ typedef enum
     NT_MUL_NT,      // E -> E * E
     NT_DIV_NT,      // E -> E / E
     NT_COALESCE_NT, // E -> E ?? E
-    NT_NOT_NT,      // E -> !E
+    NT_F_UNWRAP,    // E-> E!
     LBR_NT_RBR,     // E -> (E)
     OPERAND,        // E -> i
     NOT_A_RULE      // rule doesn't exist

@@ -1,8 +1,16 @@
+#include "parser/parser.h"
+#include "structures/error.h"
 #include <stdio.h>
 
-int main() {
-   // printf() displays the string inside quotation
-   int ggwp = 66;
-   printf("Hello, World!%c\n",ggwp);
-   return 0;
+int main()
+{
+    int ret_code;
+    if ((ret_code = analyse())) {
+        return ret_code;
+    }
+    else {
+        fprintf(stderr, "\nERROR code %d\n", ret_code);
+    }
+
+    return ER_NONE;
 }

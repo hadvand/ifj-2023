@@ -1,5 +1,6 @@
 #include <string.h>
 #include "../structures/string.h"
+#include "stdio.h"
 
 #ifndef HASH_H
 #define HASH_H
@@ -7,27 +8,28 @@
 #define MAX_TABLE_SIZE 101
 
 typedef enum {
-    Double,
-    Int,
-    String,
-    Any,
-    Undef
+    IT_DOUBLE,
+    IT_INT,
+    IT_STRING,
+    IT_ANY,
+    IT_NIL,
+    IT_UNDEF
 } item_type;
 
 
 typedef struct
 {
-    string_ptr *params;
+    string_ptr params;
     char* id;
     item_type type;
-    bool qmark;
+    bool nil_possibility;
     bool defined;
     bool global;
 } item_data;
 
 typedef struct Symbol {
     char *name;
-    item_data *data;
+    item_data data;
     struct Symbol* next;
 } Symbol;
 
