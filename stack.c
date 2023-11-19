@@ -134,9 +134,9 @@ char* get_string_to_table_symbol(Precedence_table_symbol symbol){
         case EX_MARK:
             return "!";
         case LEFT_BRACKET:
-            return "(";
-        case RIGHT_BRACKET:
             return ")";
+        case RIGHT_BRACKET:
+            return "(";
         case IDENTIFIER:
             return "I";
         case INT_NUMBER:
