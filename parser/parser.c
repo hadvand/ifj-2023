@@ -2,6 +2,7 @@
 #include "../structures/error.h"
 #include "hash.h"
 #include "parser.h"
+#include "../semantics/semantics.h"
 
 #define UNUSED(x) (void)(x)
 
@@ -64,26 +65,27 @@ parser_data_t *init_data()
     if ((tmp = insertSymbol(parser_data->global_table, "readString", &internal_error)) == NULL) return NULL;
     tmp->defined = true;
 
+    //TODO change char to enum item_type
     tmp->type = 's';
-    tmp->qmark = true;
+    tmp->nil_possibility = true;
 
     // readInt() -> int?
     tmp = insertSymbol(parser_data->global_table, "readInt", &internal_error);
     tmp->defined = true;
     tmp->type = 'i';
-    tmp->qmark = true;
+    tmp->nil_possibility = true;
 
     // readDouble() -> double?
     tmp = insertSymbol(parser_data->global_table, "readDouble", &internal_error);
     tmp->defined = true;
     tmp->type = 'd';
-    tmp->qmark = true;
+    tmp->nil_possibility = true;
 
     // write(...)
     tmp = insertSymbol(parser_data->global_table, "write", &internal_error);
     tmp->defined = true;
     tmp->type = 'n';
-    tmp->qmark = false;
+    tmp->nil_possibility = false;
 
     if (!string_append(tmp->params, 'a')) {
         return NULL;
@@ -93,7 +95,7 @@ parser_data_t *init_data()
     tmp = insertSymbol(parser_data->global_table, "Int2Double", &internal_error);
     tmp->defined = true;
     tmp->type = 'd';
-    tmp->qmark = false;
+    tmp->nil_possibility = false;
 
     if (!string_append(tmp->params, 'i')) {
         return NULL;
@@ -103,7 +105,7 @@ parser_data_t *init_data()
     tmp = insertSymbol(parser_data->global_table, "Double2Int", &internal_error);
     tmp->defined = true;
     tmp->type = 'i';
-    tmp->qmark = false;
+    tmp->nil_possibility = false;
 
     if (!string_append(tmp->params, 'd')) {
         return NULL;
@@ -113,7 +115,7 @@ parser_data_t *init_data()
     tmp = insertSymbol(parser_data->global_table, "ord", &internal_error);
     tmp->defined = true;
     tmp->type = 'i';
-    tmp->qmark = false;
+    tmp->nil_possibility = false;
 
     if (!string_append(tmp->params, 's')) {
         return NULL;
@@ -123,7 +125,7 @@ parser_data_t *init_data()
     tmp = insertSymbol(parser_data->global_table, "chr", &internal_error);
     tmp->defined = true;
     tmp->type = 's';
-    tmp->qmark = false;
+    tmp->nil_possibility = false;
 
     if (!string_append(tmp->params, 'i')) {
         return NULL;
@@ -133,7 +135,7 @@ parser_data_t *init_data()
     tmp = insertSymbol(parser_data->global_table, "length", &internal_error);
     tmp->defined = true;
     tmp->type = 'i';
-    tmp->qmark = false;
+    tmp->nil_possibility = false;
 
     if (!string_append(tmp->params, 's')) {
         return NULL;
@@ -143,7 +145,7 @@ parser_data_t *init_data()
     tmp = insertSymbol(parser_data->global_table, "substring", &internal_error);
     tmp->defined = true;
     tmp->type = 's';
-    tmp->qmark = true;
+    tmp->nil_possibility = true;
 
     if (!string_append(tmp->params, 's')) {
         return NULL;
@@ -165,6 +167,11 @@ void free_data(parser_data_t *parser_data) {
 }
 
 int analyse() {
+
+#ifdef PARS_DEBUG
+    printf("Sample of debug");
+#endif
+
     int ret_code = ER_NONE;
     bool flag;
 
@@ -195,7 +202,7 @@ int analyse() {
 int program(parser_data_t *data) {
     int ret_code = ER_NONE;
 
-    GET_TOKEN()
+    //GET_TOKEN()
     CHECK_RULE(stm)
     GET_TOKEN()
 
@@ -209,7 +216,7 @@ int program(parser_data_t *data) {
 int stm(parser_data_t *data) {
     int ret_code = ER_NONE;
 
-    GET_TOKEN()
+    //GET_TOKEN()
 
     // <stm> -> var + let id : <var_type> = <expression> \n <stm>
     // <stm> -> var + let id : <var_type> \n <stm>
@@ -274,7 +281,7 @@ int stm(parser_data_t *data) {
         }
         else if (data->token_ptr->token_type == T_ASSIGMENT) {
             GET_TOKEN()
-            // expression(data);
+            expression(data);
 
             GET_TOKEN()
             if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
@@ -510,10 +517,34 @@ int func_params_not_null(parser_data_t *data) {
 }
 
 int return_rule(parser_data_t *data) {
+    int ret_code;
 
-    UNUSED(data);
-
-    return 0;
+    if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return) {
+        GET_TOKEN();
+        if (data->is_void_function) {
+            if (data->token_ptr->token_type == T_NEW_LINE) {
+                return ER_NONE;
+            }
+            else {
+                return ER_SYNTAX;
+            }
+        }
+        else {
+            GET_TOKEN();
+            if (data->token_ptr->token_type == T_NEW_LINE) {
+                return ER_NONE;
+            }
+            else {
+                return ER_SYNTAX;
+            }
+        }
+    }
+    else if (data->token_ptr->token_type == T_NEW_LINE) {
+        return ER_NONE;
+    }
+    else {
+        return ER_SYNTAX;
+    }
 }
 
 int var_type(parser_data_t* data) {
@@ -524,37 +555,37 @@ int var_type(parser_data_t* data) {
             case k_Int:
                 if (data->id->params->string[data->param_index] != 'i') return ER_UNDEF_VAR;
 
-                if (!data->is_in_declaration) data->exp_type->type = 'i';
+                if (!data->is_in_declaration) data->exp_type->type = IT_INT;
                 break;
 
             case k_Double:
                 if (data->id->params->string[data->param_index] != 'd') return ER_UNDEF_VAR;
 
-                if (!data->is_in_declaration) data->exp_type->type = 'd';
+                if (!data->is_in_declaration) data->exp_type->type = IT_DOUBLE;
                 break;
 
             case k_String:
                 if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
 
-                if (!data->is_in_declaration) data->exp_type->type = 's';
+                if (!data->is_in_declaration) data->exp_type->type = IT_STRING;
                 break;
-
+            //TODO nil_possibility = true;
             case k_qmark_Int:
                 if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
 
-                if (!data->is_in_declaration) data->exp_type->type = 's';
+                if (!data->is_in_declaration) data->exp_type->type = IT_STRING;
                 break;
-
+                //TODO nil_possibility = true;
             case k_qmark_Double:
                 if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
 
-                if (!data->is_in_declaration) data->exp_type->type = 's';
+                if (!data->is_in_declaration) data->exp_type->type = IT_STRING;
                 break;
-
+                //TODO nil_possibility = true;
             case k_qmark_String:
                 if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
 
-                if (!data->is_in_declaration) data->exp_type->type = T_STRING;
+                if (!data->is_in_declaration) data->exp_type->type = IT_STRING;
                 break;
 
             default:
@@ -564,5 +595,20 @@ int var_type(parser_data_t* data) {
     else {
         return ER_SYNTAX;
     }
+    return ER_NONE;
+}
+
+int var_value(parser_data_t *data) {
+    if (data->token_ptr->token_type == T_INT) {
+        if (data->id->type != IT_INT) return ER_SEMAN;
+    }
+    else if (data->token_ptr->token_type == T_DEMICAL) {
+        if (data->id->type != IT_DOUBLE) return ER_SEMAN;
+    }
+    else if (data->token_ptr->token_type == T_STRING) {
+        if (data->id->type != IT_STRING) return ER_SEMAN;
+    }
+    else return ER_SYNTAX;
+
     return ER_NONE;
 }
