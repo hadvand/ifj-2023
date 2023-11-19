@@ -5,11 +5,13 @@
 #define TABLE_SIZE 16
 
 
-t_stack *stack;
+t_stack stack;
+
+static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3);
 
 #define FREE(_error_code) \
     do{                   \
-        stack_free(stack); \
+        stack_free(&stack); \
         return _error_code;   \
         }\
     while(0)
@@ -170,7 +172,7 @@ item_type get_type(struct token* token, parser_data_t * data){
                 return IT_UNDEF;
             return symbol->data.type;
         case T_INT:
-            return IT_UNDEF;
+            return IT_INT;
         case T_DEMICAL:
             return IT_DOUBLE;
         case T_STRING:
@@ -183,7 +185,7 @@ item_type get_type(struct token* token, parser_data_t * data){
 
 int number_of_symbols_after_stop(bool* found_stop){
 
-    t_stack_elem* item = get_top(stack);
+    t_stack_elem* item = get_top(&stack);
     int counter = 0;
     while (item != NULL){
 
@@ -202,16 +204,55 @@ int number_of_symbols_after_stop(bool* found_stop){
     return counter;
 }
 
+int reduce(){
+
+    //int error_code;
+
+    t_stack_elem *op1 = NULL;
+    t_stack_elem *op2 = NULL;
+    t_stack_elem *op3 = NULL;
+    item_data item;
+    Precedence_rules rule;
+    bool stop_is_founded;
+
+    int count_symbols_before_stop = number_of_symbols_after_stop(&stop_is_founded);
+
+    if(count_symbols_before_stop == 1 && stop_is_founded){
+        op1 = stack.top;
+        rule = check_rule(count_symbols_before_stop,op1,op2,op3);
+    }
+    else if(count_symbols_before_stop == 3 && stop_is_founded){
+        op1 = stack.top->next->next;
+        op2 = stack.top->next;
+        op3 = stack.top;
+        rule = check_rule(count_symbols_before_stop,op1,op2,op3);
+    }
+    else
+        return ER_SYNTAX;
+
+    if(rule == NOT_A_RULE)
+        return ER_SYNTAX;
+    else{
+        //todo check semantics
+
+        for (int i = count_symbols_before_stop + 1; i > 0 ; i--) {
+            stack_pop(&stack);
+        }
+        stack_push(&stack,item,N_TERMINAL);
+    }
+
+    return ER_NONE;
+}
+
 int expression(parser_data_t* data){
     int error_code = ER_SYNTAX;
 
-    //TODO: delete this
-    data->line_cnt = 10;
 
-    stack_init(stack);
+    stack_init(&stack);
+    //TODO init item_data
     item_data tmp_item;
     tmp_item.type = IT_UNDEF;
-    stack_push(stack, tmp_item, DOLLAR);
+    stack_push(&stack, tmp_item, DOLLAR);
 
     bool success = false;
 
@@ -220,25 +261,44 @@ int expression(parser_data_t* data){
 
     do {
         actual_symbol = convert_token_into_symbol(data->token_ptr);
-        top_terminal = stack_top_terminal(stack);
+        top_terminal = stack_top_terminal(&stack);
 
         if(top_terminal == NULL)
             FREE(ER_INTERNAL);
-
+        bool flag;
 
         switch (precedence_table[get_index(top_terminal->symbol)][get_index(actual_symbol)]) {
-            case ' ':
+            case '=':
+                tmp_item.type = get_type(data->token_ptr,data);
+                if(!stack_push(&stack, tmp_item,actual_symbol))
+                    FREE(ER_INTERNAL);
+
+                data->token_ptr = next_token(&(data->line_cnt),&error_code, &flag);
+                if(error_code != ER_NONE)
+                    FREE(error_code);
+
                 break;
             case '<':
-                if(!stack_push_after_top_term(stack,tmp_item,STOP))
+                if(!stack_push_after_top_term(&stack,tmp_item,STOP))
                     FREE(ER_INTERNAL);
                 tmp_item.type = get_type(data->token_ptr,data);
-                if(!stack_push(stack, tmp_item,actual_symbol))
+                if(!stack_push(&stack, tmp_item,actual_symbol))
                     FREE(ER_INTERNAL);
+                //TODO generatecode
+
+                data->token_ptr = next_token(&(data->line_cnt),&error_code, &flag);
+                if(error_code != ER_NONE)
+                    FREE(error_code);
                 break;
             case '>':
+                if(reduce())
+                    FREE(ER_SYNTAX);
                 break;
             default:
+                if(actual_symbol == DOLLAR && top_terminal->symbol == DOLLAR)
+                    success = true;
+                else
+                    FREE(ER_SYNTAX);
                 break;
         }
 
@@ -248,7 +308,7 @@ int expression(parser_data_t* data){
 }
 
 
-Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3){
+static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3){
 
     switch (number){
 

@@ -67,6 +67,7 @@ parser_data_t *init_data()
     tmp->defined = true;
     printf("st finish\n");
 
+    //TODO change char to enum item_type
     tmp->type = 's';
     tmp->nil_possibility = true;
 
@@ -282,7 +283,7 @@ int stm(parser_data_t *data) {
         }
         else if (data->token_ptr->token_type == T_ASSIGMENT) {
             GET_TOKEN()
-            // expression(data);
+            expression(data);
 
             GET_TOKEN()
             if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
@@ -570,19 +571,19 @@ int var_type(parser_data_t* data) {
 
                 if (!data->is_in_declaration) data->exp_type->type = IT_STRING;
                 break;
-
+            //TODO nil_possibility = true;
             case k_qmark_Int:
                 if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
 
                 if (!data->is_in_declaration) data->exp_type->type = IT_STRING;
                 break;
-
+                //TODO nil_possibility = true;
             case k_qmark_Double:
                 if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
 
                 if (!data->is_in_declaration) data->exp_type->type = IT_STRING;
                 break;
-
+                //TODO nil_possibility = true;
             case k_qmark_String:
                 if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
 
