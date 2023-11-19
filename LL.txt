@@ -17,6 +17,7 @@
 
 <func_params> -> ε
 <func_params> -> var_name var_id: <var_type> <func_params_not_null>
+<func_params> -> _ var_id: <var_type> <func_params_not_null>
 
 <func_params_not_null> -> , <func_params>
 <func_params_not_null> -> ε

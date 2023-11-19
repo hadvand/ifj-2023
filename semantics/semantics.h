@@ -53,5 +53,7 @@ typedef enum
 
 int expression(parser_data_t* data);
 
+int func_call(parser_data_t* data);
+
 
 #endif //IFJ_NEW_BEGINNING_SEMANTICS_H

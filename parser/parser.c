@@ -293,7 +293,6 @@ int stm(parser_data_t *data) {
 
         VERIFY_TOKEN(T_BRACKET_OPEN)
 
-        GET_TOKEN()
         CHECK_RULE(func_params)
 
         VERIFY_TOKEN(T_BRACKET_CLOSE)

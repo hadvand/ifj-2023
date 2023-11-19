@@ -161,6 +161,10 @@ Precedence_table_indices get_index(Precedence_table_symbol symbol){
     }
 }
 
+int func_call(parser_data_t* data){
+
+}
+
 
 item_type get_type(struct token* token, parser_data_t * data){
 
