@@ -2,6 +2,7 @@
 #include "../structures/error.h"
 #include "hash.h"
 #include "parser.h"
+#include "table_stack.h"
 #include "../semantics/semantics.h"
 
 #define UNUSED(x) (void)(x)
@@ -283,7 +284,7 @@ int stm(parser_data_t *data) {
         }
         else if (data->token_ptr->token_type == T_ASSIGMENT) {
             GET_TOKEN()
-            expression(data);
+//            expression(data);
 
             GET_TOKEN()
             if (data->token_ptr->token_type != T_NEW_LINE) return ER_SYNTAX;
