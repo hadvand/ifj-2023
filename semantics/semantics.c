@@ -279,8 +279,6 @@ int expression(parser_data_t* data){
             FREE(ER_INTERNAL);
         }
 
-        bool flag;
-
         switch (precedence_table[get_index(top_terminal->symbol)][get_index(actual_symbol)]) {
             case '=':
                 tmp_item.type = get_type(data->token_ptr,data);
@@ -296,7 +294,7 @@ int expression(parser_data_t* data){
                 stack_print_all_symbols(&stack);
 #endif
 
-                data->token_ptr = next_token(&(data->line_cnt),&error_code, &flag);
+                data->token_ptr = next_token(&(data->line_cnt),&error_code, &(data->eol_flag));
                 if(error_code != ER_NONE)
                 {
 #ifdef SEM_DEBUG
@@ -329,7 +327,7 @@ int expression(parser_data_t* data){
                 stack_print_all_symbols(&stack);
 #endif
 
-                data->token_ptr = next_token(&(data->line_cnt),&error_code, &flag);
+                data->token_ptr = next_token(&(data->line_cnt),&error_code, &(data->eol_flag));
                 if(error_code != ER_NONE)
                 {
 #ifdef SEM_DEBUG

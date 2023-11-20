@@ -174,7 +174,7 @@ int analyse() {
 #endif
 
     int ret_code = ER_NONE;
-    bool flag;
+    bool flag = false;
 
     string_ptr string;
     if ((string = string_init()) == NULL) return ER_INTERNAL;
@@ -203,9 +203,10 @@ int analyse() {
 int program(parser_data_t *data) {
     int ret_code = ER_NONE;
 
+    new_stm:
     CHECK_RULE(stm)
 
-    VERIFY_TOKEN(T_EOF)
+    if (data->token_ptr->token_type != T_EOF) goto new_stm;
 
     return ret_code;
 }
@@ -224,7 +225,6 @@ int stm(parser_data_t *data) {
             GET_TOKEN()
             CHECK_RULE(var_type)
 
-            bool flag;
             GET_TOKEN()
             if (data->token_ptr->token_type == T_ASSIGMENT) {
                 GET_TOKEN()
@@ -292,10 +292,12 @@ int stm(parser_data_t *data) {
 
         CHECK_RULE(func_params)
 
-        VERIFY_TOKEN(T_BRACKET_CLOSE)
+        if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
 
         GET_TOKEN()
         if (data->token_ptr->token_type == T_ARROW) {
+            data->is_void_function = false;
+
             GET_TOKEN()
             CHECK_RULE(var_type)
 
@@ -304,10 +306,14 @@ int stm(parser_data_t *data) {
             GET_TOKEN()
             CHECK_RULE(stm)
 
-            GET_TOKEN()
-            CHECK_RULE(return_rule)
+            if (data->is_void_function) {
+                CHECK_RULE(return_void_rule)
+            }
+            else {
+                CHECK_RULE(return_rule)
+            }
 
-            VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
+            if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
 
             GET_TOKEN()
             if (!data->eol_flag) return ER_SYNTAX;
@@ -316,12 +322,17 @@ int stm(parser_data_t *data) {
 
         }
         else if (data->token_ptr->token_type == T_CURVED_BRACKET_OPEN) {
+            data->is_void_function = true;
 
             GET_TOKEN()
             CHECK_RULE(stm)
 
-            GET_TOKEN()
-            CHECK_RULE(return_rule)
+            if (data->is_void_function) {
+                CHECK_RULE(return_void_rule)
+            }
+            else {
+                CHECK_RULE(return_rule)
+            }
 
             VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
 
@@ -336,6 +347,8 @@ int stm(parser_data_t *data) {
     // <stm> -> if ( <condition> ) { <stm> } \n else { <stm> } \n <stm>
     // <stm> -> if ( <condition> ) { <stm> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_if) {
+        data->is_in_condition = true;
+
         VERIFY_TOKEN(T_BRACKET_OPEN)
 
         GET_TOKEN()
@@ -374,6 +387,8 @@ int stm(parser_data_t *data) {
 
     // <stm> -> while ( <condition> ) { <stm> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_while) {
+        data->is_in_condition = true;
+
         VERIFY_TOKEN(T_BRACKET_OPEN)
 
         GET_TOKEN()
@@ -394,25 +409,65 @@ int stm(parser_data_t *data) {
         return stm(data);
     }
     // <statement> -> ε
-    else if (data->token_ptr->token_type == T_EOF)
-    {
-        return ER_NONE;
-    }
 
     return ret_code;
 }
 
+//<call_params> -> var_name : var_id <call_params_n>
+//<call_params> -> var_id <call_params_n>
 int call_params(parser_data_t *data) {
     int ret_code = ER_NONE;
-    UNUSED(data);
-    //TODO semantic
-    UNUSED(data);
-    return  ret_code;
+
+    // todo: its not ID, its a NAME
+    VERIFY_TOKEN(T_ID)
+
+    GET_TOKEN()
+    if (data->token_ptr->token_type == T_COLON) {
+        if (!findSymbol(data->local_table, data->token_ptr->attribute.string)) return ER_UNDEF_VAR;
+        else {
+            CHECK_RULE(call_params_n)
+        }
+    }
+    else if (data->token_ptr->token_type == T_ID) {
+        CHECK_RULE(call_params_n)
+    }
+    else return ER_SYNTAX;
+
+    return ER_NONE;
 }
 
+//<call_params> -> var_name : var_id <call_params_n>
+//<call_params> -> var_id <call_params_n>
+int call_params_n(parser_data_t *data) {
+    int ret_code;
+
+    GET_TOKEN()
+    if (data->token_ptr->token_type == T_COMMA)
+    {
+        data->param_index++;
+
+        CHECK_RULE(call_params)
+    }
+    else if (data->token_ptr->token_type == T_BRACKET_CLOSE) {
+        return ER_NONE;
+    }
+    else {
+        return ER_SYNTAX;
+    }
+
+    return ER_NONE;
+}
+
+//<condition> -> let id
+//<condition> -> <expression>
 int condition(parser_data_t *data) {
     int ret_code = ER_NONE;
-    UNUSED(data);
+
+    GET_TOKEN()
+    if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let) {
+        VERIFY_TOKEN(T_ID)
+    }
+    else CHECK_RULE(expression)
 
     return ret_code;
 }
@@ -433,6 +488,7 @@ int func_params(parser_data_t *data) {
     if(data->token_ptr->token_type == T_UNDERLINE || data->token_ptr->token_type == T_ID){
 
         // if there is function named as parameter
+        // todo: segfault here (because of T_UNDERLINE on 5th line)
         if (findSymbol(data->global_table, data->token_ptr->attribute.string))
             return ER_UNDEF_VAR;
 
@@ -450,12 +506,10 @@ int func_params(parser_data_t *data) {
             return ER_UNDEF_VAR;
 
         // if we are in definition, we need to add parameters to the local symtable
-        if (data->is_in_declaration) {
-            bool internal_error;
-            if (!(data->exp_type = insertSymbol(data->local_table, data->token_ptr->attribute.string, &internal_error))) {
-                if (internal_error) return ER_INTERNAL;
-                else return ER_UNDEF_VAR;
-            }
+        bool internal_error;
+        if (!(data->exp_type = insertSymbol(data->local_table, data->token_ptr->attribute.string, &internal_error))) {
+            if (internal_error) return ER_INTERNAL;
+            else return ER_UNDEF_VAR;
         }
 
         VERIFY_TOKEN(T_COLON)
@@ -464,17 +518,14 @@ int func_params(parser_data_t *data) {
         CHECK_RULE(var_type)
 
         CHECK_RULE(func_params_not_null)
-
     }
-    else{
-        //TODO empty params func
+    else {
+        return ER_NONE;
     }
 
-    //harmim
+    // h?
 
     if (data->token_ptr->token_type == T_ID) {
-
-
         if (data->param_index + 1 != data->id->params->last_index) return ER_UNDEF_VAR;
     }
     else if (!data->is_in_declaration && data->id->params->last_index) return ER_UNDEF_VAR;
@@ -487,93 +538,51 @@ int func_params(parser_data_t *data) {
 int func_params_not_null(parser_data_t *data) {
     int ret_code;
 
+    GET_TOKEN()
     if (data->token_ptr->token_type == T_COMMA)
     {
         data->param_index++;
 
-        if (!data->is_in_declaration && data->param_index == data->id->params->last_index)
-            return ER_UNDEF_VAR;
-
-//        GET_TOKEN_AND_CHECK_TYPE(T_ID);
-
-        if (!data->is_in_declaration)
-        {
-            bool internal_error;
-            if (!(data->exp_type = insertSymbol(data->local_table, data->token_ptr->attribute.string, &internal_error)))
-            {
-                if (internal_error) return ER_INTERNAL;
-                else return ER_UNDEF_VAR;
-            }
-        }
-
-//        GET_TOKEN_AND_CHECK_KEYWORD(KEYWORD_AS);
-//        GET_TOKEN_AND_CHECK_RULE(var_type);
-
-        GET_TOKEN()
-        return func_params_not_null(data);
+        CHECK_RULE(func_params)
+    }
+    else if (data->token_ptr->token_type == T_BRACKET_CLOSE) {
+        return ER_NONE;
+    }
+    else {
+        return ER_SYNTAX;
     }
 
-    // <param_n> -> ε
-
     return ER_NONE;
+}
+
+// <nil_flag> -> ! + ε
+int nil_flag(parser_data_t *data) {
+    if (data->token_ptr->token_type == T_EXCLAMATION_MARK) {
+        return ER_NONE;
+    }
+    else if (data->eol_flag) {
+        return ER_NONE;
+    }
+    else return ER_SYNTAX;
 }
 
 // <return> -> return <expression> <nil_flag>
 int return_rule(parser_data_t *data) {
     int ret_code;
 
-    if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return) {
-        GET_TOKEN()
-        if (data->is_void_function) {
-            if (data->eol_flag) {
-                return ER_NONE;
-            }
-            else {
-                return ER_SYNTAX;
-            }
-        }
-        else {
-            GET_TOKEN()
-            if (data->token_ptr->token_type == T_NEW_LINE) {
-                return ER_NONE;
-            }
-            else {
-                return ER_SYNTAX;
-            }
-        }
-    }
-    else if (data->eol_flag) {
-        return ER_NONE;
-    }
-    else {
-        return ER_SYNTAX;
-    }
+    if (!(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return)) return ER_SYNTAX;
+    GET_TOKEN()
+
+    CHECK_RULE(expression)
+
+    return nil_flag(data);
 }
 
 // <return_void> -> return
 // <return_void> -> ε
 int return_void_rule(parser_data_t *data) {
-    int ret_code;
-
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return) {
-        GET_TOKEN()
-        if (data->is_void_function) {
-            if (data->eol_flag) {
-                return ER_NONE;
-            }
-            else {
-                return ER_SYNTAX;
-            }
-        }
-        else {
-            GET_TOKEN()
-            if (data->token_ptr->token_type == T_NEW_LINE) {
-                return ER_NONE;
-            }
-            else {
-                return ER_SYNTAX;
-            }
-        }
+        return ER_NONE;
     }
     else if (data->eol_flag) {
         return ER_NONE;
@@ -589,37 +598,37 @@ int var_type(parser_data_t* data) {
         switch (data->token_ptr->attribute.keyword)
         {
             case k_Int:
-                if (data->id->params->string[data->param_index] != 'i') return ER_UNDEF_VAR;
+                if (!data->is_in_declaration && (data->id->params->string[data->param_index] != 'i')) return ER_UNDEF_VAR;
 
                 if (!data->is_in_declaration) data->exp_type->type = IT_INT;
                 break;
 
             case k_Double:
-                if (data->id->params->string[data->param_index] != 'd') return ER_UNDEF_VAR;
+                if (!data->is_in_declaration && (data->id->params->string[data->param_index] != 'd')) return ER_UNDEF_VAR;
 
                 if (!data->is_in_declaration) data->exp_type->type = IT_DOUBLE;
                 break;
 
             case k_String:
-                if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
+                if (!data->is_in_declaration && (data->id->params->string[data->param_index] != 's')) return ER_UNDEF_VAR;
 
                 if (!data->is_in_declaration) data->exp_type->type = IT_STRING;
                 break;
             //TODO nil_possibility = true;
             case k_qmark_Int:
-                if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
+                if (!data->is_in_declaration && (data->id->params->string[data->param_index] != 'i')) return ER_UNDEF_VAR;
 
                 if (!data->is_in_declaration) data->exp_type->type = IT_STRING;
                 break;
                 //TODO nil_possibility = true;
             case k_qmark_Double:
-                if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
+                if (!data->is_in_declaration && (data->id->params->string[data->param_index] != 'd')) return ER_UNDEF_VAR;
 
                 if (!data->is_in_declaration) data->exp_type->type = IT_STRING;
                 break;
                 //TODO nil_possibility = true;
             case k_qmark_String:
-                if (data->id->params->string[data->param_index] != 's') return ER_UNDEF_VAR;
+                if (!data->is_in_declaration && (data->id->params->string[data->param_index] != 's')) return ER_UNDEF_VAR;
 
                 if (!data->is_in_declaration) data->exp_type->type = IT_STRING;
                 break;

@@ -6,7 +6,7 @@
 <stm> -> func_id( <call_params> ) \n <stm>
 <stm> -> id = <expression> \n <stm>
 <stm> -> func func_id ( <func_params> ) -> <var_type> { <stm> <return> } \n <stm>
-<stm> -> func func_id <func_params> { <stm> <return_void> } \n <stm>
+<stm> -> func func_id ( <func_params> ) { <stm> <return_void> } \n <stm>
 <stm> -> if ( <condition> ) { <stm> } \n <stm>
 <stm> -> if ( <condition> ) { <stm> } \n else { <stm> } \n <stm>
 <stm> -> while ( <condition> ) { <stm> } \n <stm>

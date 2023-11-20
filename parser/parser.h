@@ -57,6 +57,10 @@ int return_rule(parser_data_t *data);
 
 int return_void_rule(parser_data_t *data);
 
+int nil_flag(parser_data_t *data);
+
 int call_params(parser_data_t *data);
+
+int call_params_n(parser_data_t *data);
 
 #endif //IFJ_2023_PARSER_H
