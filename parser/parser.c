@@ -1,20 +1,18 @@
 #include "../structures/string.h"
 #include "../structures/error.h"
 #include "hash.h"
-#include "parser.h"
 #include "../semantics/semantics.h"
+#include "parser.h"
 
 #define UNUSED(x) (void)(x)
 
 #define GET_TOKEN() \
-    do {            \
-        bool flag;\
-        if ((data->token_ptr = next_token(&(data->line_cnt),&ret_code, &flag)) == NULL) {\
+        if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code, &(data->eol_flag))) == NULL) {\
             return ret_code;                                               \
         }           \
-    } while(0);
-#define CHECK_RULE(rule)           \
-    if ((ret_code = rule(data))) { \
+
+#define CHECK_RULE(_rule)           \
+    if ((ret_code = _rule(data))) { \
         return ret_code;            \
     }                              \
 
@@ -55,9 +53,10 @@ parser_data_t *init_data()
     parser_data->is_void_function = false;
     parser_data->is_in_declaration = false;
     parser_data->is_in_condition = false;
+    parser_data->eol_flag = false;
 
     parser_data->param_index = 0;
-    parser_data->line_cnt = 0; // todo: macro
+    parser_data->line_cnt = 0;
 
     // predefined functions
 
@@ -68,27 +67,25 @@ parser_data_t *init_data()
 
     if ((tmp = insertSymbol(parser_data->global_table, "readString", &internal_error)) == NULL) return NULL;
     tmp->defined = true;
-
-    //TODO change char to enum item_type
-    tmp->type = 's';
+    tmp->type = IT_STRING;
     tmp->nil_possibility = true;
 
     // readInt() -> int?
     tmp = insertSymbol(parser_data->global_table, "readInt", &internal_error);
     tmp->defined = true;
-    tmp->type = 'i';
+    tmp->type = IT_INT;
     tmp->nil_possibility = true;
 
     // readDouble() -> double?
     tmp = insertSymbol(parser_data->global_table, "readDouble", &internal_error);
     tmp->defined = true;
-    tmp->type = 'd';
+    tmp->type = IT_DOUBLE;
     tmp->nil_possibility = true;
 
     // write(...)
     tmp = insertSymbol(parser_data->global_table, "write", &internal_error);
     tmp->defined = true;
-    tmp->type = 'n';
+    tmp->type = IT_ANY;
     tmp->nil_possibility = false;
 
     if (!string_append(tmp->params, 'a')) {
@@ -98,7 +95,7 @@ parser_data_t *init_data()
     // Int2Double(int) -> double
     tmp = insertSymbol(parser_data->global_table, "Int2Double", &internal_error);
     tmp->defined = true;
-    tmp->type = 'd';
+    tmp->type = IT_DOUBLE;
     tmp->nil_possibility = false;
 
     if (!string_append(tmp->params, 'i')) {
@@ -108,7 +105,7 @@ parser_data_t *init_data()
     // Double2Int(double) -> int
     tmp = insertSymbol(parser_data->global_table, "Double2Int", &internal_error);
     tmp->defined = true;
-    tmp->type = 'i';
+    tmp->type = IT_INT;
     tmp->nil_possibility = false;
 
     if (!string_append(tmp->params, 'd')) {
@@ -118,7 +115,7 @@ parser_data_t *init_data()
     // ord(str) -> int
     tmp = insertSymbol(parser_data->global_table, "ord", &internal_error);
     tmp->defined = true;
-    tmp->type = 'i';
+    tmp->type = IT_INT;
     tmp->nil_possibility = false;
 
     if (!string_append(tmp->params, 's')) {
@@ -128,7 +125,7 @@ parser_data_t *init_data()
     // chr(int) -> str
     tmp = insertSymbol(parser_data->global_table, "chr", &internal_error);
     tmp->defined = true;
-    tmp->type = 's';
+    tmp->type = IT_STRING;
     tmp->nil_possibility = false;
 
     if (!string_append(tmp->params, 'i')) {
@@ -138,7 +135,7 @@ parser_data_t *init_data()
     // length(str) -> int
     tmp = insertSymbol(parser_data->global_table, "length", &internal_error);
     tmp->defined = true;
-    tmp->type = 'i';
+    tmp->type = IT_INT;
     tmp->nil_possibility = false;
 
     if (!string_append(tmp->params, 's')) {
@@ -148,7 +145,7 @@ parser_data_t *init_data()
     // substring(str, int, int) -> str?
     tmp = insertSymbol(parser_data->global_table, "substring", &internal_error);
     tmp->defined = true;
-    tmp->type = 's';
+    tmp->type = IT_STRING;
     tmp->nil_possibility = true;
 
     if (!string_append(tmp->params, 's')) {
@@ -206,7 +203,6 @@ int analyse() {
 int program(parser_data_t *data) {
     int ret_code = ER_NONE;
 
-    //GET_TOKEN()
     CHECK_RULE(stm)
 
     VERIFY_TOKEN(T_EOF)
@@ -216,8 +212,6 @@ int program(parser_data_t *data) {
 
 int stm(parser_data_t *data) {
     int ret_code = ER_NONE;
-
-    //GET_TOKEN()
 
     // <stm> -> var + let id : <var_type> = <expression> \n <stm>
     // <stm> -> var + let id : <var_type> \n <stm>
@@ -230,31 +224,24 @@ int stm(parser_data_t *data) {
             GET_TOKEN()
             CHECK_RULE(var_type)
 
+            bool flag;
             GET_TOKEN()
             if (data->token_ptr->token_type == T_ASSIGMENT) {
                 GET_TOKEN()
                 CHECK_RULE(expression)
-
-                VERIFY_TOKEN(T_NEW_LINE)
-
-                GET_TOKEN()
+                // todo: there may be a problem with EOL
                 return stm(data);
             }
-            else if (data->token_ptr->token_type == T_NEW_LINE) {
-                GET_TOKEN()
+            else if (data->eol_flag) {
                 return stm(data);
             }
             else return ER_SYNTAX;
         }
         else if (data->token_ptr->token_type == T_ASSIGMENT) {
             GET_TOKEN()
-            // expression();
+            CHECK_RULE(expression)
 
-            VERIFY_TOKEN(T_NEW_LINE)
-
-            GET_TOKEN()
-            stm(data);
-
+            return stm(data);
         }
         else return ER_SYNTAX;
 
@@ -271,7 +258,8 @@ int stm(parser_data_t *data) {
 
             VERIFY_TOKEN(T_BRACKET_CLOSE)
 
-            VERIFY_TOKEN(T_NEW_LINE)
+            GET_TOKEN()
+            if (!data->eol_flag) return ER_SYNTAX;
 
             return stm(data);
         }
@@ -279,9 +267,8 @@ int stm(parser_data_t *data) {
             GET_TOKEN()
             CHECK_RULE(expression)
 
-            VERIFY_TOKEN(T_NEW_LINE)
+            if (!data->eol_flag) return ER_SYNTAX;
 
-            GET_TOKEN()
             return stm(data);
         }
     }
@@ -305,16 +292,16 @@ int stm(parser_data_t *data) {
             VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
 
             GET_TOKEN()
-            CHECK_RULE(stn)
+            CHECK_RULE(stm)
 
             GET_TOKEN()
             CHECK_RULE(return_rule)
 
             VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
 
-            VERIFY_TOKEN(T_NEW_LINE)
-
             GET_TOKEN()
+            if (!data->eol_flag) return ER_SYNTAX;
+
             return stm(data);
 
         }
@@ -328,9 +315,9 @@ int stm(parser_data_t *data) {
 
             VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
 
-            VERIFY_TOKEN(T_NEW_LINE)
-
             GET_TOKEN()
+            if (!data->eol_flag) return ER_SYNTAX;
+
             return stm(data);
         }
         else return ER_SYNTAX;
@@ -353,9 +340,9 @@ int stm(parser_data_t *data) {
 
         VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
 
-        VERIFY_TOKEN(T_NEW_LINE)
-
         GET_TOKEN()
+        if (!data->eol_flag) return ER_SYNTAX;
+
         if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_else) {
             VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
 
@@ -364,9 +351,9 @@ int stm(parser_data_t *data) {
 
             VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
 
-            VERIFY_TOKEN(T_NEW_LINE)
-
             GET_TOKEN()
+            if (!data->eol_flag) return ER_SYNTAX;
+
             return stm(data);
         }
         else {
@@ -391,9 +378,9 @@ int stm(parser_data_t *data) {
 
         VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
 
-        VERIFY_TOKEN(T_NEW_LINE)
-
         GET_TOKEN()
+        if (!data->eol_flag) return ER_SYNTAX;
+
         return stm(data);
     }
     // <statement> -> ε
@@ -405,8 +392,9 @@ int stm(parser_data_t *data) {
     return ret_code;
 }
 
-int call_params(parser_data_t *data){
+int call_params(parser_data_t *data) {
     int ret_code = ER_NONE;
+    UNUSED(data);
     //TODO semantic
 
     return  ret_code;
@@ -493,13 +481,14 @@ int func_params_not_null(parser_data_t *data) {
     return ER_NONE;
 }
 
+// <return> -> return <expression> <nil_flag>
 int return_rule(parser_data_t *data) {
     int ret_code;
 
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return) {
-        GET_TOKEN();
+        GET_TOKEN()
         if (data->is_void_function) {
-            if (data->token_ptr->token_type == T_NEW_LINE) {
+            if (data->eol_flag) {
                 return ER_NONE;
             }
             else {
@@ -507,7 +496,7 @@ int return_rule(parser_data_t *data) {
             }
         }
         else {
-            GET_TOKEN();
+            GET_TOKEN()
             if (data->token_ptr->token_type == T_NEW_LINE) {
                 return ER_NONE;
             }
@@ -516,7 +505,40 @@ int return_rule(parser_data_t *data) {
             }
         }
     }
-    else if (data->token_ptr->token_type == T_NEW_LINE) {
+    else if (data->eol_flag) {
+        return ER_NONE;
+    }
+    else {
+        return ER_SYNTAX;
+    }
+}
+
+// <return_void> -> return
+// <return_void> -> ε
+int return_void_rule(parser_data_t *data) {
+    int ret_code;
+
+    if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return) {
+        GET_TOKEN()
+        if (data->is_void_function) {
+            if (data->eol_flag) {
+                return ER_NONE;
+            }
+            else {
+                return ER_SYNTAX;
+            }
+        }
+        else {
+            GET_TOKEN()
+            if (data->token_ptr->token_type == T_NEW_LINE) {
+                return ER_NONE;
+            }
+            else {
+                return ER_SYNTAX;
+            }
+        }
+    }
+    else if (data->eol_flag) {
         return ER_NONE;
     }
     else {

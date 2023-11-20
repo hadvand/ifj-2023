@@ -7,6 +7,8 @@
 
 #include "../scanner/scanner.h"
 #include "hash.h"
+#include <stdbool.h>
+
 
 typedef struct {
     int line_cnt;               // line counter
@@ -16,6 +18,7 @@ typedef struct {
     bool is_void_function;      // is in void function
     bool is_in_declaration;     // is in ID declaration
     bool is_in_condition;       // is in if/while/then construction
+    bool eol_flag;              // met EOL
 
     HashTable *global_table;
     HashTable *local_table;
@@ -50,6 +53,10 @@ int func_params_not_null(parser_data_t *data);
 
 int var_type(parser_data_t *data);
 
+int call_params(parser_data_t *data);
+
 int return_rule(parser_data_t *data);
+
+int return_void_rule(parser_data_t *data);
 
 #endif //IFJ_2023_PARSER_H

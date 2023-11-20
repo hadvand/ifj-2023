@@ -18,7 +18,7 @@ typedef enum {
 
 typedef struct
 {
-    string_ptr params;
+    string_ptr params;      // i - int, s - string, d - double, a - any
     char* id;
     item_type type;
     bool nil_possibility;
