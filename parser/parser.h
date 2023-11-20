@@ -53,10 +53,10 @@ int func_params_not_null(parser_data_t *data);
 
 int var_type(parser_data_t *data);
 
-int call_params(parser_data_t *data);
-
 int return_rule(parser_data_t *data);
 
 int return_void_rule(parser_data_t *data);
+
+int call_params(parser_data_t *data);
 
 #endif //IFJ_2023_PARSER_H

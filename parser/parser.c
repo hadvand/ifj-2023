@@ -276,8 +276,18 @@ int stm(parser_data_t *data) {
     // <stm> -> func func_id( <func_params> ) -> <var_type> { <stm> <return> } \n <stm>
     // <stm> -> func func_id( <func_params> ) { <stm> <return_void> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_func) {
-        VERIFY_TOKEN(T_ID)
 
+        VERIFY_TOKEN(T_ID)
+        data->is_in_declaration = true;
+
+
+
+        bool internal_error;
+        data->id = insertSymbol(data->global_table,data->token_ptr->attribute.string,&internal_error);
+        if(!data->id){
+            if(internal_error) return ER_INTERNAL;
+            else return ER_UNDEF_VAR;
+        }
         VERIFY_TOKEN(T_BRACKET_OPEN)
 
         CHECK_RULE(func_params)
@@ -396,7 +406,7 @@ int call_params(parser_data_t *data) {
     int ret_code = ER_NONE;
     UNUSED(data);
     //TODO semantic
-
+    UNUSED(data);
     return  ret_code;
 }
 
@@ -407,23 +417,40 @@ int condition(parser_data_t *data) {
     return ret_code;
 }
 
+//<func_params> -> ε
+//<func_params> -> var_name var_id: <var_type> <func_params_not_null>
+//<func_params> -> _ var_id: <var_type> <func_params_not_null>
 int func_params(parser_data_t *data) {
     int ret_code = ER_NONE;
 
     data->param_index = 0;
 
-    // <func_params> -> var_name var_id : <var_type> <func_params_not_null>
-    if (data->token_ptr->token_type != T_ID) return ER_SYNTAX;
-
+    if ((data->id->id_names = (char**)malloc(sizeof(char*)))==NULL)
+        return ER_INTERNAL;
     GET_TOKEN()
 
-    if (data->token_ptr->token_type == T_ID) {
+    //T_ID its var_name. it is NOOOOT a var_id
+    if(data->token_ptr->token_type == T_UNDERLINE || data->token_ptr->token_type == T_ID){
+
+        // if there is function named as parameter
+        if (findSymbol(data->global_table, data->token_ptr->attribute.string))
+            return ER_UNDEF_VAR;
+
+        if((data->id->id_names[data->param_index] = (char*)realloc(data->id->id_names[data->param_index],strlen(data->token_ptr->attribute.string))) == NULL)
+            return ER_INTERNAL;
+        if(data->token_ptr->token_type == T_UNDERLINE)
+            strcpy(data->id->id_names[data->param_index],"_");
+        else
+            strcpy(data->id->id_names[data->param_index],data->token_ptr->attribute.string);
+
+        VERIFY_TOKEN(T_ID)
+
         // if there is function named as parameter
         if (findSymbol(data->global_table, data->token_ptr->attribute.string))
             return ER_UNDEF_VAR;
 
         // if we are in definition, we need to add parameters to the local symtable
-        if (!data->is_in_declaration) {
+        if (data->is_in_declaration) {
             bool internal_error;
             if (!(data->exp_type = insertSymbol(data->local_table, data->token_ptr->attribute.string, &internal_error))) {
                 if (internal_error) return ER_INTERNAL;
@@ -437,6 +464,16 @@ int func_params(parser_data_t *data) {
         CHECK_RULE(var_type)
 
         CHECK_RULE(func_params_not_null)
+
+    }
+    else{
+        //TODO empty params func
+    }
+
+    //harmim
+
+    if (data->token_ptr->token_type == T_ID) {
+
 
         if (data->param_index + 1 != data->id->params->last_index) return ER_UNDEF_VAR;
     }

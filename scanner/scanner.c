@@ -499,7 +499,9 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     if(keyword_control(token,additional_string))
                         single_token(token,*line_cnt,T_KEYWORD,additional_string);
                     else{
-                        token->attribute.string = additional_string->string;
+                        if((token->attribute.string =  (char *) realloc(token->attribute.string,additional_string->mem_allocated)) == NULL)
+                            scanning_finish_with_error(token,additional_string,err_type,ER_INTERNAL);
+                        strcpy(token->attribute.string,additional_string->string);
                         single_token(token,*line_cnt,T_ID,additional_string);
                     }
 
