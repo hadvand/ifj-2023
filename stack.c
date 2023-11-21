@@ -137,14 +137,8 @@ char* get_string_to_table_symbol(Precedence_table_symbol symbol){
             return ")";
         case RIGHT_BRACKET:
             return "(";
-        case IDENTIFIER:
+        case IDENTIFIER: // INT DOUBLE STRING
             return "I";
-        case INT_NUMBER:
-            return "i";
-        case DOUBLE_NUMBER:
-            return "d";
-        case STRING:
-            return "s";
         case DOLLAR:
             return "$";
         case STOP:

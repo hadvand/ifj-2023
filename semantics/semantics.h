@@ -23,9 +23,9 @@ typedef enum
     LEFT_BRACKET,	// (
     RIGHT_BRACKET,	// )
     IDENTIFIER,		// ID
-    INT_NUMBER,		// int
-    DOUBLE_NUMBER,	// double
-    STRING,			// string
+    INT_NUMBER = 14,		// int
+    DOUBLE_NUMBER = 14,	// double
+    STRING = 14,			// string
     DOLLAR,			// $
     STOP,			// stop symbol used when reducing
     N_TERMINAL		// non-terminal
@@ -44,7 +44,7 @@ typedef enum
     NT_MUL_NT,      // E -> E * E
     NT_DIV_NT,      // E -> E / E
     NT_COALESCE_NT, // E -> E ?? E
-    NT_NOT_NT,      // E -> !E
+    NT_F_UNWRAP,    // E-> E!
     LBR_NT_RBR,     // E -> (E)
     OPERAND,        // E -> i
     NOT_A_RULE      // rule doesn't exist
@@ -53,7 +53,7 @@ typedef enum
 
 int expression(parser_data_t* data);
 
-int func_call(parser_data_t* data);
+int check_func_call(parser_data_t *data, int position);
 
 
 #endif //IFJ_NEW_BEGINNING_SEMANTICS_H
