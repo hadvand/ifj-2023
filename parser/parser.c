@@ -29,6 +29,14 @@
 #define FIND_SYMBOL_IN_GLOBAL() \
     if (!findSymbol(data->global_table, data->token_ptr->attribute.string)) return ER_UNDEF_VAR;\
 
+#define INSERT_SYMBOL() \
+        bool internal_error;\
+        data->id = insertSymbol(data->global_table,data->token_ptr->attribute.string,&internal_error);\
+        if(!data->id){\
+            if(internal_error) return ER_INTERNAL;\
+        else return ER_UNDEF_VAR;\
+}\
+
 parser_data_t *init_data()
 {
     parser_data_t *parser_data;
@@ -227,7 +235,7 @@ int stm(parser_data_t *data) {
     // <stm> -> var + let id = <expression> \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && (data->token_ptr->attribute.keyword == k_var || data->token_ptr->attribute.keyword == k_let)) {
         VERIFY_TOKEN(T_ID)
-
+        INSERT_SYMBOL()
         GET_TOKEN()
         if (data->token_ptr->token_type == T_COLON) {
             GET_TOKEN()
@@ -290,15 +298,11 @@ int stm(parser_data_t *data) {
         VERIFY_TOKEN(T_ID)
         data->is_in_declaration = true;
 
-        bool internal_error;
-        data->id = insertSymbol(data->global_table,data->token_ptr->attribute.string,&internal_error);
-        if(!data->id){
-            if(internal_error) return ER_INTERNAL;
-            else return ER_UNDEF_VAR;
-        }
+        INSERT_SYMBOL()
         VERIFY_TOKEN(T_BRACKET_OPEN)
         data->is_in_params = true;
         data->param_index = 0;
+        data->id->id_names = NULL;
         CHECK_RULE(func_params)
         data->is_in_params = false;
 
@@ -476,8 +480,7 @@ int func_params(parser_data_t *data) {
     int ret_code = ER_NONE;
     data->local_table = createHashTable();
 
-
-    if ((data->id->id_names = (char**)realloc(data->id->id_names,data->param_index+1))==NULL)
+    if ((data->id->id_names = (char**)realloc(data->id->id_names,data->param_index+1 * sizeof(char*)))==NULL)
         return ER_INTERNAL;
     GET_TOKEN()
 

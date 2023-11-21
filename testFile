@@ -1,8 +1,9 @@
+var ggwp : Int = 10
 func decrement(of n: Int, by m: Int) -> Int {
     return n - m
 }
 
-decrement(of: 10, by: 10)
+decrement(of: ggwp, by: 10)
 
 func factorial(_ n : Int) -> Int {
     var result : Int?
