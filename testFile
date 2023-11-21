@@ -2,13 +2,6 @@ func decrement(of n: Int, by m: Int) -> Int {
     return n - m
 }
 
-let abc : Int
-
-if(let abc){
-
-}
-
-
 func factorial(_ n : Int) -> Int {
     var result : Int?
     if (n < 2) {

@@ -472,6 +472,7 @@ int condition(parser_data_t *data) {
 //<func_params> -> _ var_id: <var_type> <func_params_not_null>
 int func_params(parser_data_t *data) {
     int ret_code = ER_NONE;
+    data->local_table = createHashTable();
 
     data->param_index = 0;
 
