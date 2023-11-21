@@ -634,8 +634,14 @@ int check_param(parser_data_t* data, int position){
 }
 
 int check_func_call(parser_data_t *data, int position){
+
+
+
     int ret_code;
     VERIFY_TOKEN(T_ID)
+
+    printf("id_name[position]: %s AND %s\n",data->id->id_names[position],data->token_ptr->attribute.string);
+
     if(!strcmp(data->id->id_names[position],data->token_ptr->attribute.string)){
         //name_id : id/const
         VERIFY_TOKEN(T_COLON)
