@@ -471,6 +471,17 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     continue;
                 } else{
                     ungetc(c, stdin);
+                    if((additional_string = string_init()) == NULL){
+                        scanning_finish_with_error(token,additional_string, err_type, ER_INTERNAL);
+                        return NULL;
+                    }
+                    if(!string_append(additional_string,'_')){
+                        scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
+                        return NULL;
+                    }
+                    if((token->attribute.string =  (char *) realloc(token->attribute.string,additional_string->mem_allocated)) == NULL)
+                        scanning_finish_with_error(token,additional_string,err_type,ER_INTERNAL);
+                    strcpy(token->attribute.string,additional_string->string);
                     single_token(token,*line_cnt,T_UNDERLINE,additional_string);
                     return token;
                 }

@@ -488,7 +488,6 @@ int func_params(parser_data_t *data) {
     if(data->token_ptr->token_type == T_UNDERLINE || data->token_ptr->token_type == T_ID){
 
         // if there is function named as parameter
-        // todo: segfault here (because of T_UNDERLINE on 5th line)
         if (findSymbol(data->global_table, data->token_ptr->attribute.string))
             return ER_UNDEF_VAR;
 
