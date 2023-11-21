@@ -471,9 +471,11 @@ int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_stack_elem
     switch(rule){
         case OPERAND:
             *type_final = operand_1->item.type;
+            break;
 
         case LBR_NT_RBR:
             *type_final = operand_2->item.type;
+            break;
 
         case NT_PLUS_NT:
         case NT_MINUS_NT:
@@ -570,6 +572,16 @@ int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_stack_elem
             break;
 
     }
+
+    if (operand_1_to_double){
+        ;
+    }
+
+    if (operand_3_to_double){
+        ;
+    }
+
+    return ER_NONE;
 
 }
 
