@@ -413,7 +413,7 @@ int stm(parser_data_t *data) {
 int call_params(parser_data_t *data) {
     int ret_code = ER_NONE;
 
-    // todo: its not ID, its a NAME
+    // todo: it may be NAME, not ID
     VERIFY_TOKEN(T_ID)
 
     GET_TOKEN()
@@ -484,8 +484,8 @@ int func_params(parser_data_t *data) {
     if(data->token_ptr->token_type == T_UNDERLINE || data->token_ptr->token_type == T_ID){
 
         // if there is function named as parameter
-        if (findSymbol(data->global_table, data->token_ptr->attribute.string))
-            return ER_UNDEF_VAR;
+//        if (findSymbol(data->global_table, data->token_ptr->attribute.string))
+//            return ER_UNDEF_VAR;
 
         if((data->id->id_names[data->param_index] = (char*)realloc(data->id->id_names[data->param_index],strlen(data->token_ptr->attribute.string))) == NULL)
             return ER_INTERNAL;
@@ -518,18 +518,13 @@ int func_params(parser_data_t *data) {
         return ER_NONE;
     }
 
-    // h?
-
-    if (data->token_ptr->token_type == T_ID) {
-        if (data->param_index + 1 != data->id->params->last_index) return ER_UNDEF_VAR;
-    }
-    else if (!data->is_in_declaration && data->id->params->last_index) return ER_UNDEF_VAR;
-
     // <func_params> -> ε
 
     return ER_NONE;
 }
 
+// <func_params_not_null> -> , <func_params>
+// <func_params_not_null> -> ε
 int func_params_not_null(parser_data_t *data) {
     int ret_code;
 
