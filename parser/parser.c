@@ -473,6 +473,7 @@ int condition(parser_data_t *data) {
 //<func_params> -> _ var_id: <var_type> <func_params_not_null>
 int func_params(parser_data_t *data) {
     int ret_code = ER_NONE;
+    data->local_table = createHashTable();
 
     data->param_index = 0;
 
@@ -593,39 +594,108 @@ int var_type(parser_data_t* data) {
         switch (data->token_ptr->attribute.keyword)
         {
             case k_Int:
-                if (!data->is_in_declaration && (data->id->params->string[data->param_index] != 'i')) return ER_UNDEF_VAR;
+                if (!data->is_in_function && data->is_in_declaration) {
+                    data->id->type = IT_INT;
+                    data->id->nil_possibility = false;
+                }
 
-                if (!data->is_in_declaration) data->exp_type->type = IT_INT;
+                if (data->is_in_function && data->is_in_declaration) {
+                    data->id->type = IT_INT;
+                    data->id->nil_possibility = false;
+                }
+
+                if (data->is_in_params) {
+                    if (!string_append(data->id->params, 'i')) {
+                        return ER_INTERNAL;
+                    }
+                }
                 break;
 
             case k_Double:
-                if (!data->is_in_declaration && (data->id->params->string[data->param_index] != 'd')) return ER_UNDEF_VAR;
+                if (!data->is_in_function && data->is_in_declaration) {
+                    data->id->type = IT_DOUBLE;
+                    data->id->nil_possibility = false;
+                }
 
-                if (!data->is_in_declaration) data->exp_type->type = IT_DOUBLE;
+                if (data->is_in_function && data->is_in_declaration) {
+                    data->id->type = IT_DOUBLE;
+                    data->id->nil_possibility = false;
+                }
+
+                if (data->is_in_params) {
+                    if (!string_append(data->id->params, 'd')) {
+                        return ER_INTERNAL;
+                    }
+                }
                 break;
 
             case k_String:
-                if (!data->is_in_declaration && (data->id->params->string[data->param_index] != 's')) return ER_UNDEF_VAR;
+                if (!data->is_in_function && data->is_in_declaration) {
+                    data->id->type = IT_STRING;
+                    data->id->nil_possibility = false;
+                }
 
-                if (!data->is_in_declaration) data->exp_type->type = IT_STRING;
+                if (data->is_in_function && data->is_in_declaration) {
+                    data->id->type = IT_STRING;
+                    data->id->nil_possibility = false;
+                }
+
+                if (data->is_in_params) {
+                    if (!string_append(data->id->params, 's')) {
+                        return ER_INTERNAL;
+                    }
+                }
                 break;
-            //TODO nil_possibility = true;
             case k_qmark_Int:
-                if (!data->is_in_declaration && (data->id->params->string[data->param_index] != 'i')) return ER_UNDEF_VAR;
+                if (!data->is_in_function && data->is_in_declaration) {
+                    data->id->type = IT_INT;
+                    data->id->nil_possibility = true;
+                }
 
-                if (!data->is_in_declaration) data->exp_type->type = IT_STRING;
+                if (data->is_in_function && data->is_in_declaration) {
+                    data->id->type = IT_INT;
+                    data->id->nil_possibility = true;
+                }
+
+                if (data->is_in_params) {
+                    if (!string_append(data->id->params, 'I')) {
+                        return ER_INTERNAL;
+                    }
+                }
                 break;
-                //TODO nil_possibility = true;
             case k_qmark_Double:
-                if (!data->is_in_declaration && (data->id->params->string[data->param_index] != 'd')) return ER_UNDEF_VAR;
+                if (!data->is_in_function && data->is_in_declaration) {
+                    data->id->type = IT_DOUBLE;
+                    data->id->nil_possibility = true;
+                }
 
-                if (!data->is_in_declaration) data->exp_type->type = IT_STRING;
+                if (data->is_in_function && data->is_in_declaration) {
+                    data->id->type = IT_DOUBLE;
+                    data->id->nil_possibility = true;
+                }
+
+                if (data->is_in_params) {
+                    if (!string_append(data->id->params, 'D')) {
+                        return ER_INTERNAL;
+                    }
+                }
                 break;
-                //TODO nil_possibility = true;
             case k_qmark_String:
-                if (!data->is_in_declaration && (data->id->params->string[data->param_index] != 's')) return ER_UNDEF_VAR;
+                if (!data->is_in_function && data->is_in_declaration) {
+                    data->id->type = IT_STRING;
+                    data->id->nil_possibility = true;
+                }
 
-                if (!data->is_in_declaration) data->exp_type->type = IT_STRING;
+                if (data->is_in_function && data->is_in_declaration) {
+                    data->id->type = IT_STRING;
+                    data->id->nil_possibility = true;
+                }
+
+                if (data->is_in_params) {
+                    if (!string_append(data->id->params, 'S')) {
+                        return ER_INTERNAL;
+                    }
+                }
                 break;
 
             default:

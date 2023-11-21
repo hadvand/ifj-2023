@@ -19,7 +19,7 @@ typedef enum {
 
 typedef struct
 {
-    string_ptr params;      // i - int, s - string, d - double, a - any
+    string_ptr params;      // i - int, s - string, d - double, a - any; if BIG, then may be NULL
     char **id_names; // length = params.mem_allocated
     char* id;
     item_type type;
