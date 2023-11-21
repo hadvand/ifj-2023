@@ -20,7 +20,7 @@
 #define VERIFY_TOKEN(t_token)  \
     GET_TOKEN()                \
     if (data->token_ptr->token_type != t_token) return ER_SYNTAX;\
-    \
+                               \
 
 #define FIND_SYMBOL_IN_ALL_TABLES() \
     if (!findSymbol(data->local_table, data->token_ptr->attribute.string)) return ER_UNDEF_VAR; \
@@ -264,6 +264,7 @@ int stm(parser_data_t *data) {
         GET_TOKEN()
         if (data->token_ptr->token_type == T_BRACKET_OPEN) {
 
+            data->param_index = 0;
             CHECK_RULE(call_params)
 
             VERIFY_TOKEN(T_BRACKET_CLOSE)
@@ -297,6 +298,7 @@ int stm(parser_data_t *data) {
         }
         VERIFY_TOKEN(T_BRACKET_OPEN)
         data->is_in_params = true;
+        data->param_index = 0;
         CHECK_RULE(func_params)
         data->is_in_params = false;
 
@@ -423,28 +425,12 @@ int stm(parser_data_t *data) {
 //<call_params> -> var_id <call_params_n>
 int call_params(parser_data_t *data) {
     int ret_code = ER_NONE;
-    data->param_index = 0;
+
     check_func_call(data,data->param_index);
 
-    // todo: it may be NAME, not ID
-    VERIFY_TOKEN(T_ID)
+    CHECK_RULE(call_params_n)
 
-    GET_TOKEN()
-    if (data->token_ptr->token_type == T_COLON) {
-        GET_TOKEN()
-        if(data->token_ptr->token_type == T_ID){
-            FIND_SYMBOL_IN_ALL_TABLES()
-        }
-        //todo semantic
-        CHECK_RULE(call_params_n)
-    }
-    //TODO ID or Const
-    else if (data->token_ptr->token_type == T_ID) {
-        CHECK_RULE(call_params_n)
-    }
-    else return ER_SYNTAX;
-
-    return ER_NONE;
+    return ret_code;
 }
 
 //<call_params> -> var_name : var_id <call_params_n>
@@ -490,9 +476,8 @@ int func_params(parser_data_t *data) {
     int ret_code = ER_NONE;
     data->local_table = createHashTable();
 
-    data->param_index = 0;
 
-    if ((data->id->id_names = (char**)malloc(sizeof(char*)))==NULL)
+    if ((data->id->id_names = (char**)realloc(data->id->id_names,data->param_index+1))==NULL)
         return ER_INTERNAL;
     GET_TOKEN()
 
@@ -527,6 +512,13 @@ int func_params(parser_data_t *data) {
 
         GET_TOKEN()
         CHECK_RULE(var_type)
+
+
+#ifdef PARS_DEBUG
+    for(int i = 0; i < data->id->params->last_index;i++){
+            printf("string in data->id->id_names %s, position: %d\n",data->id->id_names[i],i);
+        }
+#endif
 
         CHECK_RULE(func_params_not_null)
     }
