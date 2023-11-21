@@ -276,30 +276,30 @@ int stm(parser_data_t *data) {
     // <stm> -> func func_id( <func_params> ) -> <var_type> { <stm> <return> } \n <stm>
     // <stm> -> func func_id( <func_params> ) { <stm> <return_void> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_func) {
-
         VERIFY_TOKEN(T_ID)
         data->is_in_declaration = true;
 
-
-
         bool internal_error;
-        data->id = insertSymbol(data->global_table,data->token_ptr->attribute.string,&internal_error);
+        data->id = insertSymbol(data->global_table,data->token_ptr->attribute.string, &internal_error);
         if(!data->id){
             if(internal_error) return ER_INTERNAL;
             else return ER_UNDEF_VAR;
         }
         VERIFY_TOKEN(T_BRACKET_OPEN)
-
+        data->is_in_params = true;
         CHECK_RULE(func_params)
+        data->is_in_params = false;
 
         if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
 
         GET_TOKEN()
         if (data->token_ptr->token_type == T_ARROW) {
+            data->is_in_function = true;
             data->is_void_function = false;
 
             GET_TOKEN()
             CHECK_RULE(var_type)
+            data->is_in_function = false;
 
             VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
 
@@ -704,20 +704,5 @@ int var_type(parser_data_t* data) {
     else {
         return ER_SYNTAX;
     }
-    return ER_NONE;
-}
-
-int var_value(parser_data_t *data) {
-    if (data->token_ptr->token_type == T_INT) {
-        if (data->id->type != IT_INT) return ER_SEMAN;
-    }
-    else if (data->token_ptr->token_type == T_DEMICAL) {
-        if (data->id->type != IT_DOUBLE) return ER_SEMAN;
-    }
-    else if (data->token_ptr->token_type == T_STRING) {
-        if (data->id->type != IT_STRING) return ER_SEMAN;
-    }
-    else return ER_SYNTAX;
-
     return ER_NONE;
 }
