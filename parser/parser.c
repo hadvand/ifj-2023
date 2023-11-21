@@ -203,9 +203,11 @@ int analyse() {
 int program(parser_data_t *data) {
     int ret_code = ER_NONE;
 
-    while (data->token_ptr->token_type != T_EOF) {
-        CHECK_RULE(stm)
-    }
+    new_stm:
+    CHECK_RULE(stm)
+
+    if (data->token_ptr->token_type != T_EOF) goto new_stm;
+
     return ret_code;
 }
 
@@ -277,7 +279,8 @@ int stm(parser_data_t *data) {
 
         VERIFY_TOKEN(T_ID)
         data->is_in_declaration = true;
-        data->local_table = createHashTable();
+
+
 
         bool internal_error;
         data->id = insertSymbol(data->global_table,data->token_ptr->attribute.string,&internal_error);
@@ -348,15 +351,10 @@ int stm(parser_data_t *data) {
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_if) {
         data->is_in_condition = true;
 
-        VERIFY_TOKEN(T_BRACKET_OPEN)
 
         // todo: if contidion == NULL -> check <else> body ???
-        GET_TOKEN()
         CHECK_RULE(condition)
 
-//        VERIFY_TOKEN(T_BRACKET_CLOSE)
-
-//        VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
         if (data->token_ptr->token_type == T_CURVED_BRACKET_OPEN)
 
         GET_TOKEN()
@@ -367,7 +365,6 @@ int stm(parser_data_t *data) {
         if (data->token_ptr->token_type == T_CURVED_BRACKET_CLOSE)
 
         GET_TOKEN()
-//        if (!data->eol_flag) return ER_SYNTAX;
 
         if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_else) {
             VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
@@ -392,12 +389,7 @@ int stm(parser_data_t *data) {
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_while) {
         data->is_in_condition = true;
 
-        VERIFY_TOKEN(T_BRACKET_OPEN)
-
-        GET_TOKEN()
         CHECK_RULE(condition)
-
-//        VERIFY_TOKEN(T_BRACKET_CLOSE)
 
         VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
 
@@ -468,7 +460,9 @@ int condition(parser_data_t *data) {
 
     CHECK_RULE(expression)
 
-    GET_TOKEN()
+    if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let) {
+        VERIFY_TOKEN(T_ID)
+    }
 
     return ret_code;
 }

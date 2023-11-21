@@ -268,15 +268,11 @@ int expression(parser_data_t* data){
     t_stack_elem* top_terminal;
     Precedence_table_symbol actual_symbol;
 
-    int bracket_counter = 0;
     do {
         actual_symbol = convert_token_into_symbol(data->token_ptr);
         top_terminal = stack_top_terminal(&stack);
-        if(actual_symbol == LEFT_BRACKET)
-            bracket_counter++;
-        else if(actual_symbol == RIGHT_BRACKET)
-            bracket_counter--;
-
+        if(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let)
+            return error_code;
         if(top_terminal == NULL){
 #ifdef SEM_DEBUG
             printf("semantic analysis finish with error\n");
@@ -349,14 +345,13 @@ int expression(parser_data_t* data){
 #endif
                     FREE(ER_INTERNAL);
                 }
-                if(actual_symbol == RIGHT_BRACKET)
-                    bracket_counter++;
+
 #ifdef SEM_DEBUG
                 stack_print_all_symbols(&stack);
 #endif
                 break;
             default:
-                if((actual_symbol == DOLLAR || (data->is_in_condition && bracket_counter == -1)) && top_terminal->symbol == DOLLAR)
+                if(actual_symbol == DOLLAR && top_terminal->symbol == DOLLAR)
                     success = true;
                 else
                 {
