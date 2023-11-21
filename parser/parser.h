@@ -16,6 +16,7 @@ typedef struct {
 
     bool is_in_function;        // is in void or non-void function
     bool is_void_function;      // is in void function
+    bool is_in_params;          // is in func_params rule
     bool is_in_declaration;     // is in ID declaration
     bool is_in_condition;       // is in if/while/then construction
     bool eol_flag;              // met EOL
