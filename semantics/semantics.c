@@ -271,7 +271,8 @@ int expression(parser_data_t* data){
     do {
         actual_symbol = convert_token_into_symbol(data->token_ptr);
         top_terminal = stack_top_terminal(&stack);
-
+        if(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let)
+            return error_code;
         if(top_terminal == NULL){
 #ifdef SEM_DEBUG
             printf("semantic analysis finish with error\n");

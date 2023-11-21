@@ -349,9 +349,6 @@ int stm(parser_data_t *data) {
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_if) {
         data->is_in_condition = true;
 
-        VERIFY_TOKEN(T_BRACKET_OPEN)
-
-        GET_TOKEN()
         CHECK_RULE(condition)
 
         VERIFY_TOKEN(T_BRACKET_CLOSE)
