@@ -20,7 +20,14 @@
 #define VERIFY_TOKEN(t_token)  \
     GET_TOKEN()                \
     if (data->token_ptr->token_type != t_token) return ER_SYNTAX;\
-    \
+                               \
+
+#define FIND_SYMBOL_IN_ALL_TABLES() \
+    if (!findSymbol(data->local_table, data->token_ptr->attribute.string)) return ER_UNDEF_VAR; \
+    else if (!findSymbol(data->global_table, data->token_ptr->attribute.string)) return ER_UNDEF_VAR;\
+
+#define FIND_SYMBOL_IN_GLOBAL() \
+    if (!findSymbol(data->global_table, data->token_ptr->attribute.string)) return ER_UNDEF_VAR;\
 
 parser_data_t *init_data()
 {
@@ -252,9 +259,11 @@ int stm(parser_data_t *data) {
     // <stm> -> func_id( <func_params> ) \n <stm>
     // <stm> -> id = <expression> \n <stm>
     if (data->token_ptr->token_type == T_ID) {
+        Symbol * idFromTable = findSymbol(data->global_table,data->token_ptr->attribute.string);
+        data->id = &(idFromTable->data);
         GET_TOKEN()
         if (data->token_ptr->token_type == T_BRACKET_OPEN) {
-            GET_TOKEN()
+
             CHECK_RULE(call_params)
 
             VERIFY_TOKEN(T_BRACKET_CLOSE)
@@ -277,11 +286,8 @@ int stm(parser_data_t *data) {
     // <stm> -> func func_id( <func_params> ) -> <var_type> { <stm> <return> } \n <stm>
     // <stm> -> func func_id( <func_params> ) { <stm> <return_void> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_func) {
-
         VERIFY_TOKEN(T_ID)
         data->is_in_declaration = true;
-
-
 
         bool internal_error;
         data->id = insertSymbol(data->global_table,data->token_ptr->attribute.string,&internal_error);
@@ -290,17 +296,20 @@ int stm(parser_data_t *data) {
             else return ER_UNDEF_VAR;
         }
         VERIFY_TOKEN(T_BRACKET_OPEN)
-
+        data->is_in_params = true;
         CHECK_RULE(func_params)
+        data->is_in_params = false;
 
         if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
 
         GET_TOKEN()
         if (data->token_ptr->token_type == T_ARROW) {
+            data->is_in_function = true;
             data->is_void_function = false;
 
             GET_TOKEN()
             CHECK_RULE(var_type)
+            data->is_in_function = false;
 
             VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
 
@@ -352,7 +361,7 @@ int stm(parser_data_t *data) {
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_if) {
         data->is_in_condition = true;
 
-
+        GET_TOKEN()
         // todo: if contidion == NULL -> check <else> body ???
         CHECK_RULE(condition)
 
@@ -390,6 +399,7 @@ int stm(parser_data_t *data) {
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_while) {
         data->is_in_condition = true;
 
+        GET_TOKEN()
         CHECK_RULE(condition)
 
         VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
@@ -413,17 +423,23 @@ int stm(parser_data_t *data) {
 //<call_params> -> var_id <call_params_n>
 int call_params(parser_data_t *data) {
     int ret_code = ER_NONE;
+    data->param_index = 0;
+    check_func_call(data,data->param_index);
 
+    //XUJNYA nize
     // todo: its not ID, its a NAME
     VERIFY_TOKEN(T_ID)
 
     GET_TOKEN()
     if (data->token_ptr->token_type == T_COLON) {
-        if (!findSymbol(data->local_table, data->token_ptr->attribute.string)) return ER_UNDEF_VAR;
-        else {
-            CHECK_RULE(call_params_n)
+        GET_TOKEN()
+        if(data->token_ptr->token_type == T_ID){
+            FIND_SYMBOL_IN_ALL_TABLES()
         }
+        //todo semantic
+        CHECK_RULE(call_params_n)
     }
+    //TODO ID or Const
     else if (data->token_ptr->token_type == T_ID) {
         CHECK_RULE(call_params_n)
     }
@@ -705,20 +721,5 @@ int var_type(parser_data_t* data) {
     else {
         return ER_SYNTAX;
     }
-    return ER_NONE;
-}
-
-int var_value(parser_data_t *data) {
-    if (data->token_ptr->token_type == T_INT) {
-        if (data->id->type != IT_INT) return ER_SEMAN;
-    }
-    else if (data->token_ptr->token_type == T_DEMICAL) {
-        if (data->id->type != IT_DOUBLE) return ER_SEMAN;
-    }
-    else if (data->token_ptr->token_type == T_STRING) {
-        if (data->id->type != IT_STRING) return ER_SEMAN;
-    }
-    else return ER_SYNTAX;
-
     return ER_NONE;
 }

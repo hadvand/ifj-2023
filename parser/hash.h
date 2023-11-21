@@ -22,7 +22,7 @@ typedef struct
     string_ptr params;      // i - int, s - string, d - double, a - any; if BIG, then may be NULL
     char **id_names; // length = params.mem_allocated
     char* id;
-    item_type type;
+    item_type type; // return type/ var type
     bool nil_possibility;
     bool defined;
     bool global;

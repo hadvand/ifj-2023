@@ -9,6 +9,15 @@ t_stack stack;
 
 static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3);
 
+#define GET_TOKEN() \
+        if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code, &(data->eol_flag))) == NULL) {\
+            return ret_code;                                               \
+        }           \
+
+#define VERIFY_TOKEN(t_token)  \
+    GET_TOKEN()                \
+    if (data->token_ptr->token_type != t_token) return ER_SYNTAX;\
+
 #define FREE(_error_code) \
     do{                   \
         stack_free(&stack); \
@@ -147,13 +156,7 @@ Precedence_table_indices get_index(Precedence_table_symbol symbol){
         case RIGHT_BRACKET:
             return I_RIGHT_BRACKET;
 
-        case IDENTIFIER:
-            return I_DATA;
-        case INT_NUMBER:
-            return I_DATA;
-        case DOUBLE_NUMBER:
-            return I_DATA;
-        case STRING:
+        case IDENTIFIER: // INT DOUBLE STRING
             return I_DATA;
 
         default:
@@ -166,6 +169,25 @@ int func_call(parser_data_t* data) {
     return ER_NONE;
 }
 
+
+item_type get_type_from_params(item_data *data,int position){
+    if(data->params == NULL)
+        return IT_UNDEF;
+    if(position > data->params->last_index)
+        return IT_UNDEF;
+    switch (data->params->string[position]) {
+        case 's':
+        case 'S':
+            return IT_STRING;
+        case 'd':
+        case 'D':
+            return IT_DOUBLE;
+        case 'i':
+        case 'I':
+            return IT_INT;
+    }
+    return IT_UNDEF;
+}
 
 item_type get_type(struct token* token, parser_data_t * data){
 
@@ -587,6 +609,45 @@ int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_stack_elem
 
     return ER_NONE;
 
+}
+
+int check_param(parser_data_t* data, int position){
+    if(data->token_ptr->token_type == T_ID){
+        Symbol* sym = NULL;
+        if((sym = findSymbol(data->global_table,data->token_ptr->attribute.string)) != NULL){
+            data->id_type = &(sym->data);
+            if(data->id_type->type != get_type_from_params(data->id,position)){
+                //TODO check error code
+                return ER_PARAMS;
+            }
+            return ER_NONE;
+        }
+
+    } else{
+        item_type type = get_type(data->token_ptr,data);
+        if(type != IT_UNDEF && type != get_type_from_params(data->id,position))
+            //TODO check error code
+            return ER_PARAMS;
+        return ER_NONE;
+    }
+    return ER_SYNTAX;
+}
+
+int check_func_call(parser_data_t *data, int position){
+    int ret_code;
+    VERIFY_TOKEN(T_ID)
+    if(!strcmp(data->id->id_names[position],data->token_ptr->attribute.string)){
+        //name_id : id/const
+        VERIFY_TOKEN(T_COLON)
+        GET_TOKEN()
+        return check_param(data,position);
+
+    }
+    else{
+        return check_param(data,position);
+    }
+
+    return ER_NONE;
 }
 
 

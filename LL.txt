@@ -36,10 +36,6 @@
 
 <nil_flag> -> ! + ε
 
-<value> -> int_value
-<value> -> str_value
-<value> -> double_value
-
 <return> -> return <expression> <nil_flag>
 
 <return_void> -> return

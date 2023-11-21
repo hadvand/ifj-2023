@@ -1,6 +1,8 @@
-func decrement(of n: Int, by m: Int) -> Int {
-    return n - m
+func decrement(of n: Int) -> Int {
+    return n - 1
 }
+
+decrement(of: 10)
 
 func factorial(_ n : Int) -> Int {
     var result : Int?
