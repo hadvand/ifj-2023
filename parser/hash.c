@@ -1,4 +1,5 @@
 #include "hash.h"
+#include "table_stack.h"
 #include <string.h>
 
 HashTable* createHashTable() {
@@ -63,6 +64,7 @@ item_data* insertSymbol(HashTable* ht, char* name, bool *internal_error) {
         *internal_error = true;
         return NULL;
     }
+//    if (!newSymbol->data) printf("inside\n");
 
     if (!(newSymbol->data.params = (string_ptr)malloc(sizeof(string_ptr))))
     {
@@ -74,8 +76,8 @@ item_data* insertSymbol(HashTable* ht, char* name, bool *internal_error) {
     if ((newSymbol->data.params = string_init()) == NULL)
     {
         free(newSymbol->name);
-        free(newSymbol);
         free(newSymbol->data.params);
+        free(newSymbol);
         *internal_error = true;
         return NULL;
     }
@@ -103,6 +105,17 @@ Symbol* findSymbol(HashTable* ht, char* name) {
             return current;
         }
         current = current->next;
+    }
+    return NULL;
+}
+
+Symbol *findSymbol_global(t_table_stack *s, char *name)
+{
+    for (t_table_stack_elem *tmp = s->top; tmp != NULL; tmp = tmp->next)
+    {
+        Symbol *symbol = findSymbol(tmp->table, name);
+        if (symbol->data.global && symbol != NULL)
+            return symbol;
     }
     return NULL;
 }

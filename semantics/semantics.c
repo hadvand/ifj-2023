@@ -431,7 +431,7 @@ static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_
                         return NT_COALESCE_NT;
 
                     case EX_MARK:
-                        return NT_NOT_NT;
+                        return NT_F_UNWRAP;
 
                     default:
                         return NOT_A_RULE;
@@ -444,6 +444,149 @@ static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_
     }
 
     return NOT_A_RULE;
+}
+
+int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3,
+                    item_type *type_final){
+
+    //bool operand_1_to_int = false;
+    //bool operand_3_to_int = false;
+    bool operand_1_to_double = false;
+    bool operand_3_to_double = false;
+
+    if (rule == OPERAND){
+        if (operand_1->item.type == IT_UNDEF){
+            return ER_UNDEF_VAR;
+        }
+    }
+
+    if (rule == LBR_NT_RBR){
+        if (operand_2->item.type == IT_UNDEF){
+            return ER_UNDEF_VAR;
+        }
+    }
+
+    if (rule != OPERAND && rule != LBR_NT_RBR){
+        if (operand_1->item.type == IT_UNDEF || operand_3->item.type == IT_UNDEF){
+            return ER_UNDEF_VAR;
+        }
+    }
+
+    switch(rule){
+        case OPERAND:
+            *type_final = operand_1->item.type;
+            break;
+
+        case LBR_NT_RBR:
+            *type_final = operand_2->item.type;
+            break;
+
+        case NT_PLUS_NT:
+        case NT_MINUS_NT:
+        case NT_MUL_NT:
+            // concatenation
+            if (operand_1->item.type == IT_STRING && operand_3->item.type == IT_STRING && rule == NT_PLUS_NT){
+                *type_final = IT_STRING;
+                break;
+            }
+            if (operand_1->item.type == IT_INT && operand_3->item.type == IT_INT){
+                *type_final = IT_INT;
+                break;
+            }
+            if (operand_1->item.type == IT_STRING || operand_3->item.type == IT_STRING){
+                return ER_TYPE_COMP;
+            }
+
+            *type_final = IT_DOUBLE;
+
+            if (operand_1->item.type == IT_INT){
+                operand_1_to_double = true;
+            }
+            if (operand_3->item.type == IT_INT){
+                operand_3_to_double = true;
+            }
+
+            break;
+
+        case NT_DIV_NT:
+            *type_final = IT_DOUBLE;
+
+            if (operand_1->item.type == IT_STRING || operand_3->item.type == IT_STRING){
+                return ER_TYPE_COMP;
+            }
+
+            if (operand_1->item.type == IT_INT){
+                operand_1_to_double = true;
+            }
+            if (operand_3->item.type == IT_INT){
+                operand_3_to_double = true;
+            }
+            break;
+            // dealing with ?? monster
+        case NT_COALESCE_NT:
+
+            if (operand_1->item.type == IT_UNDEF && operand_3->item.type == IT_NIL) {
+                // Operand_1 is undefined, but Operand_3 is nil
+                *type_final = IT_NIL;
+            } else if (operand_1->item.type == IT_UNDEF) {
+                // Operand_1 is undefined
+                *type_final = operand_3->item.type;
+            } else {
+                // Operand_1 is defined
+                *type_final = operand_1->item.type;
+            }
+            break;
+            //dealing with ! monster
+        case NT_F_UNWRAP:
+
+            if (operand_1->item.type == IT_UNDEF || operand_1->item.type == IT_NIL) {
+                return ER_UNDEF_VAR;
+            }
+            *type_final = operand_1->item.type;
+            break;
+
+        case NT_EQ_NT:
+        case NT_NEQ_NT:
+        case NT_LEQ_NT:
+        case NT_LTN_NT:
+        case NT_MEQ_NT:
+        case NT_MTN_NT:
+
+
+            // Type check
+            if (operand_1->item.type != operand_3->item.type) {
+                return ER_TYPE_COMP;
+            }
+
+            if (operand_1->item.type == IT_NIL || operand_3->item.type == IT_NIL) {
+                return ER_UNDEF_VAR;
+            }
+
+            if (operand_1->item.type == IT_STRING) {
+                if (rule == NT_LEQ_NT || rule == NT_MEQ_NT) {
+                    // <= and >= are not supported for strings for some reason
+                    return ER_TYPE_COMP;
+                }
+            }
+
+            *type_final = IT_INT;
+            break;
+
+        default:
+            break;
+
+    }
+
+    if (operand_1_to_double){
+        ;
+    }
+
+    if (operand_3_to_double){
+        ;
+    }
+
+    return ER_NONE;
+
 }
 
 

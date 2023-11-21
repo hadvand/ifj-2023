@@ -12,6 +12,7 @@ typedef enum {
     IT_INT,
     IT_STRING,
     IT_ANY,
+    IT_NIL,
     IT_UNDEF
 } item_type;
 

@@ -1,8 +1,9 @@
 #include "../structures/string.h"
 #include "../structures/error.h"
 #include "hash.h"
-#include "../semantics/semantics.h"
 #include "parser.h"
+#include "table_stack.h"
+#include "../semantics/semantics.h"
 
 #define UNUSED(x) (void)(x)
 
