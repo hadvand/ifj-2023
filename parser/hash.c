@@ -34,7 +34,7 @@ unsigned int hash(char* str, int size) {
     return hashValue % size;
 }
 
-item_data* insertSymbol(HashTable* ht, char* name, bool is_function, bool *internal_error) {
+item_data* insertSymbol(HashTable* ht, char* name, bool *internal_error) {
     if (findSymbol(ht, name)) {
         *internal_error = false;
         return NULL;
@@ -86,7 +86,7 @@ item_data* insertSymbol(HashTable* ht, char* name, bool is_function, bool *inter
 
     newSymbol->data.id = newSymbol->name;
     newSymbol->data.type = IT_UNDEF;
-    newSymbol->data.is_function = is_function;
+    newSymbol->data.is_function = false;
     newSymbol->next = NULL;
 
     newSymbol->next = ht->table[index];
