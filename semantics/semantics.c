@@ -114,7 +114,10 @@ Precedence_table_symbol convert_token_into_symbol(parser_data_t *data, bool last
             return DOUBLE_NUMBER;
         case T_STRING:
             return STRING;
-
+        case T_KEYWORD:
+            if(data->token_ptr->attribute.keyword == k_nil)
+                return NIL;
+            return DOLLAR;
         default:
             return DOLLAR;
     }

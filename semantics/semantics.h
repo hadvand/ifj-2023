@@ -25,7 +25,8 @@ typedef enum
     IDENTIFIER,		// ID
     INT_NUMBER = 14,		// int
     DOUBLE_NUMBER = 14,	// double
-    STRING = 14,			// string
+    STRING = 14,        // string
+    NIL = 14,           // nil
     DOLLAR,			// $
     STOP,			// stop symbol used when reducing
     N_TERMINAL		// non-terminal

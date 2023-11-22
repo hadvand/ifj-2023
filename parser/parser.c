@@ -665,6 +665,8 @@ item_type get_type(struct token* token, parser_data_t * data){
                 case k_Double:
                 case k_qmark_Double:
                     return IT_DOUBLE;
+                case k_nil:
+                    return IT_NIL;
                 default:
                     return IT_UNDEF;
             }
