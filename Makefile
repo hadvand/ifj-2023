@@ -31,4 +31,4 @@ semantic-tests: $(PROGS) $(PARSER_PROGS) $(SEM_TESTS)
 	$(CC) $(CFLAGS) $^ -o $@ -lm -DSEM_DEBUG -DPARS_DEBUG
 
 clean:
-	rm -rf *.o scanner-build parser-build scanner_tests semantic-build
+	rm -rf *.o scanner-build parser-build scanner_tests semantic-build semantic-tests scanner_test
