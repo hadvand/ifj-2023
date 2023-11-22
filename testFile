@@ -1,1 +1,1 @@
-let nil_val : Int? = nil
+let nil_val : Double? = nil

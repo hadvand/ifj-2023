@@ -680,6 +680,12 @@ int insert_data_type(parser_data_t *data){
     //var declaration
     if(data->is_in_declaration && !data->is_in_function && !data->is_in_params){
         data->id->type = type;
+        switch (data->token_ptr->token_type) {
+            case T_KEYWORD_NIL_POSSIBILITY:
+                data->id->nil_possibility = true;
+            default:
+                break;
+        }
     }
     //return func type
     else if(data->is_in_declaration && data->is_in_function && !data->is_in_params){
