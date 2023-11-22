@@ -2,6 +2,7 @@
 #include "structures/error.h"
 #include <stdio.h>
 
+
 int main()
 {
     int ret_code;

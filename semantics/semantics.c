@@ -9,6 +9,9 @@ t_stack stack;
 
 static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3);
 
+static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3,
+                           item_type *type_final);
+
 #define GET_TOKEN() \
         if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code, &(data->eol_flag))) == NULL) {\
             return ret_code;                                               \
@@ -234,12 +237,13 @@ int number_of_symbols_after_stop(bool* found_stop){
 
 int reduce(){
 
-    //int error_code;
+    int error_code;
 
     t_stack_elem *op1 = NULL;
     t_stack_elem *op2 = NULL;
     t_stack_elem *op3 = NULL;
     item_data item;
+    item_type type_final;
     Precedence_rules rule;
     bool stop_is_founded;
 
@@ -262,6 +266,10 @@ int reduce(){
         return ER_SYNTAX;
     else{
         //todo check semantics
+
+        if ((error_code = check_semantics(rule, op1, op2, op3, &type_final))){
+            return error_code;
+        }
 
         for (int i = count_symbols_before_stop + 1; i > 0 ; i--) {
             stack_pop(&stack);
@@ -402,7 +410,7 @@ static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_
         case(1):
 
             if (operand_1->symbol == IDENTIFIER || operand_1->symbol == INT_NUMBER || operand_1->symbol == DOUBLE_NUMBER ||
-            operand_1->symbol == STRING){
+                operand_1->symbol == STRING){
                 return OPERAND;
             }
 
@@ -411,7 +419,7 @@ static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_
         case(3):
 
             if (operand_1->symbol == LEFT_BRACKET && operand_2->symbol == N_TERMINAL
-            && operand_3->symbol == RIGHT_BRACKET) {
+                && operand_3->symbol == RIGHT_BRACKET) {
                 return LBR_NT_RBR;
             }
 
@@ -468,7 +476,7 @@ static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_
     return NOT_A_RULE;
 }
 
-int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3,
+static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3,
                     item_type *type_final){
 
     //bool operand_1_to_int = false;
@@ -655,5 +663,4 @@ int check_func_call(parser_data_t *data, int position){
 
     return ER_NONE;
 }
-
 
