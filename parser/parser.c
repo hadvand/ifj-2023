@@ -270,7 +270,8 @@ int stm(parser_data_t *data) {
                     VERIFY_TOKEN(T_BRACKET_OPEN)
                     data->param_index = 0;
                     CHECK_RULE(call_params)
-                }
+                    data->id->type = tmp->data.type;
+                } else CHECK_RULE(expression)
             }
             else {
                 CHECK_RULE(expression)
