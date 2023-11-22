@@ -1,5 +1,4 @@
 #include "hash.h"
-#include "table_stack.h"
 #include <string.h>
 
 HashTable* createHashTable() {
@@ -107,16 +106,6 @@ Symbol* findSymbol(HashTable* ht, char* name) {
     return NULL;
 }
 
-Symbol *findSymbol_global(t_table_stack *s, char *name)
-{
-    for (t_table_stack_elem *tmp = s->top; tmp != NULL; tmp = tmp->next)
-    {
-        Symbol *symbol = findSymbol(tmp->table, name);
-        if (symbol->data.global && symbol != NULL)
-            return symbol;
-    }
-    return NULL;
-}
 
 void removeSymbol(HashTable* ht, char* name) {
     unsigned int index = hash(name, ht->size);

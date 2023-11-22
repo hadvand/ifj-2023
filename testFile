@@ -1,13 +1,7 @@
 let ggwp : Int = 10
-func test(by a : Int) -> Int {
-    return a
+func decrement(by a : Int,of b : Int) -> Int {
+    return a - b
 }
-
-if let ggwp {
-    write("str")
-}
-
-test(by: ggwp)
 
 func factorial(_ n : Int) -> Int {
     var result : Int?

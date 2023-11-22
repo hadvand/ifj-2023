@@ -605,7 +605,9 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 int check_param(parser_data_t* data, int position){
     if(data->token_ptr->token_type == T_ID){
         Symbol* sym = NULL;
-        if((sym = findSymbol(data->global_table,data->token_ptr->attribute.string)) != NULL){
+        if(table_count_elements_in_stack(data->tableStack) == 0)
+            return ER_INTERNAL;
+        if((sym = findSymbol(data->tableStack->top->table,data->token_ptr->attribute.string)) != NULL){
             data->id_type = &(sym->data);
             if(data->id_type->type != get_type_from_params(data->id,position)){
                 //TODO check error code

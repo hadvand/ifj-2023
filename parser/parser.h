@@ -6,7 +6,7 @@
 #define IFJ_2023_PARSER_H
 
 #include "../scanner/scanner.h"
-#include "hash.h"
+#include "table_stack.h"
 #include <stdbool.h>
 
 
@@ -21,8 +21,7 @@ typedef struct {
     bool is_in_condition;       // is in if/while/then construction
     bool eol_flag;              // met EOL
 
-    HashTable *global_table;
-    HashTable *local_table;
+    t_table_stack *tableStack;
 
     token_t_ptr token_ptr;           // current token
 

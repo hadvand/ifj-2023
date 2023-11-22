@@ -1,8 +1,12 @@
 #include "table_stack.h"
 
-void table_stack_init(t_table_stack *s)
+t_table_stack* table_stack_init()
 {
+    t_table_stack* s = (t_table_stack*)malloc(sizeof (t_table_stack));
+    if(s == NULL)
+        return NULL;
     s->top = NULL;
+    return s;
 }
 
 bool table_stack_is_empty(t_table_stack *s)
@@ -50,4 +54,14 @@ void table_stack_free(t_table_stack *s)
     {
         table_stack_pop(s);
     }
+}
+
+int table_count_elements_in_stack(t_table_stack *s){
+    int count = 0;
+    t_table_stack_elem *tmp = s->top;
+    while (tmp != NULL){
+        count++;
+        tmp = tmp->next;
+    }
+    return count;
 }
