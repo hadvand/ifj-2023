@@ -702,6 +702,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                 }
             case(S_STRING):
                 if(additional_string->string != NULL){
+                    ungetc(c,stdin);
                     token->attribute.string = additional_string->string;
                     single_token(token,*line_cnt,T_STRING,additional_string);
                     return token;
