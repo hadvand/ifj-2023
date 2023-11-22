@@ -430,7 +430,9 @@ int stm(parser_data_t *data) {
 int call_params(parser_data_t *data) {
     int ret_code = ER_NONE;
 
-    check_func_call(data,data->param_index);
+    if((ret_code = check_func_call(data,data->param_index))){
+        return ret_code;
+    }
 
     CHECK_RULE(call_params_n)
 
