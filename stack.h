@@ -1,33 +1,39 @@
 #ifndef IFJ_2023_STACK_H
 #define IFJ_2023_STACK_H
 
-#include "scanner/scanner.h"
+#include "semantics/semantics.h"
+#include "parser/hash.h"
 
 #define BRACKET_STACK_MAX 1000
 
 typedef struct stack_elem
 {
-    token_t_ptr *stack_item;
-} stack_elem;
+    Precedence_table_symbol symbol;
+    item_data item;
+    struct stack_elem *next;
+} t_stack_elem;
 
 typedef struct stack
 {
-    stack_elem *data_array[BRACKET_STACK_MAX];
-    int top;
-} stack;
+    t_stack_elem *top;
+} t_stack;
 
-stack *stack_init();
+void stack_init(t_stack* stack);
 
-bool stack_is_empty(stack *s);
+bool stack_is_empty(t_stack *s);
 
-void stack_push(stack *s, token_t_ptr *stack_item);
+bool stack_push(t_stack *s, item_data stack_item, Precedence_table_symbol  symbol);
 
-void stack_pop(stack *s);
+bool stack_push_after_top_term(t_stack *s, item_data stack_item, Precedence_table_symbol symbol);
 
-stack_elem *get_top(stack *s);
+bool stack_pop(t_stack *s);
 
-void print_and_pop(stack *s);
+t_stack_elem* stack_top_terminal(t_stack* s);
 
-void stack_dispose(stack *s);
+t_stack_elem *get_top(t_stack *s);
+
+void stack_print_all_symbols(t_stack *s);
+
+void stack_free(t_stack* s);
 
 #endif //IFJ_2023_STACK_H

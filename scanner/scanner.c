@@ -1,3 +1,4 @@
+#include "../structures/error.h"
 #include "scanner.h"
 
 token_t_ptr create_token(){
@@ -18,7 +19,7 @@ void delete_token(token_t_ptr token){
 
 char *tokens[] = {"T_ITS_NOT_A_TOKEN", "T_EXPONENT", "T_DEMICAL", "T_INT", "T_EQUALS",
                   "T_ASSIGMENT", "T_UNDERLINE", "T_KEYWORD", "T_ID",
-                  "T_KEYWORD_TYPE_ID", "T_EXCLAMATION_MARK", "T_STRING", "T_MORE", "T_MORE_EQUAL",
+                  "T_KEYWORD_NIL_POSSIBILITY", "T_EXCLAMATION_MARK", "T_STRING", "T_MORE", "T_MORE_EQUAL",
                   "T_LESS", "T_LESS_EQUAL", "T_MINUS", "T_ARROW",
                   "T_TERN", "T_COMMENT_STRING", "T_COMMENT_BLOCK",
                   "T_NOT_EQUAL", "T_DIVISION", "T_COLON",
@@ -87,8 +88,8 @@ bool keyword_control(token_t_ptr token, string_ptr add_string){
     }
     return false;
 }
-
-token_t_ptr next_token(int *line_cnt, int* err_type){
+// TODO: changes in scanner (flag for EOL)
+token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
 
 
     int c;
@@ -114,15 +115,16 @@ token_t_ptr next_token(int *line_cnt, int* err_type){
     token_t_ptr token = create_token();
 
     unsigned hex_count = 0;
-
+    *flag = false;
     while((c = getc(stdin))){
         //todo 2 more tokens missing
         switch(state){
             case(S_START):
                 //printf("current sym %c\n",c);
                 if(c == '\n'){
-                    single_token(token,*line_cnt, T_NEW_LINE,additional_string);
                     (*line_cnt)++;
+                    *flag = true;
+                    continue;
                 }
                 else if(isspace(c))
                     continue;
@@ -469,6 +471,17 @@ token_t_ptr next_token(int *line_cnt, int* err_type){
                     continue;
                 } else{
                     ungetc(c, stdin);
+                    if((additional_string = string_init()) == NULL){
+                        scanning_finish_with_error(token,additional_string, err_type, ER_INTERNAL);
+                        return NULL;
+                    }
+                    if(!string_append(additional_string,'_')){
+                        scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
+                        return NULL;
+                    }
+                    if((token->attribute.string =  (char *) realloc(token->attribute.string,additional_string->mem_allocated)) == NULL)
+                        scanning_finish_with_error(token,additional_string,err_type,ER_INTERNAL);
+                    strcpy(token->attribute.string,additional_string->string);
                     single_token(token,*line_cnt,T_UNDERLINE,additional_string);
                     return token;
                 }
@@ -497,7 +510,9 @@ token_t_ptr next_token(int *line_cnt, int* err_type){
                     if(keyword_control(token,additional_string))
                         single_token(token,*line_cnt,T_KEYWORD,additional_string);
                     else{
-                        token->attribute.string = additional_string->string;
+                        if((token->attribute.string =  (char *) realloc(token->attribute.string,additional_string->mem_allocated)) == NULL)
+                            scanning_finish_with_error(token,additional_string,err_type,ER_INTERNAL);
+                        strcpy(token->attribute.string,additional_string->string);
                         single_token(token,*line_cnt,T_ID,additional_string);
                     }
 

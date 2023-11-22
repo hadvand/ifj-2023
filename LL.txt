@@ -1,30 +1,31 @@
 <program> -> <stm> EOF
 
+<stm> -> var + let id : <var_type> = <expression> \n <stm>
+<stm> -> var + let id = <expression> \n <stm>
+<stm> -> var + let id : <var_type> \n <stm>
+<stm> -> func_id( <call_params> ) \n <stm>
+<stm> -> id = <expression> \n <stm>
+<stm> -> func func_id ( <func_params> ) -> <var_type> { <stm> <return> } \n <stm>
+<stm> -> func func_id ( <func_params> ) { <stm> <return_void> } \n <stm>
+<stm> -> if ( <condition> ) { <stm> } \n <stm>
+<stm> -> if ( <condition> ) { <stm> } else { <stm> } \n <stm>
+<stm> -> while ( <condition> ) { <stm> } \n <stm>
 <stm> -> ε
-<stm> -> <stm_not_null>
-<stm> -> <stm_not_null> <stm>
 
-<stm_not_null> -> var + let id : <var_type> = <expression>
-<stm_not_null> -> var + let id = <expression>
-<stm_not_null> -> var + let id : <var_type>
-<stm_not_null> -> id = <expression>
-<stm_not_null> -> <func>
-<stm_not_null> -> if ( <condition> ) { <stm> } \n
-<stm_not_null> -> if ( <condition> ) { <stm> } \n else { <stm> } \n
-<stm_not_null> -> while <condition> { <stm> } \n
-
-<condition> -> let id
 <condition> -> <expression>
-
-<func> -> func func_id(<func_params>) -> <var_type> { <stm> <return> } \n
-<func> -> func func_id(<func_params>) { <stm> <return_void> } \n
-<func> -> func_id(<func_params>)
 
 <func_params> -> ε
 <func_params> -> var_name var_id: <var_type> <func_params_not_null>
+<func_params> -> _ var_id: <var_type> <func_params_not_null>
 
 <func_params_not_null> -> , <func_params>
 <func_params_not_null> -> ε
+
+<call_params> -> var_name : var_id <call_params_n>
+<call_params> -> var_id <call_params_n>
+
+<call_params_n> -> , <call_params>
+<call_params_n> -> ε
 
 <var_type> -> String
 <var_type> -> Int
@@ -34,10 +35,6 @@
 <var_type> -> Double?
 
 <nil_flag> -> ! + ε
-
-<value> -> int_value
-<value> -> str_value
-<value> -> double_value
 
 <return> -> return <expression> <nil_flag>
 

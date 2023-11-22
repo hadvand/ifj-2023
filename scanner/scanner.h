@@ -2,9 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "../structures/string.h"
-#include "../structures/error.h"
 #include "string.h"
+#include "../structures/string.h"
 
 
 #define PRINTABLE_MIN 32
@@ -16,7 +15,7 @@ typedef enum state{
     S_KEYWORD,
     S_ID,
     S_UNDERLINE,
-    S_KEYWORD_TYPE_ID, //чекнуть правильное название 
+    S_KEYWORD_TYPE_ID, // check the right name
     S_STRING_START,
     S_STRING_SPEC_SYMBOL,
     S_STRING_START_HEX,
@@ -36,7 +35,7 @@ typedef enum state{
     S_EXPONENT_SING,
     S_EXPONENT,
     S_ASSINGMENT,
-    S_NOT_EQUELS_START,
+    S_EXCLAMATION_MARK,
     S_DIVISION,
     S_COMMENT_STRING,
     S_COMMENT_BLOCK_START,
@@ -58,7 +57,8 @@ typedef enum token_type{
     T_UNDERLINE,
     T_KEYWORD,
     T_ID,
-    T_KEYWORD_TYPE_ID,
+    T_KEYWORD_NIL_POSSIBILITY,
+    T_EXCLAMATION_MARK,
     T_STRING,
     T_MORE,
     T_MORE_EQUAL,
@@ -120,4 +120,4 @@ typedef struct token
 } *token_t_ptr;
 
 
-token_t_ptr next_token(int *line_cnt, int* error);
+token_t_ptr next_token(int *line_cnt, int* error, bool *flag);
