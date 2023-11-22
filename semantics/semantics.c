@@ -625,9 +625,6 @@ int check_param(parser_data_t* data, int position){
 }
 
 int check_func_call(parser_data_t *data, int position){
-
-
-
     int ret_code;
     GET_TOKEN()
     if(data->token_ptr->token_type != T_BRACKET_CLOSE && data->id->params->string == NULL)

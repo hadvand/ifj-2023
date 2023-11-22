@@ -34,7 +34,7 @@ unsigned int hash(char* str, int size) {
     return hashValue % size;
 }
 
-item_data* insertSymbol(HashTable* ht, char* name, bool *internal_error) {
+item_data* insertSymbol(HashTable* ht, char* name, bool is_function, bool *internal_error) {
     if (findSymbol(ht, name)) {
         *internal_error = false;
         return NULL;
@@ -64,7 +64,6 @@ item_data* insertSymbol(HashTable* ht, char* name, bool *internal_error) {
         *internal_error = true;
         return NULL;
     }
-//    if (!newSymbol->data) printf("inside\n");
 
     if (!(newSymbol->data.params = (string_ptr)malloc(sizeof(string_ptr))))
     {
@@ -87,8 +86,7 @@ item_data* insertSymbol(HashTable* ht, char* name, bool *internal_error) {
 
     newSymbol->data.id = newSymbol->name;
     newSymbol->data.type = IT_UNDEF;
-    newSymbol->data.defined = false;
-    newSymbol->data.global = false;
+    newSymbol->data.is_function = is_function;
     newSymbol->next = NULL;
 
     newSymbol->next = ht->table[index];
