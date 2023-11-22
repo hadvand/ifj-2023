@@ -634,9 +634,6 @@ int check_param(parser_data_t* data, int position){
 }
 
 int check_func_call(parser_data_t *data, int position){
-
-
-
     int ret_code;
     VERIFY_TOKEN(T_ID)
 

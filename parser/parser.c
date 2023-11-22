@@ -73,25 +73,25 @@ parser_data_t *init_data()
 
     // readString() -> str?
 
-    if ((tmp = insertSymbol(parser_data->global_table, "readString", &internal_error)) == NULL) return NULL;
+    if ((tmp = insertSymbol(parser_data->global_table, "readString", true, &internal_error)) == NULL) return NULL;
     tmp->defined = true;
     tmp->type = IT_STRING;
     tmp->nil_possibility = true;
 
     // readInt() -> int?
-    tmp = insertSymbol(parser_data->global_table, "readInt", &internal_error);
+    tmp = insertSymbol(parser_data->global_table, "readInt", true, &internal_error);
     tmp->defined = true;
     tmp->type = IT_INT;
     tmp->nil_possibility = true;
 
     // readDouble() -> double?
-    tmp = insertSymbol(parser_data->global_table, "readDouble", &internal_error);
+    tmp = insertSymbol(parser_data->global_table, "readDouble", true, &internal_error);
     tmp->defined = true;
     tmp->type = IT_DOUBLE;
     tmp->nil_possibility = true;
 
     // write(...)
-    tmp = insertSymbol(parser_data->global_table, "write", &internal_error);
+    tmp = insertSymbol(parser_data->global_table, "write", true, &internal_error);
     tmp->defined = true;
     tmp->type = IT_ANY;
     tmp->nil_possibility = false;
@@ -101,7 +101,7 @@ parser_data_t *init_data()
     }
 
     // Int2Double(int) -> double
-    tmp = insertSymbol(parser_data->global_table, "Int2Double", &internal_error);
+    tmp = insertSymbol(parser_data->global_table, "Int2Double", true, &internal_error);
     tmp->defined = true;
     tmp->type = IT_DOUBLE;
     tmp->nil_possibility = false;
@@ -111,7 +111,7 @@ parser_data_t *init_data()
     }
 
     // Double2Int(double) -> int
-    tmp = insertSymbol(parser_data->global_table, "Double2Int", &internal_error);
+    tmp = insertSymbol(parser_data->global_table, "Double2Int", true, &internal_error);
     tmp->defined = true;
     tmp->type = IT_INT;
     tmp->nil_possibility = false;
@@ -121,7 +121,7 @@ parser_data_t *init_data()
     }
 
     // ord(str) -> int
-    tmp = insertSymbol(parser_data->global_table, "ord", &internal_error);
+    tmp = insertSymbol(parser_data->global_table, "ord", true, &internal_error);
     tmp->defined = true;
     tmp->type = IT_INT;
     tmp->nil_possibility = false;
@@ -131,7 +131,7 @@ parser_data_t *init_data()
     }
 
     // chr(int) -> str
-    tmp = insertSymbol(parser_data->global_table, "chr", &internal_error);
+    tmp = insertSymbol(parser_data->global_table, "chr", true, &internal_error);
     tmp->defined = true;
     tmp->type = IT_STRING;
     tmp->nil_possibility = false;
@@ -141,7 +141,7 @@ parser_data_t *init_data()
     }
 
     // length(str) -> int
-    tmp = insertSymbol(parser_data->global_table, "length", &internal_error);
+    tmp = insertSymbol(parser_data->global_table, "length", true, &internal_error);
     tmp->defined = true;
     tmp->type = IT_INT;
     tmp->nil_possibility = false;
@@ -151,7 +151,7 @@ parser_data_t *init_data()
     }
 
     // substring(str, int, int) -> str?
-    tmp = insertSymbol(parser_data->global_table, "substring", &internal_error);
+    tmp = insertSymbol(parser_data->global_table, "substring", true, &internal_error);
     tmp->defined = true;
     tmp->type = IT_STRING;
     tmp->nil_possibility = true;
@@ -247,7 +247,16 @@ int stm(parser_data_t *data) {
         }
         else if (data->token_ptr->token_type == T_ASSIGMENT) {
             GET_TOKEN()
-            CHECK_RULE(expression)
+            Symbol *tmp = findSymbol(data->global_table, data->token_ptr->attribute.string);
+            // todo: set flag on true when declaring new func
+            if (tmp && tmp->data.is_function) {
+                VERIFY_TOKEN(T_BRACKET_OPEN)
+                data->param_index = 0;
+                CHECK_RULE(call_params)
+            }
+            else {
+                CHECK_RULE(expression)
+            }
 
             return stm(data);
         }
@@ -267,7 +276,7 @@ int stm(parser_data_t *data) {
             data->param_index = 0;
             CHECK_RULE(call_params)
 
-            VERIFY_TOKEN(T_BRACKET_CLOSE)
+            if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
 
             GET_TOKEN()
             if (!data->eol_flag) return ER_SYNTAX;
@@ -291,7 +300,8 @@ int stm(parser_data_t *data) {
         data->is_in_declaration = true;
 
         bool internal_error;
-        data->id = insertSymbol(data->global_table,data->token_ptr->attribute.string,&internal_error);
+        data->id = insertSymbol(data->global_table,data->token_ptr->attribute.string, true, &internal_error);
+
         if(!data->id){
             if(internal_error) return ER_INTERNAL;
             else return ER_UNDEF_VAR;
@@ -367,14 +377,12 @@ int stm(parser_data_t *data) {
         // todo: if contidion == NULL -> check <else> body ???
         CHECK_RULE(condition)
 
-        if (data->token_ptr->token_type == T_CURVED_BRACKET_OPEN)
+        if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
 
         GET_TOKEN()
         CHECK_RULE(stm)
 
-//        VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
-
-        if (data->token_ptr->token_type == T_CURVED_BRACKET_CLOSE)
+        if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
 
         GET_TOKEN()
 
@@ -427,8 +435,11 @@ int call_params(parser_data_t *data) {
     int ret_code = ER_NONE;
 
     check_func_call(data,data->param_index);
-
-    CHECK_RULE(call_params_n)
+    if (data->token_ptr->token_type == T_BRACKET_CLOSE) {
+        GET_TOKEN()
+        return ret_code;
+    }
+    else CHECK_RULE(call_params_n)
 
     return ret_code;
 }
@@ -503,7 +514,7 @@ int func_params(parser_data_t *data) {
 
         // if we are in definition, we need to add parameters to the local symtable
         bool internal_error;
-        if (!(data->exp_type = insertSymbol(data->local_table, data->token_ptr->attribute.string, &internal_error))) {
+        if (!(data->exp_type = insertSymbol(data->local_table, data->token_ptr->attribute.string, false, &internal_error))) {
             if (internal_error) return ER_INTERNAL;
             else return ER_UNDEF_VAR;
         }
