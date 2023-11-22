@@ -86,7 +86,7 @@ item_data* insertSymbol(HashTable* ht, char* name, bool *internal_error) {
     strcpy(newSymbol->name, name);
 
     newSymbol->data.id = newSymbol->name;
-    newSymbol->data.type = 'u';
+    newSymbol->data.type = IT_UNDEF;
     newSymbol->data.defined = false;
     newSymbol->data.global = false;
     newSymbol->next = NULL;

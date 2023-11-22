@@ -18,7 +18,7 @@ main:
 scanner-build: $(PROGS) /scanner/scanner_tests.c
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 
-scanner_tests: $(TESTS)
+scanner_test: $(TESTS)
 	$(CC) $(CFLAGS) -o $@ $^ -lm
 
 parser-build: $(PARSER_PROGS) $(PROGS) main.c

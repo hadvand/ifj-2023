@@ -15,7 +15,7 @@ typedef enum state{
     S_KEYWORD,
     S_ID,
     S_UNDERLINE,
-    S_KEYWORD_TYPE_ID, //чекнуть правильное название 
+    S_KEYWORD_TYPE_ID, // check the right name
     S_STRING_START,
     S_STRING_SPEC_SYMBOL,
     S_STRING_START_HEX,

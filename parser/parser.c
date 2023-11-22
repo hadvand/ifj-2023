@@ -35,7 +35,8 @@
         if(!data->id){\
             if(internal_error) return ER_INTERNAL;\
         else return ER_UNDEF_VAR;\
-}\
+}                       \
+
 
 parser_data_t *init_data()
 {
@@ -234,6 +235,7 @@ int stm(parser_data_t *data) {
     // <stm> -> var + let id : <var_type> \n <stm>
     // <stm> -> var + let id = <expression> \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && (data->token_ptr->attribute.keyword == k_var || data->token_ptr->attribute.keyword == k_let)) {
+        data->is_in_declaration = true;
         VERIFY_TOKEN(T_ID)
         INSERT_SYMBOL()
         GET_TOKEN()
@@ -245,10 +247,12 @@ int stm(parser_data_t *data) {
             if (data->token_ptr->token_type == T_ASSIGMENT) {
                 GET_TOKEN()
                 CHECK_RULE(expression)
+                data->is_in_declaration = false;
                 // todo: there may be a problem with EOL
                 return stm(data);
             }
             else if (data->eol_flag) {
+                data->is_in_declaration = false;
                 return stm(data);
             }
             else return ER_SYNTAX;
@@ -256,7 +260,7 @@ int stm(parser_data_t *data) {
         else if (data->token_ptr->token_type == T_ASSIGMENT) {
             GET_TOKEN()
             CHECK_RULE(expression)
-
+            data->is_in_declaration = false;
             return stm(data);
         }
         else return ER_SYNTAX;
@@ -303,6 +307,7 @@ int stm(parser_data_t *data) {
         data->is_in_params = true;
         data->param_index = 0;
         data->id->id_names = NULL;
+        data->is_in_function = true;
         CHECK_RULE(func_params)
         data->is_in_params = false;
 
@@ -310,7 +315,7 @@ int stm(parser_data_t *data) {
 
         GET_TOKEN()
         if (data->token_ptr->token_type == T_ARROW) {
-            data->is_in_function = true;
+
             data->is_void_function = false;
 
             GET_TOKEN()
@@ -600,119 +605,80 @@ int return_void_rule(parser_data_t *data) {
     }
 }
 
+item_type get_type(struct token* token, parser_data_t * data){
+
+    Symbol* symbol;
+
+    switch(token -> token_type){
+        case T_ID:
+            symbol = findSymbol(data->local_table, token->attribute.string);
+            if (symbol == NULL)
+                return IT_UNDEF;
+            return symbol->data.type;
+        case T_INT:
+            return IT_INT;
+        case T_STRING:
+            return IT_STRING;
+        case T_DEMICAL:
+            return IT_DOUBLE;
+        default:
+            switch (token->attribute.keyword) {
+                case k_Int:
+                case k_qmark_Int:
+                    return IT_INT;
+                case k_String:
+                case k_qmark_String:
+                    return IT_STRING;
+                case k_Double:
+                case k_qmark_Double:
+                    return IT_DOUBLE;
+                default:
+                    return IT_UNDEF;
+            }
+            return IT_UNDEF;
+    }
+}
+
+int insert_data_type(parser_data_t *data){
+    item_type type  = get_type(data->token_ptr,data);
+
+    //var declaration
+    if(data->is_in_declaration && !data->is_in_function && !data->is_in_params){
+        data->id->type = type;
+    }
+    //return func type
+    else if(data->is_in_declaration && data->is_in_function && !data->is_in_params){
+        data->id->type = type;
+    }
+    //func params
+    else if(data->is_in_declaration && data->is_in_function && data->is_in_params) {
+        char data_type_for_func_params = 'a';
+        switch (type) {
+            case IT_INT:
+                data_type_for_func_params = 'i' - ((data->token_ptr->token_type == T_KEYWORD_NIL_POSSIBILITY) * 32);
+                break;
+            case IT_STRING:
+                data_type_for_func_params = 's' - ((data->token_ptr->token_type == T_KEYWORD_NIL_POSSIBILITY) * 32);
+                break;
+            case IT_DOUBLE:
+                data_type_for_func_params = 'd' - ((data->token_ptr->token_type == T_KEYWORD_NIL_POSSIBILITY) * 32);
+                break;
+            default:
+                return ER_INTERNAL;
+        }
+        if (!string_append(data->id->params, data_type_for_func_params)) {
+            return ER_INTERNAL;
+        }
+        data->exp_type->type = type;
+    }
+
+    return ER_NONE;
+}
+
 int var_type(parser_data_t* data) {
     if (data->token_ptr->token_type == T_KEYWORD || data->token_ptr->token_type == T_KEYWORD_NIL_POSSIBILITY)
     {
-        switch (data->token_ptr->attribute.keyword)
-        {
-            case k_Int:
-                if (!data->is_in_function && data->is_in_declaration) {
-                    data->id->type = IT_INT;
-                    data->id->nil_possibility = false;
-                }
-
-                if (data->is_in_function && data->is_in_declaration) {
-                    data->id->type = IT_INT;
-                    data->id->nil_possibility = false;
-                }
-
-                if (data->is_in_params) {
-                    if (!string_append(data->id->params, 'i')) {
-                        return ER_INTERNAL;
-                    }
-                }
-                break;
-
-            case k_Double:
-                if (!data->is_in_function && data->is_in_declaration) {
-                    data->id->type = IT_DOUBLE;
-                    data->id->nil_possibility = false;
-                }
-
-                if (data->is_in_function && data->is_in_declaration) {
-                    data->id->type = IT_DOUBLE;
-                    data->id->nil_possibility = false;
-                }
-
-                if (data->is_in_params) {
-                    if (!string_append(data->id->params, 'd')) {
-                        return ER_INTERNAL;
-                    }
-                }
-                break;
-
-            case k_String:
-                if (!data->is_in_function && data->is_in_declaration) {
-                    data->id->type = IT_STRING;
-                    data->id->nil_possibility = false;
-                }
-
-                if (data->is_in_function && data->is_in_declaration) {
-                    data->id->type = IT_STRING;
-                    data->id->nil_possibility = false;
-                }
-
-                if (data->is_in_params) {
-                    if (!string_append(data->id->params, 's')) {
-                        return ER_INTERNAL;
-                    }
-                }
-                break;
-            case k_qmark_Int:
-                if (!data->is_in_function && data->is_in_declaration) {
-                    data->id->type = IT_INT;
-                    data->id->nil_possibility = true;
-                }
-
-                if (data->is_in_function && data->is_in_declaration) {
-                    data->id->type = IT_INT;
-                    data->id->nil_possibility = true;
-                }
-
-                if (data->is_in_params) {
-                    if (!string_append(data->id->params, 'I')) {
-                        return ER_INTERNAL;
-                    }
-                }
-                break;
-            case k_qmark_Double:
-                if (!data->is_in_function && data->is_in_declaration) {
-                    data->id->type = IT_DOUBLE;
-                    data->id->nil_possibility = true;
-                }
-
-                if (data->is_in_function && data->is_in_declaration) {
-                    data->id->type = IT_DOUBLE;
-                    data->id->nil_possibility = true;
-                }
-
-                if (data->is_in_params) {
-                    if (!string_append(data->id->params, 'D')) {
-                        return ER_INTERNAL;
-                    }
-                }
-                break;
-            case k_qmark_String:
-                if (!data->is_in_function && data->is_in_declaration) {
-                    data->id->type = IT_STRING;
-                    data->id->nil_possibility = true;
-                }
-
-                if (data->is_in_function && data->is_in_declaration) {
-                    data->id->type = IT_STRING;
-                    data->id->nil_possibility = true;
-                }
-
-                if (data->is_in_params) {
-                    if (!string_append(data->id->params, 'S')) {
-                        return ER_INTERNAL;
-                    }
-                }
-                break;
-
-            default:
-                return ER_SYNTAX;
-        }
+        insert_data_type(data);
     }
     else {
         return ER_SYNTAX;

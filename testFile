@@ -1,8 +1,9 @@
-func test() -> Int {
-return 1
+var ggwp : Int = 10
+func test(by a : Int) -> Int {
+    return a
 }
 
-test(10)
+test(by: ggwp)
 
 func factorial(_ n : Int) -> Int {
     var result : Int?
