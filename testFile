@@ -1,6 +1,10 @@
-var ggwp : Int = 10
+let ggwp : Int = 10
 func test(by a : Int) -> Int {
     return a
+}
+
+if let ggwp {
+    write("str")
 }
 
 test(by: ggwp)

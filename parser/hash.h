@@ -46,7 +46,7 @@ void destroyHashTable(HashTable* ht);
 
 unsigned int hash(char* str, int size);
 
-item_data* insertSymbol(HashTable* ht, char* name, bool is_function, bool *internal_error);
+item_data* insertSymbol(HashTable* ht, char* name, bool *internal_error);
 
 Symbol* findSymbol(HashTable* ht, char* name);
 

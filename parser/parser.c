@@ -82,88 +82,98 @@ parser_data_t *init_data()
 
     // readString() -> str?
 
-    if ((tmp = insertSymbol(parser_data->global_table, "readString", true, &internal_error)) == NULL) return NULL;
+    if ((tmp = insertSymbol(parser_data->global_table, "readString", &internal_error)) == NULL) return NULL;
     tmp->defined = true;
     tmp->type = IT_STRING;
     tmp->nil_possibility = true;
+    tmp->is_function = true;
 
     // readInt() -> int?
-    tmp = insertSymbol(parser_data->global_table, "readInt", true, &internal_error);
+    tmp = insertSymbol(parser_data->global_table, "readInt", &internal_error);
     tmp->defined = true;
     tmp->type = IT_INT;
     tmp->nil_possibility = true;
+    tmp->is_function = true;
 
     // readDouble() -> double?
-    tmp = insertSymbol(parser_data->global_table, "readDouble", true, &internal_error);
+    tmp = insertSymbol(parser_data->global_table, "readDouble", &internal_error);
     tmp->defined = true;
     tmp->type = IT_DOUBLE;
     tmp->nil_possibility = true;
+    tmp->is_function = true;
 
     // write(...)
-    tmp = insertSymbol(parser_data->global_table, "write", true, &internal_error);
+    tmp = insertSymbol(parser_data->global_table, "write", &internal_error);
     tmp->defined = true;
     tmp->type = IT_ANY;
     tmp->nil_possibility = false;
+    tmp->is_function = true;
 
     if (!string_append(tmp->params, 'a')) {
         return NULL;
     }
 
     // Int2Double(int) -> double
-    tmp = insertSymbol(parser_data->global_table, "Int2Double", true, &internal_error);
+    tmp = insertSymbol(parser_data->global_table, "Int2Double", &internal_error);
     tmp->defined = true;
     tmp->type = IT_DOUBLE;
     tmp->nil_possibility = false;
+    tmp->is_function = true;
 
     if (!string_append(tmp->params, 'i')) {
         return NULL;
     }
 
     // Double2Int(double) -> int
-    tmp = insertSymbol(parser_data->global_table, "Double2Int", true, &internal_error);
+    tmp = insertSymbol(parser_data->global_table, "Double2Int", &internal_error);
     tmp->defined = true;
     tmp->type = IT_INT;
     tmp->nil_possibility = false;
+    tmp->is_function = true;
 
     if (!string_append(tmp->params, 'd')) {
         return NULL;
     }
 
     // ord(str) -> int
-    tmp = insertSymbol(parser_data->global_table, "ord", true, &internal_error);
+    tmp = insertSymbol(parser_data->global_table, "ord", &internal_error);
     tmp->defined = true;
     tmp->type = IT_INT;
     tmp->nil_possibility = false;
+    tmp->is_function = true;
 
     if (!string_append(tmp->params, 's')) {
         return NULL;
     }
 
     // chr(int) -> str
-    tmp = insertSymbol(parser_data->global_table, "chr", true, &internal_error);
+    tmp = insertSymbol(parser_data->global_table, "chr", &internal_error);
     tmp->defined = true;
     tmp->type = IT_STRING;
     tmp->nil_possibility = false;
+    tmp->is_function = true;
 
     if (!string_append(tmp->params, 'i')) {
         return NULL;
     }
 
     // length(str) -> int
-    tmp = insertSymbol(parser_data->global_table, "length", true, &internal_error);
+    tmp = insertSymbol(parser_data->global_table, "length", &internal_error);
     tmp->defined = true;
     tmp->type = IT_INT;
     tmp->nil_possibility = false;
+    tmp->is_function = true;
 
     if (!string_append(tmp->params, 's')) {
         return NULL;
     }
 
     // substring(str, int, int) -> str?
-    tmp = insertSymbol(parser_data->global_table, "substring", true, &internal_error);
+    tmp = insertSymbol(parser_data->global_table, "substring", &internal_error);
     tmp->defined = true;
     tmp->type = IT_STRING;
     tmp->nil_possibility = true;
+    tmp->is_function = true;
 
     if (!string_append(tmp->params, 's')) {
         return NULL;
@@ -260,7 +270,6 @@ int stm(parser_data_t *data) {
         else if (data->token_ptr->token_type == T_ASSIGMENT) {
             GET_TOKEN()
             Symbol *tmp = findSymbol(data->global_table, data->token_ptr->attribute.string);
-            // todo: set flag on true when declaring new func
             if (tmp && tmp->data.is_function) {
                 VERIFY_TOKEN(T_BRACKET_OPEN)
                 data->param_index = 0;
@@ -316,6 +325,7 @@ int stm(parser_data_t *data) {
         VERIFY_TOKEN(T_BRACKET_OPEN)
         data->is_in_params = true;
         data->param_index = 0;
+        data->id->is_function = true;
         data->id->id_names = NULL;
         data->is_in_function = true;
         CHECK_RULE(func_params)
@@ -383,7 +393,6 @@ int stm(parser_data_t *data) {
         data->is_in_condition = true;
 
         GET_TOKEN()
-        // todo: if contidion == NULL -> check <else> body ???
         CHECK_RULE(condition)
 
         if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
@@ -479,6 +488,16 @@ int call_params_n(parser_data_t *data) {
 int condition(parser_data_t *data) {
     int ret_code = ER_NONE;
 
+    if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let) {
+        VERIFY_TOKEN(T_ID)
+        bool internal_error;
+        if (!insertSymbol(data->local_table, data->token_ptr->attribute.string, &internal_error)) {
+            if (internal_error) return ER_INTERNAL;
+            else return ER_UNDEF_VAR;
+        }
+        return ret_code;
+    }
+
     CHECK_RULE(expression)
 
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let) {
@@ -521,7 +540,7 @@ int func_params(parser_data_t *data) {
 
         // if we are in definition, we need to add parameters to the local symtable
         bool internal_error;
-        if (!(data->exp_type = insertSymbol(data->local_table, data->token_ptr->attribute.string, false, &internal_error))) {
+        if (!(data->exp_type = insertSymbol(data->local_table, data->token_ptr->attribute.string, &internal_error))) {
             if (internal_error) return ER_INTERNAL;
             else return ER_UNDEF_VAR;
         }
