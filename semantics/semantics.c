@@ -237,7 +237,7 @@ int number_of_symbols_after_stop(bool* found_stop){
 
 int reduce(){
 
-    int error_code;
+    int ret_code;
 
     t_stack_elem *op1 = NULL;
     t_stack_elem *op2 = NULL;
@@ -267,10 +267,13 @@ int reduce(){
     else{
         //todo check semantics
 
-        if ((error_code = check_semantics(rule, op1, op2, op3, &type_final))){
-            return error_code;
+        if ((ret_code = check_semantics(rule, op1, op2, op3, &type_final))){
+#ifdef SEM_DEBUG
+            printf("wrong types\n");
+#endif
+            return ret_code;
         }
-
+        item.type = type_final;
         for (int i = count_symbols_before_stop + 1; i > 0 ; i--) {
             stack_pop(&stack);
         }
@@ -281,7 +284,7 @@ int reduce(){
 }
 
 int expression(parser_data_t* data){
-    int error_code = ER_SYNTAX;
+    int ret_code = ER_SYNTAX;
 
 #ifdef SEM_DEBUG
     printf("semantic analysis starts\n");
@@ -302,7 +305,7 @@ int expression(parser_data_t* data){
         actual_symbol = convert_token_into_symbol(data->token_ptr);
         top_terminal = stack_top_terminal(&stack);
         if(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let)
-            return error_code;
+            return ret_code;
         if(top_terminal == NULL){
 #ifdef SEM_DEBUG
             printf("semantic analysis finish with error\n");
@@ -325,8 +328,8 @@ int expression(parser_data_t* data){
                 stack_print_all_symbols(&stack);
 #endif
 
-                data->token_ptr = next_token(&(data->line_cnt),&error_code, &(data->eol_flag));
-                if(error_code != ER_NONE)
+                data->token_ptr = next_token(&(data->line_cnt),&ret_code, &(data->eol_flag));
+                if(ret_code != ER_NONE)
                 {
 #ifdef SEM_DEBUG
                     printf("semantic analysis finish with error\n");
@@ -358,8 +361,8 @@ int expression(parser_data_t* data){
                 stack_print_all_symbols(&stack);
 #endif
 
-                data->token_ptr = next_token(&(data->line_cnt),&error_code, &(data->eol_flag));
-                if(error_code != ER_NONE)
+                data->token_ptr = next_token(&(data->line_cnt),&ret_code, &(data->eol_flag));
+                if(ret_code != ER_NONE)
                 {
 #ifdef SEM_DEBUG
                     printf("semantic analysis finish with error\n");
@@ -368,12 +371,12 @@ int expression(parser_data_t* data){
                 }
                 break;
             case '>':
-                if(reduce())
+                if((ret_code = reduce()))
                 {
 #ifdef SEM_DEBUG
                     printf("semantic analysis finish with error\n");
 #endif
-                    FREE(ER_INTERNAL);
+                    FREE(ret_code);
                 }
 
 #ifdef SEM_DEBUG
@@ -399,7 +402,7 @@ int expression(parser_data_t* data){
     printf("semantic analysis finish\n");
 #endif
 
-    return error_code;
+    return ret_code;
 }
 
 
