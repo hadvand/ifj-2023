@@ -262,13 +262,15 @@ int stm(parser_data_t *data) {
         }
         else if (data->token_ptr->token_type == T_ASSIGMENT) {
             GET_TOKEN()
-            if(table_count_elements_in_stack(data->tableStack) == 0)
-                return ER_INTERNAL;
-            Symbol *tmp = findSymbol(data->tableStack->top->table, data->token_ptr->attribute.string);
-            if (tmp && tmp->data.is_function) {
-                VERIFY_TOKEN(T_BRACKET_OPEN)
-                data->param_index = 0;
-                CHECK_RULE(call_params)
+            if(data->token_ptr->token_type == T_ID) {
+                if (table_count_elements_in_stack(data->tableStack) == 0)
+                    return ER_INTERNAL;
+                Symbol *tmp = findSymbol(data->tableStack->top->table, data->token_ptr->attribute.string);
+                if (tmp && tmp->data.is_function) {
+                    VERIFY_TOKEN(T_BRACKET_OPEN)
+                    data->param_index = 0;
+                    CHECK_RULE(call_params)
+                }
             }
             else {
                 CHECK_RULE(expression)

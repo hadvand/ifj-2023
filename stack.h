@@ -32,6 +32,8 @@ t_stack_elem* stack_top_terminal(t_stack* s);
 
 t_stack_elem *get_top(t_stack *s);
 
+int stack_count_elements(t_stack *s);
+
 void stack_print_all_symbols(t_stack *s);
 
 void stack_free(t_stack* s);

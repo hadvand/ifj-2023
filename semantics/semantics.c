@@ -66,15 +66,15 @@ int precedence_table[TABLE_SIZE][TABLE_SIZE] =
             {'>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', ' ', '>', ' ', '>'},   // |!|
             {'<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', '<', '=', '<', ' '},   // |(|
             {'>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', '>', ' ', '>'},   // |)|
-            {'>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', '>', ' ', '>'},   // |i|
+            {'>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', '>', '>', '>'},   // |i|
             {'<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', '<', ' '}   // |$|
 
 };
 
 
-Precedence_table_symbol convert_token_into_symbol(struct token* token){
+Precedence_table_symbol convert_token_into_symbol(parser_data_t *data, bool last_action_is_reduce ){
 
-    switch(token -> token_type){
+    switch(data->token_ptr->token_type){
 
         case T_PLUS:
             return PLUS;
@@ -105,6 +105,8 @@ Precedence_table_symbol convert_token_into_symbol(struct token* token){
         case T_BRACKET_CLOSE:
             return RIGHT_BRACKET;
         case T_ID:
+            if(last_action_is_reduce)
+                return DOLLAR;
             return IDENTIFIER;
         case T_INT:
             return INT_NUMBER;
@@ -278,12 +280,13 @@ int expression(parser_data_t* data){
 
     bool success = false;
 
+    bool last_action_is_reduce = false;
     t_stack_elem* top_terminal;
     Precedence_table_symbol actual_symbol;
 
     do {
-        actual_symbol = convert_token_into_symbol(data->token_ptr);
         top_terminal = stack_top_terminal(&stack);
+        actual_symbol = convert_token_into_symbol(data,last_action_is_reduce);
         if(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let)
             return ret_code;
         if(top_terminal == NULL){
@@ -317,7 +320,7 @@ int expression(parser_data_t* data){
                     FREE(ER_INTERNAL);
                 }
 
-
+                last_action_is_reduce = false;
                 break;
             case '<':
                 if(!stack_push_after_top_term(&stack,tmp_item,STOP))
@@ -347,8 +350,9 @@ int expression(parser_data_t* data){
 #ifdef SEM_DEBUG
                     printf("semantic analysis finish with error\n");
 #endif
-                    FREE(ER_INTERNAL);
+                    FREE(ret_code);
                 }
+                last_action_is_reduce = false;
                 break;
             case '>':
                 if((ret_code = reduce()))
@@ -362,6 +366,7 @@ int expression(parser_data_t* data){
 #ifdef SEM_DEBUG
                 stack_print_all_symbols(&stack);
 #endif
+                last_action_is_reduce = true;
                 break;
             default:
                 if(actual_symbol == DOLLAR && top_terminal->symbol == DOLLAR)
@@ -371,8 +376,9 @@ int expression(parser_data_t* data){
 #ifdef SEM_DEBUG
                     printf("semantic analysis finish with error\n");
 #endif
-                    FREE(ER_INTERNAL);
+                    FREE(ER_SYNTAX);
                 }
+                last_action_is_reduce = false;
                 break;
         }
 
