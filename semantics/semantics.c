@@ -287,6 +287,7 @@ int expression(parser_data_t* data){
     t_stack_elem* top_terminal;
     Precedence_table_symbol actual_symbol;
 
+
     do {
         top_terminal = stack_top_terminal(&stack);
         actual_symbol = convert_token_into_symbol(data,last_action_is_reduce);
@@ -386,6 +387,21 @@ int expression(parser_data_t* data){
         }
 
     }while(!success);
+    t_stack_elem op1;
+    op1.symbol = N_TERMINAL;
+    op1.item = *(data->id);
+    t_stack_elem op2;
+    op2.symbol = EQUAL;
+    t_stack_elem op3;
+    op3 = *(stack.top);
+    item_type final_type;
+    if((ret_code =check_semantics(NT_EQ_NT,&op1,&op2,&op3,&final_type))){
+#ifdef SEM_DEBUG
+        printf("semantic analysis finish with error\n");
+#endif
+        FREE(ret_code);
+    }
+
 
 #ifdef SEM_DEBUG
     printf("semantic analysis finish\n");
@@ -576,12 +592,14 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
 
             // Type check
-            if (operand_1->item.type != operand_3->item.type) {
+            if (operand_1->item.type != operand_3->item.type &&
+                (!operand_1->item.nil_possibility && operand_3->item.type == IT_NIL)) {
                 return ER_TYPE_COMP;
             }
 
-            if (operand_1->item.type == IT_NIL || operand_3->item.type == IT_NIL) {
-                return ER_UNDEF_VAR;
+            if ((operand_1->item.type == IT_NIL || operand_3->item.type == IT_NIL) &&
+                    (!operand_1->item.nil_possibility && operand_3->item.type == IT_NIL)) {
+                return ER_TYPE_COMP;
             }
 
             if (operand_1->item.type == IT_STRING) {
