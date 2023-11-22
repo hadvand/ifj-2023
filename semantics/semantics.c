@@ -387,6 +387,8 @@ int expression(parser_data_t* data){
         }
 
     }while(!success);
+
+
     t_stack_elem op1;
     op1.symbol = N_TERMINAL;
     op1.item = *(data->id);
@@ -402,6 +404,9 @@ int expression(parser_data_t* data){
         FREE(ret_code);
     }
 
+
+    if(op1.item.type == IT_UNDEF && op3.item.type != IT_NIL)
+        data->id->type = final_type;
 
 #ifdef SEM_DEBUG
     printf("semantic analysis finish\n");
@@ -504,7 +509,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         }
     }
 
-    if (rule != OPERAND && rule != LBR_NT_RBR){
+    if (rule != OPERAND && rule != LBR_NT_RBR && rule != NT_EQ_NT){
         if (operand_1->item.type == IT_UNDEF || operand_3->item.type == IT_UNDEF){
             return ER_UNDEF_VAR;
         }
@@ -609,7 +614,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                 }
             }
 
-            *type_final = IT_INT;
+            *type_final = operand_3->item.type;
             break;
 
         default:
