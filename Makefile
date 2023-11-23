@@ -15,7 +15,7 @@ all:
 main:
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 
-scanner-build: $(PROGS) /scanner/scanner_tests.c
+scanner-build: $(PROGS) ./scanner/scanner_tests.c
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 
 scanner_test: $(TESTS)

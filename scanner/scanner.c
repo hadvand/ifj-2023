@@ -115,6 +115,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
     token_t_ptr token = create_token();
 
     unsigned hex_count = 0;
+    unsigned quot_count = 0;
     *flag = false;
     while((c = getc(stdin))){
         //todo 2 more tokens missing
@@ -228,7 +229,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     single_token(token, *line_cnt,T_EOF,additional_string);
                 }
                 else{
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
                 return token;
@@ -238,7 +239,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     single_token(token,*line_cnt,T_TERN,additional_string);
                     return token;
                 } else{
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
             case(S_DIVISION):
@@ -270,7 +271,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     state = S_NESTED_COMMENT;
                 }
                 else if (c == EOF){
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
                 else if (c == '\n')
@@ -281,7 +282,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     comment_count++;
                 }
                 if(c == EOF){
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
                 state = S_COMMENT_BLOCK_START;
@@ -296,7 +297,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                         state = S_COMMENT_BLOCK_START;
                 }
                 else if (c == EOF){
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
                 else{
@@ -371,7 +372,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     continue;
                 }
                 else{
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
             case(S_DEMICAL):
@@ -415,7 +416,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     continue;
                 }
                 else{
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
             case(S_EXPONENT_SING):
@@ -428,7 +429,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     continue;
                 }
                 else{
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
             case(S_EXPONENT):
@@ -558,6 +559,10 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                             return NULL;
                         }
                     }
+                else {
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
+                    return NULL;
+                }
                 break;
             case(S_STRING_SPEC_SYMBOL):
                 if(c == 'u'){
@@ -644,7 +649,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     continue;
                 }
                 else {
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
 
@@ -657,18 +662,17 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                             scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
                             return NULL;
                         }
-                        printf("test");
                         state = S_STRING_HEX_NUMBER;
                         hex_count++;
                         continue;
                     } else {
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
             case(S_STRING_HEX_NUMBER):
                 if(hex_count > 8){
                     //todo i dont understand what is it error type
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
                 else if((c >= 48 && c <= 57) /*numbers 0..9*/
@@ -695,9 +699,10 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     else {
                         state = S_STRING_START;
                     }
+                    hex_count = 0;
                     continue;
                 } else {
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
             case(S_STRING):
@@ -711,7 +716,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     state = S_MULTILINE_OPEN;
                     continue;
                 } else {
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
             case(S_MULTILINE_OPEN):
@@ -720,7 +725,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     (*line_cnt)++;
                     continue;
                 } else {
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
             case(S_MULTILINE_START):
@@ -740,7 +745,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     state = S_MULTILINE_LINE;
                     continue;
                 } else {
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
             case(S_MULTILINE_LINE):
@@ -758,6 +763,16 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     state = S_STRING_SPEC_SYMBOL;
                     continue;
                 } else if (c >= PRINTABLE_MIN && c <= PRINTABLE_MAX) {
+                    if (c == '"') {
+                        quot_count++;
+                        if (quot_count == 3) {
+                            scanning_finish_with_error(token, additional_string, err_type, ER_LEX);
+                            return NULL;
+                        }
+                    }
+                    else {
+                        quot_count = 0;
+                    }
                     if(!string_append(additional_string,c)){
                         scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
                         return NULL;
@@ -765,7 +780,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     state = S_MULTILINE_LINE;
                     continue;
                 } else {
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
             case(S_MULTILINE_END_1):
@@ -785,7 +800,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     state = S_MULTILINE_LINE;
                     continue;
                 } else {
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
             case(S_MULTILINE_END_2):
@@ -805,7 +820,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     state = S_MULTILINE_LINE;
                     continue;
                 } else {
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
             case(S_MULTILINE_STRING):
@@ -815,7 +830,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     single_token(token,*line_cnt,T_STRING,additional_string);
                     return token;
                 } else{
-                    scanning_finish_with_error(token,additional_string,err_type,ER_SYNTAX);
+                    scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
 
                 }
