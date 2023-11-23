@@ -26,6 +26,7 @@ typedef struct
     bool nil_possibility;
     bool defined;
     bool global;
+    bool is_function;
 } item_data;
 
 typedef struct Symbol {

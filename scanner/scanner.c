@@ -258,8 +258,8 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
             case (S_COMMENT_STRING):
                 if(c == '\n' || c == EOF){
                     ungetc(c,stdin);
-                    single_token(token,*line_cnt,T_COMMENT_STRING,additional_string);
-                    return token;
+                    state = S_START;
+                    continue;
                 }
                 continue;
             case(S_COMMENT_BLOCK_START):
@@ -290,8 +290,8 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                 if(c == '/'){
                     comment_count--;
                     if(comment_count == 0){
-                        single_token(token,*line_cnt,T_COMMENT_BLOCK,additional_string);
-                        return token;
+                        state = S_START;
+                        continue;
                     } else
                         state = S_COMMENT_BLOCK_START;
                 }
@@ -702,6 +702,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                 }
             case(S_STRING):
                 if(additional_string->string != NULL){
+                    ungetc(c,stdin);
                     token->attribute.string = additional_string->string;
                     single_token(token,*line_cnt,T_STRING,additional_string);
                     return token;

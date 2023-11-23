@@ -1,1 +1,5 @@
-var b : Int = 10 + "str"
+let a = readInt()
+
+if (a < 0){
+    write("ggwp")
+}

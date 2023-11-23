@@ -46,6 +46,15 @@ bool stack_pop(t_stack *s)
 //    }
 //}
 
+int stack_count_elements(t_stack *s){
+    int count = 0;
+    t_stack_elem *tmp = s->top;
+    while (tmp != NULL){
+        count++;
+        tmp = tmp->next;
+    }
+    return count;
+}
 
 t_stack_elem* stack_top_terminal(t_stack* s)
 {

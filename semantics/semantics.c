@@ -66,15 +66,15 @@ int precedence_table[TABLE_SIZE][TABLE_SIZE] =
             {'>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', ' ', '>', ' ', '>'},   // |!|
             {'<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', '<', '=', '<', ' '},   // |(|
             {'>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', '>', ' ', '>'},   // |)|
-            {'>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', '>', ' ', '>'},   // |i|
+            {'>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', '>', '>', '>'},   // |i|
             {'<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', '<', ' '}   // |$|
 
 };
 
 
-Precedence_table_symbol convert_token_into_symbol(struct token* token){
+Precedence_table_symbol convert_token_into_symbol(parser_data_t *data, bool last_action_is_reduce ){
 
-    switch(token -> token_type){
+    switch(data->token_ptr->token_type){
 
         case T_PLUS:
             return PLUS;
@@ -105,6 +105,8 @@ Precedence_table_symbol convert_token_into_symbol(struct token* token){
         case T_BRACKET_CLOSE:
             return RIGHT_BRACKET;
         case T_ID:
+            if(last_action_is_reduce)
+                return DOLLAR;
             return IDENTIFIER;
         case T_INT:
             return INT_NUMBER;
@@ -112,7 +114,10 @@ Precedence_table_symbol convert_token_into_symbol(struct token* token){
             return DOUBLE_NUMBER;
         case T_STRING:
             return STRING;
-
+        case T_KEYWORD:
+            if(data->token_ptr->attribute.keyword == k_nil)
+                return NIL;
+            return DOLLAR;
         default:
             return DOLLAR;
     }
@@ -192,26 +197,6 @@ item_type get_type_from_params(item_data *data,int position){
     return IT_UNDEF;
 }
 
-item_type get_type(struct token* token, parser_data_t * data){
-
-    Symbol* symbol;
-
-    switch(token -> token_type){
-        case T_ID:
-            symbol = findSymbol(data->local_table, token->attribute.string);
-            if (symbol == NULL)
-                return IT_UNDEF;
-            return symbol->data.type;
-        case T_INT:
-            return IT_INT;
-        case T_DEMICAL:
-            return IT_DOUBLE;
-        case T_STRING:
-            return IT_STRING;
-        default:
-            return IT_UNDEF;
-    }
-}
 
 
 int number_of_symbols_after_stop(bool* found_stop){
@@ -298,12 +283,14 @@ int expression(parser_data_t* data){
 
     bool success = false;
 
+    bool last_action_is_reduce = false;
     t_stack_elem* top_terminal;
     Precedence_table_symbol actual_symbol;
 
+
     do {
-        actual_symbol = convert_token_into_symbol(data->token_ptr);
         top_terminal = stack_top_terminal(&stack);
+        actual_symbol = convert_token_into_symbol(data,last_action_is_reduce);
         if(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let)
             return ret_code;
         if(top_terminal == NULL){
@@ -337,7 +324,7 @@ int expression(parser_data_t* data){
                     FREE(ER_INTERNAL);
                 }
 
-
+                last_action_is_reduce = false;
                 break;
             case '<':
                 if(!stack_push_after_top_term(&stack,tmp_item,STOP))
@@ -367,8 +354,9 @@ int expression(parser_data_t* data){
 #ifdef SEM_DEBUG
                     printf("semantic analysis finish with error\n");
 #endif
-                    FREE(ER_INTERNAL);
+                    FREE(ret_code);
                 }
+                last_action_is_reduce = false;
                 break;
             case '>':
                 if((ret_code = reduce()))
@@ -382,6 +370,7 @@ int expression(parser_data_t* data){
 #ifdef SEM_DEBUG
                 stack_print_all_symbols(&stack);
 #endif
+                last_action_is_reduce = true;
                 break;
             default:
                 if(actual_symbol == DOLLAR && top_terminal->symbol == DOLLAR)
@@ -391,12 +380,33 @@ int expression(parser_data_t* data){
 #ifdef SEM_DEBUG
                     printf("semantic analysis finish with error\n");
 #endif
-                    FREE(ER_INTERNAL);
+                    FREE(ER_SYNTAX);
                 }
+                last_action_is_reduce = false;
                 break;
         }
 
     }while(!success);
+
+
+    t_stack_elem op1;
+    op1.symbol = N_TERMINAL;
+    op1.item = *(data->id);
+    t_stack_elem op2;
+    op2.symbol = EQUAL;
+    t_stack_elem op3;
+    op3 = *(stack.top);
+    item_type final_type;
+    if((ret_code =check_semantics(NT_EQ_NT,&op1,&op2,&op3,&final_type))){
+#ifdef SEM_DEBUG
+        printf("semantic analysis finish with error\n");
+#endif
+        FREE(ret_code);
+    }
+
+
+    if(op1.item.type == IT_UNDEF && op3.item.type != IT_NIL)
+        data->id->type = final_type;
 
 #ifdef SEM_DEBUG
     printf("semantic analysis finish\n");
@@ -499,7 +509,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         }
     }
 
-    if (rule != OPERAND && rule != LBR_NT_RBR){
+    if (rule != OPERAND && rule != LBR_NT_RBR && rule != NT_EQ_NT){
         if (operand_1->item.type == IT_UNDEF || operand_3->item.type == IT_UNDEF){
             return ER_UNDEF_VAR;
         }
@@ -587,12 +597,14 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
 
             // Type check
-            if (operand_1->item.type != operand_3->item.type) {
+            if (operand_1->item.type != operand_3->item.type &&
+                (!operand_1->item.nil_possibility && operand_3->item.type == IT_NIL)) {
                 return ER_TYPE_COMP;
             }
 
-            if (operand_1->item.type == IT_NIL || operand_3->item.type == IT_NIL) {
-                return ER_UNDEF_VAR;
+            if ((operand_1->item.type == IT_NIL || operand_3->item.type == IT_NIL) &&
+                    (!operand_1->item.nil_possibility && operand_3->item.type == IT_NIL)) {
+                return ER_TYPE_COMP;
             }
 
             if (operand_1->item.type == IT_STRING) {
@@ -602,7 +614,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                 }
             }
 
-            *type_final = IT_INT;
+            *type_final = operand_3->item.type;
             break;
 
         default:
@@ -625,7 +637,9 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 int check_param(parser_data_t* data, int position){
     if(data->token_ptr->token_type == T_ID){
         Symbol* sym = NULL;
-        if((sym = findSymbol(data->global_table,data->token_ptr->attribute.string)) != NULL){
+        if(table_count_elements_in_stack(data->tableStack) == 0)
+            return ER_INTERNAL;
+        if((sym = findSymbol(data->tableStack->top->table,data->token_ptr->attribute.string)) != NULL){
             data->id_type = &(sym->data);
             if(data->id_type->type != get_type_from_params(data->id,position)){
                 //TODO check error code
@@ -645,24 +659,27 @@ int check_param(parser_data_t* data, int position){
 }
 
 int check_func_call(parser_data_t *data, int position){
-
-
-
     int ret_code;
-    VERIFY_TOKEN(T_ID)
+    GET_TOKEN()
+    if(data->token_ptr->token_type != T_BRACKET_CLOSE && data->id->params->string == NULL)
+        return ER_SEMAN;
+    else if(data->token_ptr->token_type == T_ID){
 
-    printf("id_name[position]: %s AND %s\n",data->id->id_names[position],data->token_ptr->attribute.string);
+        printf("id_name[position]: %s AND %s\n",data->id->id_names[position],data->token_ptr->attribute.string);
 
-    if(!strcmp(data->id->id_names[position],data->token_ptr->attribute.string)){
-        //name_id : id/const
-        VERIFY_TOKEN(T_COLON)
-        GET_TOKEN()
-        return check_param(data,position);
+        if(!strcmp(data->id->id_names[position],data->token_ptr->attribute.string)){
+            //name_id : id/const
+            VERIFY_TOKEN(T_COLON)
+            GET_TOKEN()
+            return check_param(data,position);
 
+        }
+        else{
+            return check_param(data,position);
+        }
     }
-    else{
-        return check_param(data,position);
-    }
+
+
 
     return ER_NONE;
 }
