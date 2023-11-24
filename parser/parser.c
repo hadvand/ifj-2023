@@ -229,10 +229,9 @@ int analyse() {
 int program(parser_data_t *data) {
     int ret_code = ER_NONE;
 
-    new_stm:
-    CHECK_RULE(stm)
-
-    if (data->token_ptr->token_type != T_EOF) goto new_stm;
+    while (data->token_ptr->token_type != T_EOF) {
+        CHECK_RULE(stm)
+    }
 
     return ret_code;
 }
