@@ -316,7 +316,7 @@ int stm(parser_data_t *data) {
             GET_TOKEN()
             CHECK_RULE(expression)
 
-            if (!data->eol_flag || data->token_ptr->token_type != T_EOF) return ER_SYNTAX;
+            if (!data->eol_flag && data->token_ptr->token_type != T_EOF) return ER_SYNTAX;
 
             return stm(data);
         }
