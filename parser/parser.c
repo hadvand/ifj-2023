@@ -299,7 +299,7 @@ int stm(parser_data_t *data) {
             if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
 
             GET_TOKEN()
-            if (!data->eol_flag) return ER_SYNTAX;
+//            if (!data->eol_flag) return ER_SYNTAX;
 
             return stm(data);
         }
@@ -358,7 +358,6 @@ int stm(parser_data_t *data) {
             table_stack_pop(data->tableStack);
 
             GET_TOKEN()
-            if (!data->eol_flag) return ER_SYNTAX;
 
             return stm(data);
 
@@ -380,7 +379,7 @@ int stm(parser_data_t *data) {
             table_stack_pop(data->tableStack);
 
             GET_TOKEN()
-            if (!data->eol_flag) return ER_SYNTAX;
+//            if (!data->eol_flag) return ER_SYNTAX;
 
             return stm(data);
         }
@@ -413,7 +412,7 @@ int stm(parser_data_t *data) {
             VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
 
             GET_TOKEN()
-            if (!data->eol_flag) return ER_SYNTAX;
+//            if (!data->eol_flag) return ER_SYNTAX;
 
             return stm(data);
         }
@@ -438,9 +437,19 @@ int stm(parser_data_t *data) {
         VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
 
         GET_TOKEN()
-        if (!data->eol_flag) return ER_SYNTAX;
+//        if (!data->eol_flag) return ER_SYNTAX;
 
         return stm(data);
+    }
+
+    if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return) {
+        if (data->is_void_function) {
+            CHECK_RULE(return_void_rule)
+        }
+        else {
+            CHECK_RULE(return_rule)
+        }
+        return ER_NONE;
     }
     // <statement> -> ε
 
@@ -466,6 +475,11 @@ int call_params(parser_data_t *data) {
 int call_params_n(parser_data_t *data) {
     int ret_code;
 
+    if (data->token_ptr->token_type == T_BRACKET_CLOSE) {
+        GET_TOKEN()
+        return ER_NONE;
+    }
+
     GET_TOKEN()
     if (data->token_ptr->token_type == T_COMMA)
     {
@@ -490,13 +504,12 @@ int condition(parser_data_t *data) {
 
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let) {
         VERIFY_TOKEN(T_ID)
-        bool internal_error;
         if(table_count_elements_in_stack(data->tableStack) == 0)
             return ER_INTERNAL;
-        if (!insertSymbol(data->tableStack->top->table, data->token_ptr->attribute.string, &internal_error)) {
-            if (internal_error) return ER_INTERNAL;
-            else return ER_UNDEF_VAR;
+        if (!findSymbol(data->tableStack->top->table, data->token_ptr->attribute.string)) {
+            return ER_UNDEF_VAR;
         }
+        GET_TOKEN()
         return ret_code;
     }
 
@@ -522,11 +535,6 @@ int func_params(parser_data_t *data) {
 
     //T_ID its var_name. it is NOOOOT a var_id
     if(data->token_ptr->token_type == T_UNDERLINE || data->token_ptr->token_type == T_ID){
-
-        // if there is function named as parameter
-//        if (findSymbol(data->global_table, data->token_ptr->attribute.string))
-//            return ER_UNDEF_VAR;
-
         if((data->id->id_names[data->param_index] = (char*)realloc(data->id->id_names[data->param_index],strlen(data->token_ptr->attribute.string))) == NULL)
             return ER_INTERNAL;
         if(data->token_ptr->token_type == T_UNDERLINE)
@@ -601,7 +609,7 @@ int nil_flag(parser_data_t *data) {
     if (data->token_ptr->token_type == T_EXCLAMATION_MARK) {
         return ER_NONE;
     }
-    else if (data->eol_flag) {
+    else if (data->token_ptr->token_type == T_CURVED_BRACKET_CLOSE) {
         return ER_NONE;
     }
     else return ER_SYNTAX;

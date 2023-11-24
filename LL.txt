@@ -10,6 +10,7 @@
 <stm> -> if ( <condition> ) { <stm> } \n <stm>
 <stm> -> if ( <condition> ) { <stm> } else { <stm> } \n <stm>
 <stm> -> while ( <condition> ) { <stm> } \n <stm>
+<stm> -> <return> + <return_void>
 <stm> -> ε
 
 <condition> -> <expression>

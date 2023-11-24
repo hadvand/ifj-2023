@@ -56,6 +56,4 @@ int expression(parser_data_t* data);
 
 int check_func_call(parser_data_t *data, int position);
 
-
-
 #endif //IFJ_NEW_BEGINNING_SEMANTICS_H

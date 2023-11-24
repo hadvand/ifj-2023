@@ -665,7 +665,7 @@ int check_func_call(parser_data_t *data, int position){
         return ER_SEMAN;
     else if(data->token_ptr->token_type == T_ID){
 
-        printf("id_name[position]: %s AND %s\n",data->id->id_names[position],data->token_ptr->attribute.string);
+//        printf("id_name[position]: %s AND %s\n",data->id->id_names[position],data->token_ptr->attribute.string);
 
         if(!strcmp(data->id->id_names[position],data->token_ptr->attribute.string)){
             //name_id : id/const
@@ -678,9 +678,10 @@ int check_func_call(parser_data_t *data, int position){
             return check_param(data,position);
         }
     }
+    else if (data->token_ptr->token_type == T_BRACKET_CLOSE) {
 
-
-
+    }
+    
     return ER_NONE;
 }
 
