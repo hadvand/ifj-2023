@@ -641,7 +641,7 @@ int check_param(parser_data_t* data, int position){
             return ER_INTERNAL;
         if((sym = findSymbol(data->tableStack->top->table,data->token_ptr->attribute.string)) != NULL){
             data->id_type = &(sym->data);
-            if(data->id_type->type != get_type_from_params(data->id,position)){
+            if(data->id_type->type != get_type_from_params(data->id,position) && data->id->type != IT_ANY){
                 //TODO check error code
                 return ER_PARAMS;
             }
@@ -667,7 +667,7 @@ int check_func_call(parser_data_t *data, int position){
 
 //        printf("id_name[position]: %s AND %s\n",data->id->id_names[position],data->token_ptr->attribute.string);
 
-        if(!strcmp(data->id->id_names[position],data->token_ptr->attribute.string)){
+        if(data->id->id_names && !strcmp(data->id->id_names[position],data->token_ptr->attribute.string)){
             //name_id : id/const
             VERIFY_TOKEN(T_COLON)
             GET_TOKEN()
@@ -677,9 +677,6 @@ int check_func_call(parser_data_t *data, int position){
         else{
             return check_param(data,position);
         }
-    }
-    else if (data->token_ptr->token_type == T_BRACKET_CLOSE) {
-
     }
     
     return ER_NONE;

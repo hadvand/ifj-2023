@@ -108,6 +108,16 @@ parser_data_t *init_data()
             return NULL;
         }
 
+        // print(...)
+        tmp = insertSymbol(global_table, "print", &internal_error);
+        tmp->defined = true;
+        tmp->type = IT_ANY;
+        tmp->nil_possibility = false;
+        tmp->is_function = true;
+        if (!string_append(tmp->params, 'a')) {
+            return NULL;
+        }
+
         // Int2Double(int) -> double
         tmp = insertSymbol(global_table, "Int2Double", &internal_error);
         tmp->defined = true;
