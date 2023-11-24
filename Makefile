@@ -21,7 +21,7 @@ scanner-build: $(PROGS) ./scanner/scanner_tests.c
 scanner_test: $(TESTS)
 	$(CC) $(CFLAGS) -o $@ $^ -lm
 
-parser-build: $(PARSER_PROGS) $(PROGS) main.c
+parser-debug: $(PARSER_PROGS) $(PROGS) main.c
 	$(CC) $(CFLAGS) $^ -o $@ -lm -DPARS_DEBUG
 
 semantic-build: $(SEMANTIC_PROGS) $(PARSER_PROGS) $(PROGS) main.c
@@ -30,5 +30,8 @@ semantic-build: $(SEMANTIC_PROGS) $(PARSER_PROGS) $(PROGS) main.c
 semantic-tests: $(PROGS) $(PARSER_PROGS) $(SEM_TESTS)
 	$(CC) $(CFLAGS) $^ -o $@ -lm -DSEM_DEBUG -DPARS_DEBUG
 
+compiler: $(PARSER_PROGS) $(PROGS) main.c
+	$(CC) $(CFLAGS) $^ -o $@ -lm
+
 clean:
-	rm -rf *.o scanner-build parser-build scanner_tests semantic-build semantic-tests scanner_test
+	rm -rf *.o scanner-build parser-build scanner_tests semantic-build semantic-tests scanner_test parser-debug compiler

@@ -10,7 +10,11 @@ int main()
         return ret_code;
     }
     else {
+#ifdef PARS_DEBUG
         fprintf(stderr, "\nERROR code %d\n", ret_code);
+#else
+        fprintf(stderr, "%d\n", ret_code);
+#endif
     }
 
     return ER_NONE;

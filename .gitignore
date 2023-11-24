@@ -9,6 +9,7 @@ scanner-build
 parser-build
 semantic-build
 testFile
+compiler
 
 .vscode
 CMakeLists.txt

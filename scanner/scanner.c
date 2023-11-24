@@ -34,6 +34,7 @@ const char *keywords[] = {"Double","else","func","if","Int","let","nil","return"
 void single_token(token_t_ptr token ,int line_cnt, token_type_t token_type,string_ptr string){
     token->token_type = token_type;
     token->line = line_cnt;
+#ifdef PARS_DEBUG
     printf("Token %s found in line %i", tokens[token->token_type], line_cnt);
 
     switch (token->token_type) {
@@ -56,6 +57,7 @@ void single_token(token_t_ptr token ,int line_cnt, token_type_t token_type,strin
             printf("\n");
             break;
     }
+#endif
 
     string_free(string);
     string = NULL;

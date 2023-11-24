@@ -189,10 +189,6 @@ void free_data(parser_data_t *parser_data) {
 
 int analyse() {
 
-#ifdef PARS_DEBUG
-    printf("Sample of debug");
-#endif
-
     int ret_code = ER_NONE;
     bool flag = false;
 
@@ -311,7 +307,7 @@ int stm(parser_data_t *data) {
             GET_TOKEN()
             CHECK_RULE(expression)
 
-            if (!data->eol_flag) return ER_SYNTAX;
+            if (!data->eol_flag || data->token_ptr->token_type != T_EOF) return ER_SYNTAX;
 
             return stm(data);
         }
