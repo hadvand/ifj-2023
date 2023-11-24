@@ -290,6 +290,8 @@ int expression(parser_data_t* data){
 
     do {
         top_terminal = stack_top_terminal(&stack);
+        if(top_terminal->symbol == IDENTIFIER && data->id_type != NULL && data->id_type->is_function)
+            call_params(data);
         actual_symbol = convert_token_into_symbol(data,last_action_is_reduce);
         if(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let)
             return ret_code;
@@ -597,7 +599,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
 
             // Type check
-            if (operand_1->item.type != operand_3->item.type &&
+            if ((operand_1->item.type != operand_3->item.type && operand_1->item.type != IT_UNDEF) ||
                 (!operand_1->item.nil_possibility && operand_3->item.type == IT_NIL)) {
                 return ER_TYPE_COMP;
             }

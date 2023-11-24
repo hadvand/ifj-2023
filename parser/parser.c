@@ -267,20 +267,7 @@ int stm(parser_data_t *data) {
         }
         else if (data->token_ptr->token_type == T_ASSIGMENT) {
             GET_TOKEN()
-            if(data->token_ptr->token_type == T_ID) {
-                if (table_count_elements_in_stack(data->tableStack) == 0)
-                    return ER_INTERNAL;
-                Symbol *tmp = findSymbol(data->tableStack->top->table, data->token_ptr->attribute.string);
-                if (tmp && tmp->data.is_function) {
-                    VERIFY_TOKEN(T_BRACKET_OPEN)
-                    data->param_index = 0;
-                    CHECK_RULE(call_params)
-                    data->id->type = tmp->data.type;
-                } else CHECK_RULE(expression)
-            }
-            else {
-                CHECK_RULE(expression)
-            }
+            CHECK_RULE(expression)
 
             data->is_in_declaration = false;
             return stm(data);
@@ -356,12 +343,12 @@ int stm(parser_data_t *data) {
             GET_TOKEN()
             CHECK_RULE(stm)
 
-            if (data->is_void_function) {
-                CHECK_RULE(return_void_rule)
-            }
-            else {
-                CHECK_RULE(return_rule)
-            }
+//            if (data->is_void_function) {
+//                CHECK_RULE(return_void_rule)
+//            }
+//            else {
+//                CHECK_RULE(return_rule)
+//            }
 
             if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
             table_stack_pop(data->tableStack);
@@ -418,7 +405,7 @@ int stm(parser_data_t *data) {
             GET_TOKEN()
             CHECK_RULE(stm)
 
-            VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
+            if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
 
             GET_TOKEN()
 //            if (!data->eol_flag) return ER_SYNTAX;
@@ -438,19 +425,19 @@ int stm(parser_data_t *data) {
         GET_TOKEN()
         CHECK_RULE(condition)
 
-        VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
+        if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
 
         GET_TOKEN()
         CHECK_RULE(stm)
 
-        VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
+        if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
 
         GET_TOKEN()
 //        if (!data->eol_flag) return ER_SYNTAX;
 
         return stm(data);
     }
-
+    //return ....
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return) {
         if (data->is_void_function) {
             CHECK_RULE(return_void_rule)
@@ -521,7 +508,9 @@ int condition(parser_data_t *data) {
         GET_TOKEN()
         return ret_code;
     }
-
+    item_data tmp_data;
+    tmp_data.type = IT_INT;
+    data->id = &tmp_data;
     CHECK_RULE(expression)
 
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let) {
@@ -661,6 +650,7 @@ item_type get_type(struct token* token, parser_data_t * data){
             symbol = findSymbol(data->tableStack->top->table, token->attribute.string);
             if (symbol == NULL)
                 return IT_UNDEF;
+            data->id_type = &(symbol->data);
             return symbol->data.type;
         case T_INT:
             return IT_INT;
