@@ -1,6 +1,6 @@
 #include "semantics.h"
-#include "../stack.h"
-#include "../structures/error.h"
+#include "stack.h"
+#include "error.h"
 
 #define TABLE_SIZE 16
 

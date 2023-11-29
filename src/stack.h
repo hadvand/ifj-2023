@@ -1,8 +1,8 @@
 #ifndef IFJ_2023_STACK_H
 #define IFJ_2023_STACK_H
 
-#include "semantics/semantics.h"
-#include "parser/hash.h"
+#include "semantics.h"
+#include "hash.h"
 
 #define BRACKET_STACK_MAX 1000
 
