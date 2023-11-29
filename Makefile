@@ -10,9 +10,9 @@ SEMANTIC_PROGS = ./semantics/*
 TESTS = ./tests/* ./scanner/scanner.c ./scanner/scanner.h ./structures/*
 SEM_TESTS = ./semantic_tests/*
 
-all:
-	$(CC) $(CFLAGS) $^ -o $@ -lm
-main:
+all: main
+
+main: $(PARSER_PROGS) $(PROGS) main.c
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 
 scanner-build: $(PROGS) ./scanner/scanner_tests.c

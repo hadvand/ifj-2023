@@ -1,5 +1,4 @@
 var x: Int = 1
-var y: Double = 1.0
-//y transate to Int
+var y: String = "ABC"
 var z: Int = x + y
 print(z)

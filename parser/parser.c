@@ -548,7 +548,7 @@ int func_params(parser_data_t *data) {
         if (findSymbol(data->tableStack->top->table, data->token_ptr->attribute.string))
             return ER_UNDEF_VAR;
 
-        // if we are in definition, we need to add parameters to the local symtable
+        // if we are in definition, we need to add_LitInt_LitInt parameters to the local symtable
         bool internal_error;
         if(table_count_elements_in_stack(data->tableStack) == 0)
             return ER_INTERNAL;
