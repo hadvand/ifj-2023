@@ -1,0 +1,4 @@
+var x: Int? = nil
+var y: Int = 1
+var z: Int? = x / y
+print(z)
