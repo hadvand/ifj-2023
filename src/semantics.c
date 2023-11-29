@@ -312,7 +312,7 @@ int expression(parser_data_t* data){
 
         switch (precedence_table[get_index(top_terminal->symbol)][get_index(actual_symbol)]) {
             case '=':
-                tmp_item.type = get_type(data->token_ptr,data,&(tmp_item.nil_possibility));
+                tmp_item.type = get_type(data->token_ptr,data,&(tmp_item.nil_possibility),&(tmp_item.defined));
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
 #ifdef SEM_DEBUG
@@ -344,7 +344,7 @@ int expression(parser_data_t* data){
 #endif
                     FREE(ER_INTERNAL);
                 }
-                tmp_item.type = get_type(data->token_ptr,data,&(tmp_item.nil_possibility));
+                tmp_item.type = get_type(data->token_ptr,data,&(tmp_item.nil_possibility),&(tmp_item.defined));
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
 #ifdef SEM_DEBUG
@@ -526,31 +526,50 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         case OPERAND:
             type_final->type = operand_1->item.type;
             type_final->nil_possibility = operand_1->item.nil_possibility;
+            type_final->defined = operand_1->item.defined;
             break;
 
         case LBR_NT_RBR:
             type_final->type = operand_2->item.type;
             type_final->nil_possibility = operand_2->item.nil_possibility;
+            type_final->defined = true;
             break;
 
         case NT_PLUS_NT:
         case NT_MINUS_NT:
         case NT_MUL_NT:
+
             // concatenation
             if (operand_1->item.type == IT_STRING && operand_3->item.type == IT_STRING && rule == NT_PLUS_NT){
                 type_final->type = IT_STRING;
                 NIL_POSSIBILITY_CHECK();
                 type_final->nil_possibility = operand_1->item.nil_possibility;
+                type_final->defined = true;
                 break;
             }
-            if (operand_1->item.type == IT_INT && operand_3->item.type == IT_INT){
+            else if (operand_1->item.type == IT_INT && operand_3->item.type == IT_INT){
                 type_final->type = IT_INT;
                 NIL_POSSIBILITY_CHECK();
                 type_final->nil_possibility = operand_1->item.nil_possibility;
+                type_final->defined = true;
                 break;
             }
-            if (operand_1->item.type == IT_STRING || operand_3->item.type == IT_STRING){
+            else if (operand_1->item.type == IT_DOUBLE && operand_3->item.type == IT_DOUBLE){
+                type_final->type = IT_DOUBLE;
+                NIL_POSSIBILITY_CHECK();
+                type_final->nil_possibility = operand_1->item.nil_possibility;
+                type_final->defined = true;
+                break;
+            }
+            else if (operand_1->item.type == IT_STRING || operand_3->item.type == IT_STRING){
                 return ER_TYPE_COMP;
+            }
+            else if(operand_1->item.type != operand_3->item.type){
+                if((operand_1->item.type == IT_INT && operand_3->item.type == IT_DOUBLE && !operand_1->item.defined) ||
+                   (operand_3->item.type == IT_INT && operand_1->item.type == IT_DOUBLE && !operand_3->item.defined))
+                    ; //todo translate Int2Double
+                else
+                    return ER_TYPE_COMP;
             }
 
             type_final->type = IT_DOUBLE;
@@ -569,6 +588,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         case NT_DIV_NT:
             type_final->type = IT_DOUBLE;
             NIL_POSSIBILITY_CHECK();
+            type_final->defined = true;
 
             if (operand_1->item.type == IT_STRING || operand_3->item.type == IT_STRING){
                 return ER_TYPE_COMP;
@@ -608,14 +628,6 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         case NT_LTN_NT:
         case NT_MEQ_NT:
         case NT_MTN_NT:
-
-            if(operand_1->item.type != operand_3->item.type && operand_1->item.type != IT_UNDEF){
-                if((operand_1->item.type == IT_INT && operand_3->item.type == IT_DOUBLE && !operand_1->item.defined) ||
-                        (operand_3->item.type == IT_INT && operand_1->item.type == IT_DOUBLE && !operand_3->item.defined))
-                    ; //todo translate Int2Double
-                else
-                    return ER_TYPE_COMP;
-            }
             // Type check
             if ((operand_1->item.type != operand_3->item.type && operand_1->item.type != IT_UNDEF) ||
                 (!operand_1->item.nil_possibility && operand_3->item.type == IT_NIL)) {
@@ -651,6 +663,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             if(operand_1->item.type == IT_UNDEF){
                 operand_1->item.type = type_final->type;
                 operand_1->item.nil_possibility = operand_3->item.nil_possibility;
+                operand_1->item.defined = true;
             }
 
             break;
@@ -688,7 +701,7 @@ int check_param(parser_data_t* data, int position){
         }
 
     } else{
-        item_type type = get_type(data->token_ptr,data,false);
+        item_type type = get_type(data->token_ptr,data,false,false);
         if(type != IT_UNDEF && type != get_type_from_params(data->id,position))
             //TODO check error code
             return ER_PARAMS;

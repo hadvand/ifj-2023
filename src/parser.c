@@ -246,6 +246,7 @@ int stm(parser_data_t *data) {
         data->is_in_declaration = true;
         VERIFY_TOKEN(T_ID)
         INSERT_SYMBOL()
+        data->id->defined = true;
         GET_TOKEN()
         if (data->token_ptr->token_type == T_COLON) {
             GET_TOKEN()
@@ -639,9 +640,10 @@ int return_void_rule(parser_data_t *data) {
     }
 }
 
-item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibility){
+item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibility, bool* defined){
 
     UNUSED(nil_possibility);
+    UNUSED(defined);
 
     Symbol* symbol;
 
@@ -651,17 +653,22 @@ item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibil
                 return IT_UNDEF;
             symbol = findSymbol(data->tableStack->top->table, token->attribute.string);
             if (symbol == NULL){
+                *nil_possibility = false;
+                *defined = false;
                 return IT_UNDEF;
-                nil_possibility = false;
             }
             data->id_type = &(symbol->data);
-            nil_possibility = &(symbol->data.nil_possibility);
+            *nil_possibility = symbol->data.nil_possibility;
+            *defined = symbol->data.defined;
             return symbol->data.type;
         case T_INT:
+            defined = false;
             return IT_INT;
         case T_STRING:
+            defined = false;
             return IT_STRING;
         case T_DEMICAL:
+            defined = false;
             return IT_DOUBLE;
         default:
             switch (token->attribute.keyword) {
@@ -684,7 +691,7 @@ item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibil
 }
 
 int insert_data_type(parser_data_t *data){
-    item_type type  = get_type(data->token_ptr,data,false);
+    item_type type  = get_type(data->token_ptr,data,false,false);
 
     //var declaration
     if(data->is_in_declaration && !data->is_in_function && !data->is_in_params){

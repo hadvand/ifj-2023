@@ -63,5 +63,5 @@ int call_params(parser_data_t *data);
 
 int call_params_n(parser_data_t *data);
 
-item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibility);
+item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibility, bool* defined);
 #endif //IFJ_2023_PARSER_H
