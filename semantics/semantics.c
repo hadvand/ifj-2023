@@ -10,7 +10,7 @@ t_stack stack;
 static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3);
 
 static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3,
-                           item_type *type_final);
+                           item_data *type_final);
 
 #define GET_TOKEN() \
         if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code, &(data->eol_flag))) == NULL) {\
@@ -27,7 +27,12 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         \
         return _error_code;   \
         }\
-    while(0)
+    while(0) \
+
+#define NIL_POSSIBILITY_CHECK() \
+                if(operand_1->item.nil_possibility != operand_3->item.nil_possibility) \
+                    return ER_TYPE_COMP;                                               \
+                type_final->nil_possibility = operand_1->item.nil_possibility\
 
 typedef enum {
     I_PLUS,
@@ -227,8 +232,7 @@ int reduce(){
     t_stack_elem *op1 = NULL;
     t_stack_elem *op2 = NULL;
     t_stack_elem *op3 = NULL;
-    item_data item;
-    item_type type_final;
+    item_data final_item;
     Precedence_rules rule;
     bool stop_is_founded;
 
@@ -247,22 +251,25 @@ int reduce(){
     else
         return ER_SYNTAX;
 
-    if(rule == NOT_A_RULE)
+    if(rule == NOT_A_RULE){
+#ifdef SEM_DEBUG
+        printf("not a rule\n");
+#endif
         return ER_SYNTAX;
+    }
     else{
         //todo check semantics
 
-        if ((ret_code = check_semantics(rule, op1, op2, op3, &type_final))){
+        if ((ret_code = check_semantics(rule, op1, op2, op3, &final_item))){
 #ifdef SEM_DEBUG
             printf("wrong types\n");
 #endif
             return ret_code;
         }
-        item.type = type_final;
         for (int i = count_symbols_before_stop + 1; i > 0 ; i--) {
             stack_pop(&stack);
         }
-        stack_push(&stack,item,N_TERMINAL);
+        stack_push(&stack,final_item,N_TERMINAL);
     }
 
     return ER_NONE;
@@ -279,6 +286,7 @@ int expression(parser_data_t* data){
     //TODO init item_data
     item_data tmp_item;
     tmp_item.type = IT_UNDEF;
+    tmp_item.nil_possibility = false;
     stack_push(&stack, tmp_item, DOLLAR);
 
     bool success = false;
@@ -304,7 +312,7 @@ int expression(parser_data_t* data){
 
         switch (precedence_table[get_index(top_terminal->symbol)][get_index(actual_symbol)]) {
             case '=':
-                tmp_item.type = get_type(data->token_ptr,data);
+                tmp_item.type = get_type(data->token_ptr,data,&(tmp_item.nil_possibility));
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
 #ifdef SEM_DEBUG
@@ -336,7 +344,7 @@ int expression(parser_data_t* data){
 #endif
                     FREE(ER_INTERNAL);
                 }
-                tmp_item.type = get_type(data->token_ptr,data);
+                tmp_item.type = get_type(data->token_ptr,data,&(tmp_item.nil_possibility));
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
 #ifdef SEM_DEBUG
@@ -398,7 +406,7 @@ int expression(parser_data_t* data){
     op2.symbol = EQUAL;
     t_stack_elem op3;
     op3 = *(stack.top);
-    item_type final_type;
+    item_data final_type;
     if((ret_code =check_semantics(NT_EQ_NT,&op1,&op2,&op3,&final_type))){
 #ifdef SEM_DEBUG
         printf("semantic analysis finish with error\n");
@@ -406,9 +414,6 @@ int expression(parser_data_t* data){
         FREE(ret_code);
     }
 
-
-    if(op1.item.type == IT_UNDEF && op3.item.type != IT_NIL)
-        data->id->type = final_type;
 
 #ifdef SEM_DEBUG
     printf("semantic analysis finish\n");
@@ -492,7 +497,7 @@ static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_
 }
 
 static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3,
-                    item_type *type_final){
+                    item_data *type_final){
 
     //bool operand_1_to_int = false;
     //bool operand_3_to_int = false;
@@ -519,11 +524,13 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
     switch(rule){
         case OPERAND:
-            *type_final = operand_1->item.type;
+            type_final->type = operand_1->item.type;
+            type_final->nil_possibility = operand_1->item.nil_possibility;
             break;
 
         case LBR_NT_RBR:
-            *type_final = operand_2->item.type;
+            type_final->type = operand_2->item.type;
+            type_final->nil_possibility = operand_2->item.nil_possibility;
             break;
 
         case NT_PLUS_NT:
@@ -531,18 +538,24 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         case NT_MUL_NT:
             // concatenation
             if (operand_1->item.type == IT_STRING && operand_3->item.type == IT_STRING && rule == NT_PLUS_NT){
-                *type_final = IT_STRING;
+                type_final->type = IT_STRING;
+                NIL_POSSIBILITY_CHECK();
+                type_final->nil_possibility = operand_1->item.nil_possibility;
                 break;
             }
             if (operand_1->item.type == IT_INT && operand_3->item.type == IT_INT){
-                *type_final = IT_INT;
+                type_final->type = IT_INT;
+                NIL_POSSIBILITY_CHECK();
+                type_final->nil_possibility = operand_1->item.nil_possibility;
                 break;
             }
             if (operand_1->item.type == IT_STRING || operand_3->item.type == IT_STRING){
                 return ER_TYPE_COMP;
             }
 
-            *type_final = IT_DOUBLE;
+            type_final->type = IT_DOUBLE;
+            NIL_POSSIBILITY_CHECK();
+            type_final->nil_possibility = operand_1->item.nil_possibility;
 
             if (operand_1->item.type == IT_INT){
                 operand_1_to_double = true;
@@ -554,7 +567,8 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             break;
 
         case NT_DIV_NT:
-            *type_final = IT_DOUBLE;
+            type_final->type = IT_DOUBLE;
+            NIL_POSSIBILITY_CHECK();
 
             if (operand_1->item.type == IT_STRING || operand_3->item.type == IT_STRING){
                 return ER_TYPE_COMP;
@@ -572,13 +586,13 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
             if (operand_1->item.type == IT_UNDEF && operand_3->item.type == IT_NIL) {
                 // Operand_1 is undefined, but Operand_3 is nil
-                *type_final = IT_NIL;
+                type_final->type = IT_NIL;
             } else if (operand_1->item.type == IT_UNDEF) {
                 // Operand_1 is undefined
-                *type_final = operand_3->item.type;
+                type_final->type = operand_3->item.type;
             } else {
                 // Operand_1 is defined
-                *type_final = operand_1->item.type;
+                type_final->type = operand_1->item.type;
             }
             break;
             //dealing with ! monster
@@ -587,17 +601,21 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             if (operand_1->item.type == IT_UNDEF || operand_1->item.type == IT_NIL) {
                 return ER_UNDEF_VAR;
             }
-            *type_final = operand_1->item.type;
+            type_final->type = operand_1->item.type;
             break;
-
-        case NT_EQ_NT:
         case NT_NEQ_NT:
         case NT_LEQ_NT:
         case NT_LTN_NT:
         case NT_MEQ_NT:
         case NT_MTN_NT:
 
-
+            if(operand_1->item.type != operand_3->item.type && operand_1->item.type != IT_UNDEF){
+                if((operand_1->item.type == IT_INT && operand_3->item.type == IT_DOUBLE && !operand_1->item.defined) ||
+                        (operand_3->item.type == IT_INT && operand_1->item.type == IT_DOUBLE && !operand_3->item.defined))
+                    ; //todo translate Int2Double
+                else
+                    return ER_TYPE_COMP;
+            }
             // Type check
             if ((operand_1->item.type != operand_3->item.type && operand_1->item.type != IT_UNDEF) ||
                 (!operand_1->item.nil_possibility && operand_3->item.type == IT_NIL)) {
@@ -616,11 +634,30 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                 }
             }
 
-            *type_final = operand_3->item.type;
+            type_final->type = operand_3->item.type;
+            break;
+        case NT_EQ_NT:
+
+            if(operand_3->item.type == IT_UNDEF)
+                return ER_OTHER_SEM;
+
+            if(operand_1->item.type != operand_3->item.type && operand_1->item.type != IT_UNDEF){
+                return ER_TYPE_COMP;
+            }
+            if(!operand_1->item.nil_possibility && operand_3->item.nil_possibility)
+                return ER_TYPE_COMP;
+
+            type_final->type = operand_3->item.type;
+            if(operand_1->item.type == IT_UNDEF){
+                operand_1->item.type = type_final->type;
+                operand_1->item.nil_possibility = operand_3->item.nil_possibility;
+            }
+
             break;
 
         default:
-            break;
+            //todo change error;
+            return ER_OTHER_SEM;
 
     }
 
@@ -651,7 +688,7 @@ int check_param(parser_data_t* data, int position){
         }
 
     } else{
-        item_type type = get_type(data->token_ptr,data);
+        item_type type = get_type(data->token_ptr,data,false);
         if(type != IT_UNDEF && type != get_type_from_params(data->id,position))
             //TODO check error code
             return ER_PARAMS;

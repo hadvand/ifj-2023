@@ -639,7 +639,9 @@ int return_void_rule(parser_data_t *data) {
     }
 }
 
-item_type get_type(struct token* token, parser_data_t * data){
+item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibility){
+
+    UNUSED(nil_possibility);
 
     Symbol* symbol;
 
@@ -648,9 +650,12 @@ item_type get_type(struct token* token, parser_data_t * data){
             if(table_count_elements_in_stack(data->tableStack) == 0)
                 return IT_UNDEF;
             symbol = findSymbol(data->tableStack->top->table, token->attribute.string);
-            if (symbol == NULL)
+            if (symbol == NULL){
                 return IT_UNDEF;
+                nil_possibility = false;
+            }
             data->id_type = &(symbol->data);
+            nil_possibility = &(symbol->data.nil_possibility);
             return symbol->data.type;
         case T_INT:
             return IT_INT;
@@ -679,7 +684,7 @@ item_type get_type(struct token* token, parser_data_t * data){
 }
 
 int insert_data_type(parser_data_t *data){
-    item_type type  = get_type(data->token_ptr,data);
+    item_type type  = get_type(data->token_ptr,data,false);
 
     //var declaration
     if(data->is_in_declaration && !data->is_in_function && !data->is_in_params){
