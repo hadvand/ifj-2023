@@ -535,6 +535,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             type_final->defined = true;
             break;
 
+        case NT_DIV_NT:
         case NT_PLUS_NT:
         case NT_MINUS_NT:
         case NT_MUL_NT:
@@ -565,6 +566,8 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                 return ER_TYPE_COMP;
             }
             else if(operand_1->item.type != operand_3->item.type){
+                if(rule == NT_DIV_NT)
+                    return ER_TYPE_COMP;
                 if((operand_1->item.type == IT_INT && operand_3->item.type == IT_DOUBLE && !operand_1->item.defined) ||
                    (operand_3->item.type == IT_INT && operand_1->item.type == IT_DOUBLE && !operand_3->item.defined))
                     ; //todo translate Int2Double
@@ -583,23 +586,6 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                 operand_3_to_double = true;
             }
 
-            break;
-
-        case NT_DIV_NT:
-            type_final->type = IT_DOUBLE;
-            NIL_POSSIBILITY_CHECK();
-            type_final->defined = true;
-
-            if (operand_1->item.type == IT_STRING || operand_3->item.type == IT_STRING){
-                return ER_TYPE_COMP;
-            }
-
-            if (operand_1->item.type == IT_INT){
-                operand_1_to_double = true;
-            }
-            if (operand_3->item.type == IT_INT){
-                operand_3_to_double = true;
-            }
             break;
             // dealing with ?? monster
         case NT_COALESCE_NT:
