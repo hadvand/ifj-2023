@@ -104,9 +104,7 @@ parser_data_t *init_data()
         tmp->type = IT_ANY;
         tmp->nil_possibility = false;
         tmp->is_function = true;
-        if (!string_append(tmp->params, 'a')) {
-            return NULL;
-        }
+        if (!string_append(tmp->params, 'a')) return NULL;
 
         // print(...)
         tmp = insertSymbol(global_table, "print", &internal_error);
@@ -291,6 +289,7 @@ int stm(parser_data_t *data) {
         if (data->token_ptr->token_type == T_BRACKET_OPEN) {
 
             data->param_index = 0;
+
             CHECK_RULE(call_params)
 
             if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
