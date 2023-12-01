@@ -298,10 +298,28 @@ int expression(parser_data_t* data){
 
     do {
         top_terminal = stack_top_terminal(&stack);
-        if(top_terminal->symbol == IDENTIFIER && data->id_type != NULL && data->id_type->is_function)
-            call_params(data);
+        if(top_terminal->symbol == IDENTIFIER && data->id_type != NULL && data->id_type->is_function) {
+            if(table_count_elements_in_stack(data->tableStack) == 0)
+                return ER_INTERNAL;
+            Symbol *idFromTable = NULL;
+            if((idFromTable = findSymbol(data->tableStack->top->table,data->id_type->id))== NULL)
+                return ER_UNDEF_VAR;
+            data->id = &(idFromTable->data);
+            if (data->token_ptr->token_type == T_BRACKET_OPEN) {
+
+                data->param_index = 0;
+
+                if ((ret_code = call_params(data))) return ret_code;
+
+                if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
+
+                GET_TOKEN()
+                return ret_code;
+//            if (!data->eol_flag) return ER_SYNTAX;
+            }
+        }
         actual_symbol = convert_token_into_symbol(data,last_action_is_reduce);
-        if(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let)
+        if(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let && data->eol_flag)
             return ret_code;
         if(top_terminal == NULL){
 #ifdef SEM_DEBUG
@@ -362,7 +380,7 @@ int expression(parser_data_t* data){
                 if(ret_code != ER_NONE)
                 {
 #ifdef SEM_DEBUG
-                    printf("semantic analysis finish with error\n");
+                    printf("semantic analysis finished with error\n");
 #endif
                     FREE(ret_code);
                 }
