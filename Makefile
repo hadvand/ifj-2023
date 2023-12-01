@@ -30,7 +30,7 @@ semantic-build: $(SEMANTIC_PROGS) $(PARSER_PROGS) $(PROGS) src/main.c
 semantic-tests: $(PROGS) $(PARSER_PROGS) $(SEM_TESTS)
 	$(CC) $(CFLAGS) $^ -o $@ -lm -DSEM_DEBUG -DPARS_DEBUG
 
-compiler: $(PARSER_PROGS) $(PROGS) main.c
+compiler: $(PARSER_PROGS) $(PROGS) src/main.c
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 
 clean:
