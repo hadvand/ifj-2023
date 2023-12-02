@@ -1,0 +1,5 @@
+func test_func(of a: Int) -> Int{
+    return a
+}
+
+test_func(of:1.0)
