@@ -29,6 +29,8 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         }\
     while(0) \
 
+#define UNUSED(x) (void)(x)
+
 #define NIL_POSSIBILITY_CHECK() \
                 if(operand_1->item.nil_possibility != operand_3->item.nil_possibility) \
                     return ER_TYPE_COMP;                                               \
@@ -183,20 +185,28 @@ int func_call(parser_data_t* data) {
 }
 
 
-item_type get_type_from_params(item_data *data,int position){
+item_type get_type_from_params(item_data *data,int position, bool *nil_possibility){
+    UNUSED(nil_possibility);
+    *nil_possibility = false;
     if(data->params == NULL)
         return IT_UNDEF;
     if(position > data->params->last_index)
         return IT_UNDEF;
     switch (data->params->string[position]) {
         case 's':
+            return IT_STRING;
         case 'S':
+            *nil_possibility = true;
             return IT_STRING;
         case 'd':
+            return IT_DOUBLE;
         case 'D':
+            *nil_possibility = true;
             return IT_DOUBLE;
         case 'i':
+            return IT_INT;
         case 'I':
+            *nil_possibility = true;
             return IT_INT;
     }
     return IT_UNDEF;
@@ -692,7 +702,8 @@ int check_param(parser_data_t* data, int position){
         if(table_count_elements_in_stack(data->tableStack) == 0)
             return ER_INTERNAL;
         if((sym = findSymbol(data->tableStack->top->table,data->token_ptr->attribute.string)) != NULL){
-            if(sym->data.type != get_type_from_params(data->id_type,position) && data->id_type->type != IT_ANY){
+            bool param_nil_possibility = false;
+            if(sym->data.type != get_type_from_params(data->id_type,position, &param_nil_possibility) && data->id_type->type != IT_ANY){
                 //TODO check error code
                 return ER_PARAMS;
             }
@@ -701,9 +712,12 @@ int check_param(parser_data_t* data, int position){
 
     } else{
         item_type type = get_type(data->token_ptr,data,false,false);
-        if(type != IT_UNDEF && type != get_type_from_params(data->id,position))
-            //TODO check error code
+        bool param_nil_possibility = false;
+        if(type != IT_UNDEF && type != get_type_from_params(data->id_type,position,&param_nil_possibility)) {
+            if(type == IT_NIL && param_nil_possibility)
+                return ER_NONE;
             return ER_PARAMS;
+        }
         return ER_NONE;
     }
     return ER_SYNTAX;
