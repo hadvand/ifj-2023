@@ -732,7 +732,7 @@ int check_param(parser_data_t* data, int position){
         }
         return ER_NONE;
     }
-    return ER_SYNTAX;
+    return ER_PARAMS;
 }
 
 int check_func_call(parser_data_t *data, int position){
