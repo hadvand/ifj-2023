@@ -289,6 +289,7 @@ int expression(parser_data_t* data){
     tmp_item.nil_possibility = false;
     stack_push(&stack, tmp_item, DOLLAR);
 
+    data->id_type = NULL;
     bool success = false;
 
     bool last_action_is_reduce = false;

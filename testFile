@@ -1,2 +1,3 @@
-var input: String? = readString()
-print(input)
+var str1 = "abc"
+let i = length(str1)
+var str2 = "cba"
