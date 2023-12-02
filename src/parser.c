@@ -287,7 +287,7 @@ int stm(parser_data_t *data) {
         data->id = &(idFromTable->data);
         GET_TOKEN()
         if (data->token_ptr->token_type == T_BRACKET_OPEN) {
-
+            data->id_type = data->id;
             data->param_index = 0;
 
             CHECK_RULE(call_params)
@@ -454,7 +454,7 @@ int stm(parser_data_t *data) {
 
 //<call_params> -> var_name : var_id <call_params_n>
 //<call_params> -> var_id <call_params_n>
-int call_params(parser_data_t *data) {
+int  call_params(parser_data_t *data) {
     int ret_code = ER_NONE;
 
     if((ret_code = check_func_call(data,data->param_index))){
@@ -472,7 +472,6 @@ int call_params_n(parser_data_t *data) {
     int ret_code;
 
     if (data->token_ptr->token_type == T_BRACKET_CLOSE) {
-        GET_TOKEN()
         return ER_NONE;
     }
 

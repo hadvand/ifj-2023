@@ -298,11 +298,25 @@ int expression(parser_data_t* data){
 
     do {
         top_terminal = stack_top_terminal(&stack);
-        if(top_terminal->symbol == IDENTIFIER && data->id_type != NULL && data->id_type->is_function)
-            call_params(data);
+        if(top_terminal->symbol == IDENTIFIER && data->id_type != NULL && data->id_type->is_function) {
+
+            if (data->token_ptr->token_type == T_BRACKET_OPEN) {
+
+                data->param_index = 0;
+
+                if ((ret_code = call_params(data))) return ret_code;
+
+                if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
+
+                GET_TOKEN()
+                return ret_code;
+            }
+            else
+                return ER_SYNTAX;
+        }
         actual_symbol = convert_token_into_symbol(data,last_action_is_reduce);
-//        if(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let)
-//            return ret_code;
+        if(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let && !data->eol_flag)
+            return ret_code;
         if(top_terminal == NULL){
 #ifdef SEM_DEBUG
             printf("semantic analysis finish with error\n");
@@ -413,8 +427,7 @@ int expression(parser_data_t* data){
 #endif
         FREE(ret_code);
     }
-
-
+    *(data->id) = op1.item;
 #ifdef SEM_DEBUG
     printf("semantic analysis finish\n");
 #endif
@@ -678,8 +691,7 @@ int check_param(parser_data_t* data, int position){
         if(table_count_elements_in_stack(data->tableStack) == 0)
             return ER_INTERNAL;
         if((sym = findSymbol(data->tableStack->top->table,data->token_ptr->attribute.string)) != NULL){
-            data->id_type = &(sym->data);
-            if(data->id_type->type != get_type_from_params(data->id,position) && data->id->type != IT_ANY){
+            if(sym->data.type != get_type_from_params(data->id_type,position) && data->id_type->type != IT_ANY){
                 //TODO check error code
                 return ER_PARAMS;
             }
@@ -699,13 +711,13 @@ int check_param(parser_data_t* data, int position){
 int check_func_call(parser_data_t *data, int position){
     int ret_code;
     GET_TOKEN()
-    if(data->token_ptr->token_type != T_BRACKET_CLOSE && data->id->params->string == NULL)
+    if(data->token_ptr->token_type != T_BRACKET_CLOSE && data->id_type->params->string == NULL)
         return ER_SEMAN;
     else if(data->token_ptr->token_type == T_ID){
 
 //        printf("id_name[position]: %s AND %s\n",data->id->id_names[position],data->token_ptr->attribute.string);
 
-        if(data->id->id_names && !strcmp(data->id->id_names[position],data->token_ptr->attribute.string)){
+        if(data->id_type->id_names && !strcmp(data->id_type->id_names[position],data->token_ptr->attribute.string)){
             //name_id : id/const
             VERIFY_TOKEN(T_COLON)
             GET_TOKEN()
