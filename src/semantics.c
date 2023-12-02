@@ -714,8 +714,9 @@ int check_param(parser_data_t* data, int position){
             return ER_INTERNAL;
         if((sym = findSymbol(data->tableStack->top->table,data->token_ptr->attribute.string)) != NULL){
             bool param_nil_possibility = false;
-            if(sym->data.type != get_type_from_params(data->id_type,position, &param_nil_possibility) && data->id_type->type != IT_ANY){
-                //TODO check error code
+            if((sym->data.type != get_type_from_params(data->id_type,position, &param_nil_possibility)
+                || sym->data.nil_possibility != param_nil_possibility)
+                && data->id_type->type != IT_ANY){
                 return ER_PARAMS;
             }
             return ER_NONE;
