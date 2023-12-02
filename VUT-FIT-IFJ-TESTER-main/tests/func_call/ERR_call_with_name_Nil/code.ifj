@@ -1,0 +1,5 @@
+func test_func(of a: Int) -> Int{
+    return a
+}
+var ggwp: Int? = nil
+test_func(of:ggwp)
