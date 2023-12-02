@@ -722,8 +722,8 @@ int check_param(parser_data_t* data, int position){
         }
 
     } else{
-        item_type type = get_type(data->token_ptr,data,false,false);
         bool param_nil_possibility = false;
+        item_type type = get_type(data->token_ptr,data,&param_nil_possibility,false);
         if(type != IT_UNDEF && type != get_type_from_params(data->id_type,position,&param_nil_possibility)) {
             if(type == IT_NIL && param_nil_possibility)
                 return ER_NONE;
