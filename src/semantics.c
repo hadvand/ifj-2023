@@ -297,6 +297,7 @@ int expression(parser_data_t* data){
     item_data tmp_item;
     tmp_item.type = IT_UNDEF;
     tmp_item.nil_possibility = false;
+    tmp_item.it_is_nil = false;
     stack_push(&stack, tmp_item, DOLLAR);
 
     data->id_type = NULL;
@@ -338,6 +339,7 @@ int expression(parser_data_t* data){
         switch (precedence_table[get_index(top_terminal->symbol)][get_index(actual_symbol)]) {
             case '=':
                 tmp_item.type = get_type(data->token_ptr,data,&(tmp_item.nil_possibility),&(tmp_item.defined));
+                tmp_item.it_is_nil = data->token_ptr->attribute.keyword == k_nil;
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
 #ifdef SEM_DEBUG
@@ -370,6 +372,7 @@ int expression(parser_data_t* data){
                     FREE(ER_INTERNAL);
                 }
                 tmp_item.type = get_type(data->token_ptr,data,&(tmp_item.nil_possibility),&(tmp_item.defined));
+                tmp_item.it_is_nil = (data->token_ptr->attribute.keyword == k_nil || (data->id_type != NULL && data->id_type->it_is_nil));
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
 #ifdef SEM_DEBUG
@@ -551,6 +554,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             type_final->type = operand_1->item.type;
             type_final->nil_possibility = operand_1->item.nil_possibility;
             type_final->defined = operand_1->item.defined;
+            type_final->it_is_nil = operand_1->item.it_is_nil;
             break;
 
         case LBR_NT_RBR:
@@ -564,6 +568,8 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         case NT_MINUS_NT:
         case NT_MUL_NT:
 
+            if(operand_1->item.it_is_nil || operand_3->item.it_is_nil)
+                return ER_OTHER_SEM;
             // concatenation
             if (operand_1->item.type == IT_STRING && operand_3->item.type == IT_STRING && rule == NT_PLUS_NT){
                 type_final->type = IT_STRING;
@@ -587,16 +593,16 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                 break;
             }
             else if (operand_1->item.type == IT_STRING || operand_3->item.type == IT_STRING){
-                return ER_TYPE_COMP;
+                return ER_OTHER_SEM;
             }
             else if(operand_1->item.type != operand_3->item.type){
                 if(rule == NT_DIV_NT)
-                    return ER_TYPE_COMP;
+                    return ER_OTHER_SEM;
                 if((operand_1->item.type == IT_INT && operand_3->item.type == IT_DOUBLE && !operand_1->item.defined) ||
                    (operand_3->item.type == IT_INT && operand_1->item.type == IT_DOUBLE && !operand_3->item.defined))
                     ; //todo translate Int2Double
                 else
-                    return ER_TYPE_COMP;
+                    return ER_OTHER_SEM;
             }
 
             type_final->type = IT_DOUBLE;
@@ -663,15 +669,20 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             if(operand_3->item.type == IT_UNDEF)
                 return ER_OTHER_SEM;
 
-            if(operand_1->item.type != operand_3->item.type && operand_1->item.type != IT_UNDEF){
+            if(operand_1->item.type != operand_3->item.type && operand_1->item.type != IT_UNDEF && operand_3->item.type != IT_NIL){
                 return ER_TYPE_COMP;
             }
             if(!operand_1->item.nil_possibility && operand_3->item.nil_possibility)
                 return ER_TYPE_COMP;
 
-            type_final->type = operand_3->item.type;
+            if(operand_1->item.type == IT_UNDEF && operand_3->item.type == IT_NIL)
+                return ER_OTHER_SEM;
+
+            if(operand_3->item.type == IT_NIL)
+                operand_1->item.it_is_nil = true;
+            //type_final->type = operand_3->item.type;
             if(operand_1->item.type == IT_UNDEF){
-                operand_1->item.type = type_final->type;
+                operand_1->item.type = operand_3->item.type;
                 operand_1->item.nil_possibility = operand_3->item.nil_possibility;
                 operand_1->item.defined = true;
             }
