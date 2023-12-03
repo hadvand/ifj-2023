@@ -306,7 +306,8 @@ int stm(parser_data_t *data) {
         if(table_count_elements_in_stack(data->tableStack) == 0)
             return ER_INTERNAL;
         Symbol *idFromTable = NULL;
-        if((idFromTable = findSymbol(data->tableStack->top->table,data->token_ptr->attribute.string))== NULL)
+
+        if((idFromTable = findSymbol_global(data->tableStack,data->token_ptr->attribute.string))== NULL)
             return ER_UNDEF_VAR;
         data->id = &(idFromTable->data);
         GET_TOKEN()

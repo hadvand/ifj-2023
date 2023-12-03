@@ -65,3 +65,14 @@ int table_count_elements_in_stack(t_table_stack *s){
     }
     return count;
 }
+
+Symbol *findSymbol_global(t_table_stack *s, char *name)
+{
+    for (t_table_stack_elem *tmp = s->top; tmp != NULL; tmp = tmp->next)
+    {
+        Symbol *symbol = findSymbol(tmp->table, name);
+        if(symbol != NULL)
+            return symbol;
+    }
+    return NULL;
+}

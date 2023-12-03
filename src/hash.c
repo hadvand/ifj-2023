@@ -106,7 +106,6 @@ Symbol* findSymbol(HashTable* ht, char* name) {
     return NULL;
 }
 
-
 void removeSymbol(HashTable* ht, char* name) {
     unsigned int index = hash(name, ht->size);
     Symbol* current = ht->table[index];
