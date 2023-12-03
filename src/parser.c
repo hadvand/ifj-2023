@@ -244,7 +244,7 @@ int stm(parser_data_t *data) {
         data->is_in_declaration = true;
         VERIFY_TOKEN(T_ID)
         INSERT_SYMBOL()
-        data->id->defined = true;
+        data->id->defined = false;
         GET_TOKEN()
         if (data->token_ptr->token_type == T_COLON) {
             GET_TOKEN()

@@ -338,6 +338,8 @@ int expression(parser_data_t* data){
         switch (precedence_table[get_index(top_terminal->symbol)][get_index(actual_symbol)]) {
             case '=':
                 tmp_item.type = get_type(data->token_ptr,data,&(tmp_item.nil_possibility),&(tmp_item.defined));
+                if(actual_symbol == IDENTIFIER && data->token_ptr->token_type == T_ID && !tmp_item.defined)
+                    return ER_UNDEF_VAR;
                 tmp_item.it_is_nil = data->token_ptr->attribute.keyword == k_nil;
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
@@ -371,6 +373,8 @@ int expression(parser_data_t* data){
                     FREE(ER_INTERNAL);
                 }
                 tmp_item.type = get_type(data->token_ptr,data,&(tmp_item.nil_possibility),&(tmp_item.defined));
+                if(actual_symbol == IDENTIFIER && data->token_ptr->token_type == T_ID && !tmp_item.defined)
+                    return ER_UNDEF_VAR;
                 tmp_item.it_is_nil = (data->token_ptr->attribute.keyword == k_nil || (data->id_type != NULL && data->id_type->it_is_nil));
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
@@ -425,6 +429,8 @@ int expression(parser_data_t* data){
 
     }while(!success);
 
+    if(data->id == NULL)
+        return ER_OTHER_SEM;
 
     t_stack_elem op1;
     op1.symbol = N_TERMINAL;
@@ -594,16 +600,16 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                 break;
             }
             else if (operand_1->item.type == IT_STRING || operand_3->item.type == IT_STRING){
-                return ER_OTHER_SEM;
+                return ER_TYPE_COMP;
             }
             else if(operand_1->item.type != operand_3->item.type){
                 if(rule == NT_DIV_NT)
-                    return ER_OTHER_SEM;
+                    return ER_TYPE_COMP;
                 if((operand_1->item.type == IT_INT && operand_3->item.type == IT_DOUBLE && !operand_1->item.defined) ||
                    (operand_3->item.type == IT_INT && operand_1->item.type == IT_DOUBLE && !operand_3->item.defined))
                     ; //todo translate Int2Double
                 else
-                    return ER_OTHER_SEM;
+                    return ER_TYPE_COMP;
             }
 
             type_final->type = IT_DOUBLE;
@@ -671,7 +677,10 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                 return ER_OTHER_SEM;
 
             if(operand_1->item.type != operand_3->item.type && operand_1->item.type != IT_UNDEF && operand_3->item.type != IT_NIL){
-                return ER_TYPE_COMP;
+                if(operand_1->item.type == IT_DOUBLE && operand_3->item.type == IT_INT && !operand_3->item.defined)
+                    ; // TODO Generate int2Double
+                else
+                    return ER_TYPE_COMP;
             }
             if(operand_1->item.type != IT_UNDEF &&
                 !operand_1->item.nil_possibility &&
@@ -687,9 +696,8 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             if(operand_1->item.type == IT_UNDEF){
                 operand_1->item.type = operand_3->item.type;
                 operand_1->item.nil_possibility = operand_3->item.nil_possibility;
-                operand_1->item.defined = true;
             }
-
+            operand_1->item.defined = true;
             break;
 
         default:
@@ -757,6 +765,12 @@ int check_func_call(parser_data_t *data, int position){
         else{
             return check_param(data,position);
         }
+    }
+    else if(data->token_ptr->token_type == T_INT
+            || data->token_ptr->token_type == T_DEMICAL
+            || data->token_ptr->token_type == T_STRING
+            || (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_nil)){
+        return check_param(data,position);
     }
     
     return ER_NONE;
