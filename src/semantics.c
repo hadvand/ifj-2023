@@ -754,7 +754,6 @@ int check_func_call(parser_data_t *data, int position){
     else if(data->token_ptr->token_type == T_ID){
 
 //        printf("id_name[position]: %s AND %s\n",data->id->id_names[position],data->token_ptr->attribute.string);
-
         if(data->id_type->id_names && !strcmp(data->id_type->id_names[position],data->token_ptr->attribute.string)){
             //name_id : id/const
             VERIFY_TOKEN(T_COLON)
@@ -762,14 +761,16 @@ int check_func_call(parser_data_t *data, int position){
             return check_param(data,position);
 
         }
-        else{
+        else if ((data->id_type->id_names && !strcmp(data->id_type->id_names[position],"_")) || !strcmp(data->id_type->id,"write")){
             return check_param(data,position);
-        }
+        } else
+            return ER_PARAMS;
     }
-    else if(data->token_ptr->token_type == T_INT
+    else if(data->id_type->id_names && !strcmp(data->id_type->id_names[position],"_")
+            && (data->token_ptr->token_type == T_INT
             || data->token_ptr->token_type == T_DEMICAL
             || data->token_ptr->token_type == T_STRING
-            || (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_nil)){
+            || (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_nil))){
         return check_param(data,position);
     }
     
