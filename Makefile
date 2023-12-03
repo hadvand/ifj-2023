@@ -7,6 +7,7 @@ CFLAGS += -g
 PROGS = src/scanner.c src/scanner.h src/error.h src/string.h src/string.c
 PARSER_PROGS = src/hash.h src/hash.c src/parser.h src/parser.c src/table_stack.h src/table_stack.c src/stack.c src/stack.h src/semantics.c src/semantics.h
 SEMANTIC_PROGS = src/semantics.c src/semantics.h
+GENERATOR_PROGS = src/generator.c src/generator.h
 TESTS = ./tests/* src/scanner.c src/scanner.h src/error.h src/string.h src/string.c
 SEM_TESTS = ./semantic_tests/*
 
@@ -29,6 +30,9 @@ semantic-build: $(SEMANTIC_PROGS) $(PARSER_PROGS) $(PROGS) src/main.c
 
 semantic-tests: $(PROGS) $(PARSER_PROGS) $(SEM_TESTS)
 	$(CC) $(CFLAGS) $^ -o $@ -lm -DSEM_DEBUG -DPARS_DEBUG
+
+generator-tests: $(GENERATOR_PROGS)
+	$(CC) $(CFLAGS) $^ -o gen_tests -lm
 
 compiler: $(PARSER_PROGS) $(PROGS) src/main.c
 	$(CC) $(CFLAGS) $^ -o $@ -lm
