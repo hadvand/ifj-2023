@@ -748,6 +748,8 @@ int check_param(parser_data_t* data, int position){
 
 int check_func_call(parser_data_t *data, int position){
     int ret_code;
+    if(position >= data->id_type->params->last_index)
+        return ER_PARAMS;
     GET_TOKEN()
     if(data->token_ptr->token_type != T_BRACKET_CLOSE && data->id_type->params->string == NULL)
         return ER_PARAMS;
