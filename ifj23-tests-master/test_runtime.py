@@ -105,7 +105,18 @@ def test(input_code: str, expected_output: str, program_stdin: str = "",
         print_error(f"Error: compiler return code does not match expected value: GGWP {expected_return_code} != {compiler_return_code}")
         print_compiler_info()
         nr_failed += 1
+        print("--------------------------")
         return
+    else:
+        print_green("compiler stdin:")
+        print(input_code)
+        # print_red("compiler stdout:")
+        # print(compiler_stdout.decode())
+        print_green("compiler stderr:")
+        print(compiler_stderr.decode())
+        print_green(
+            f"compiler returned error code {compiler_return_code} ({compiler_output.returncode})")
+        print("--------------------------")
 
     if compiler_return_code != ErrorType.success:
         return
