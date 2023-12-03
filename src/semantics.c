@@ -671,7 +671,9 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             if(operand_1->item.type != operand_3->item.type && operand_1->item.type != IT_UNDEF && operand_3->item.type != IT_NIL){
                 return ER_TYPE_COMP;
             }
-            if(!operand_1->item.nil_possibility && operand_3->item.nil_possibility)
+            if(operand_1->item.type != IT_UNDEF &&
+                !operand_1->item.nil_possibility &&
+                    operand_3->item.nil_possibility)
                 return ER_TYPE_COMP;
 
             if(operand_1->item.type == IT_UNDEF && operand_3->item.type == IT_NIL)
