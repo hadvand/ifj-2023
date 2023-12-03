@@ -103,7 +103,7 @@ Precedence_table_symbol convert_token_into_symbol(parser_data_t *data, bool last
             return L_EQUAL;
         case T_MORE_EQUAL:
             return G_EQUAL;
-        case T_KEYWORD_NIL_POSSIBILITY:
+        case T_TERN:
             return DQ_MARK;
         case T_EXCLAMATION_MARK:
             return EX_MARK;
@@ -560,6 +560,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             type_final->type = operand_2->item.type;
             type_final->nil_possibility = operand_2->item.nil_possibility;
             type_final->defined = true;
+            type_final->it_is_nil = operand_2->item.it_is_nil;
             break;
 
         case NT_DIV_NT:
@@ -569,6 +570,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
             if(operand_1->item.it_is_nil || operand_3->item.it_is_nil)
                 return ER_OTHER_SEM;
+            type_final->it_is_nil = false;
             // concatenation
             if (operand_1->item.type == IT_STRING && operand_3->item.type == IT_STRING && rule == NT_PLUS_NT){
                 type_final->type = IT_STRING;
