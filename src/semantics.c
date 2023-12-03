@@ -775,6 +775,7 @@ int check_func_call(parser_data_t *data, int position){
             || (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_nil))){
         return check_param(data,position);
     }
+    //else if(data->token_ptr->token_type == T_BRACKET_CLOSE && position )
     
     return ER_NONE;
 }
