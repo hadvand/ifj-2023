@@ -388,18 +388,9 @@ int stm(parser_data_t *data) {
             GET_TOKEN()
             CHECK_RULE(stm)
 
-            if (data->is_void_function) {
-                CHECK_RULE(return_void_rule)
-            }
-            else {
-                CHECK_RULE(return_rule)
-            }
-
-            VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
             table_stack_pop(data->tableStack);
 
             GET_TOKEN()
-//            if (!data->eol_flag) return ER_SYNTAX;
 
             return stm(data);
         }
@@ -465,9 +456,11 @@ int stm(parser_data_t *data) {
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return) {
         if (data->is_void_function) {
             CHECK_RULE(return_void_rule)
+            if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_FUNC_RETURN;
         }
         else {
             CHECK_RULE(return_rule)
+            VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
         }
         return ER_NONE;
     }
@@ -652,10 +645,14 @@ int return_rule(parser_data_t *data) {
 // <return_void> -> return
 // <return_void> -> ε
 int return_void_rule(parser_data_t *data) {
+    int ret_code;
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return) {
+        GET_TOKEN()
         return ER_NONE;
     }
+    // eps
     else if (data->eol_flag) {
+        GET_TOKEN()
         return ER_NONE;
     }
     else {
