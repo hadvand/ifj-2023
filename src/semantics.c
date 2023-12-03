@@ -321,7 +321,6 @@ int expression(parser_data_t* data){
                 if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
 
                 GET_TOKEN()
-                return ret_code;
             }
             else
                 return ER_SYNTAX;
@@ -739,7 +738,7 @@ int check_func_call(parser_data_t *data, int position){
     int ret_code;
     GET_TOKEN()
     if(data->token_ptr->token_type != T_BRACKET_CLOSE && data->id_type->params->string == NULL)
-        return ER_SEMAN;
+        return ER_PARAMS;
     else if(data->token_ptr->token_type == T_ID){
 
 //        printf("id_name[position]: %s AND %s\n",data->id->id_names[position],data->token_ptr->attribute.string);
