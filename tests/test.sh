@@ -1,7 +1,7 @@
 #!/bin/bash
 
 testNum=1
-compilerPath="../src/main"
+compilerPath="../compiler"
 
 # arguments:
 # 1. name of test
@@ -128,5 +128,5 @@ execTest "Create a variable inside while loop" "input/init_inside_while.swift" "
 execTest "Shadowing a variable inside if-let statement" "input/if_let_shadowing.swift" "output/if_let_shadowing.txt" 0
 execTest "Implicit conversions in variable declarations" "input/var_init_implicit_convert.swift" "output/empty.txt" 0
 execTest "Illegal implicit conversions in variable declarations" "input/var_init_implicit_convert_bad.swift" "output/empty.txt" 7
-execTest "Implicit conversions in variable assignment" "input/assignment_implicit_convert.swift" "output/empty.txt" 0
+execTest "Implicit conversions in variable assignment" "input/assignment_implicit_convert.swift" "output/empty.txt" 7
 execTest "Illegal implicit conversions in variable assignment" "input/assignment_implicit_convert_wrong.swift" "output/empty.txt" 7

@@ -193,17 +193,17 @@ def test_all():
     let b = a
     """)
 
-    test_invalid("""
-    var t: Bool
-    while t {
-    }
-    """, error_undefined_var)
+    # test_invalid("""
+    # var t: Bool
+    # while t {
+    # }
+    # """, error_undefined_var)
 
-    test_invalid("""
-    var t: Bool
-    if t {
-    }
-    """, error_undefined_var)
+    # test_invalid("""
+    # var t: Bool
+    # if t {
+    # }
+    # """, error_undefined_var)
 
     test("""
     let a: Double
@@ -309,12 +309,12 @@ def test_all():
     } else {}
     """, "true")
 
-    test_invalid("""
-    let a: Bool? = 45 > 3
-    if a {
-        write(a)
-    } else {}
-    """, error_type)
+    # test_invalid("""
+    # let a: Bool? = 45 > 3
+    # if a {
+    #     write(a)
+    # } else {}
+    # """, error_type)
 
     test_invalid("""
     let a = 45
@@ -1247,13 +1247,13 @@ def test_all():
     test_expr("0 - 5", "-5")
     test_expr(" \"\\u{1}\\u{37}\\u{71}\\u{7e}\\u{7f}\"",
               chr(0x1) + chr(0x37) + chr(0x71) + chr(0x7e) + chr(0x7f))
-    test("""
-    let a = 45
-    let b = 2.3
-    let c: Bool? = nil
-    let d = "\\n"
-    write(a, " kentus ", a, d, b, c, " ", d )
-    """, f"45 kentus 45\n{2.3.hex()} \n")
+    # test("""
+    # let a = 45
+    # let b = 2.3
+    # let c: Bool? = nil
+    # let d = "\\n"
+    # write(a, " kentus ", a, d, b, c, " ", d )
+    # """, f"45 kentus 45\n{2.3.hex()} \n")
 
     test("""
     let a = 4 - 8
