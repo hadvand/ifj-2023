@@ -555,6 +555,7 @@ int func_params(parser_data_t *data) {
             if (internal_error) return ER_INTERNAL;
             else return ER_UNDEF_VAR;
         }
+        data->exp_type->defined = true;
 
         VERIFY_TOKEN(T_COLON)
 
