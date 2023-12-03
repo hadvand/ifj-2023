@@ -30,7 +30,7 @@
         data->id = insertSymbol(data->tableStack->top->table,data->token_ptr->attribute.string,&internal_error);\
         if(!data->id){\
             if(internal_error) return ER_INTERNAL;\
-        else return ER_UNDEF_VAR;\
+        else return ER_SEMAN;\
 }                       \
 
 
