@@ -75,9 +75,10 @@ parser_data_t *init_data()
     item_data *tmp;
     bool internal_error;
 
-    // readString() -> str?
+
     if(table_count_elements_in_stack(parser_data->tableStack) == 1){
         HashTable *global_table = parser_data->tableStack->top->table;
+        // readString() -> str?
         if ((tmp = insertSymbol(global_table, "readString", &internal_error)) == NULL) return NULL;
         tmp->defined = true;
         tmp->type = IT_STRING;
@@ -106,16 +107,6 @@ parser_data_t *init_data()
         tmp->is_function = true;
         if (!string_append(tmp->params, 'a')) return NULL;
 
-        // print(...)
-        tmp = insertSymbol(global_table, "print", &internal_error);
-        tmp->defined = true;
-        tmp->type = IT_ANY;
-        tmp->nil_possibility = false;
-        tmp->is_function = true;
-        if (!string_append(tmp->params, 'a')) {
-            return NULL;
-        }
-
         // Int2Double(int) -> double
         tmp = insertSymbol(global_table, "Int2Double", &internal_error);
         tmp->defined = true;
@@ -125,6 +116,11 @@ parser_data_t *init_data()
         if (!string_append(tmp->params, 'i')) {
             return NULL;
         }
+        if ((tmp->id_names = (char**)realloc(tmp->id_names,1 * sizeof(char*)))==NULL)
+            return NULL;
+        if((tmp->id_names[0] = (char*)realloc(tmp->id_names[0],strlen("_"))) == NULL)
+            return NULL;
+        strcpy(tmp->id_names[0],"_");
         // Double2Int(double) -> int
         tmp = insertSymbol(global_table, "Double2Int", &internal_error);
         tmp->defined = true;
@@ -134,7 +130,11 @@ parser_data_t *init_data()
         if (!string_append(tmp->params, 'd')) {
             return NULL;
         }
-
+        if ((tmp->id_names = (char**)realloc(tmp->id_names,1 * sizeof(char*)))==NULL)
+            return NULL;
+        if((tmp->id_names[0] = (char*)realloc(tmp->id_names[0],strlen("_"))) == NULL)
+            return NULL;
+        strcpy(tmp->id_names[0],"_");
         // ord(str) -> int
         tmp = insertSymbol(global_table, "ord", &internal_error);
         tmp->defined = true;
@@ -145,7 +145,11 @@ parser_data_t *init_data()
         if (!string_append(tmp->params, 's')) {
             return NULL;
         }
-
+        if ((tmp->id_names = (char**)realloc(tmp->id_names,1 * sizeof(char*)))==NULL)
+            return NULL;
+        if((tmp->id_names[0] = (char*)realloc(tmp->id_names[0],strlen("_"))) == NULL)
+            return NULL;
+        strcpy(tmp->id_names[0],"_");
         // chr(int) -> str
         tmp = insertSymbol(global_table, "chr", &internal_error);
         tmp->defined = true;
@@ -156,6 +160,11 @@ parser_data_t *init_data()
         if (!string_append(tmp->params, 'i')) {
             return NULL;
         }
+        if ((tmp->id_names = (char**)realloc(tmp->id_names,1 * sizeof(char*)))==NULL)
+            return NULL;
+        if((tmp->id_names[0] = (char*)realloc(tmp->id_names[0],strlen("_"))) == NULL)
+            return NULL;
+        strcpy(tmp->id_names[0],"_");
 
         // length(str) -> int
         tmp = insertSymbol(global_table, "length", &internal_error);
@@ -167,7 +176,11 @@ parser_data_t *init_data()
         if (!string_append(tmp->params, 's')) {
             return NULL;
         }
-
+        if ((tmp->id_names = (char**)realloc(tmp->id_names,1 * sizeof(char*)))==NULL)
+            return NULL;
+        if((tmp->id_names[0] = (char*)realloc(tmp->id_names[0],strlen("_"))) == NULL)
+            return NULL;
+        strcpy(tmp->id_names[0],"_");
         // substring(str, int, int) -> str?
         tmp = insertSymbol(global_table, "substring", &internal_error);
         tmp->defined = true;
@@ -178,12 +191,23 @@ parser_data_t *init_data()
         if (!string_append(tmp->params, 's')) {
             return NULL;
         }
+        if ((tmp->id_names = (char**)realloc(tmp->id_names,3 * sizeof(char*)))==NULL)
+            return NULL;
+        if((tmp->id_names[0] = (char*)realloc(tmp->id_names[0],strlen("of"))) == NULL)
+            return NULL;
+        strcpy(tmp->id_names[0],"of");
         if (!string_append(tmp->params, 'i')) {
             return NULL;
         }
+        if((tmp->id_names[1] = (char*)realloc(tmp->id_names[0],strlen("startingAt"))) == NULL)
+            return NULL;
+        strcpy(tmp->id_names[1],"startingAt");
         if (!string_append(tmp->params, 'i')) {
             return NULL;
         }
+        if((tmp->id_names[2] = (char*)realloc(tmp->id_names[0],strlen("endingBefore"))) == NULL)
+            return NULL;
+        strcpy(tmp->id_names[2],"endingBefore");
     }
 
 
