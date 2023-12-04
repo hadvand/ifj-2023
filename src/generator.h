@@ -8,7 +8,7 @@
 //#include "parser.h"
 //#include "stack.h"
 
-#define GENERATE_CODE(code) fprintf(stdout, "%s", code)
+#define GENERATE_CODE(...) fprintf(stdout, __VA_ARGS__)
 
 // Built-in functions
 #define BUILTIN_LENGHT                                                      \
@@ -20,7 +20,49 @@
 	"\nRETURN\n"                                                             \
 
 // TODO
-#define BUILTIN_SUBSTR
+#define BUILTIN_SUBSTR \
+    "\nLABEL $substr" \
+    "\nPUSHFRAME" \
+    "\nDEFVAR LF@%return" \
+    "\nDEFVAR LF@%length" \
+    "\nDEFVAR LF@%index" \
+    "\nDEFVAR LF@%string" \
+    "\nMOVE LF@%string LF@%0" \
+    "\nMOVE LF@%index LF@%1" \
+    "\nMOVE LF@%length LF@%2" \
+    "\nDEFVAR LF@%strlength" \
+    "\nSTRLEN LF@%strlength LF@%string" \
+    "\nDEFVAR LF@%condition" \
+    "\nLT LF@%condition LF@%index int@0" \
+    "\nJUMPIFEQ $ret LF@%condition bool@true" \
+    "\nGT LF@%condition LF@%index LF@%strlength" \
+    "\nJUMPIFEQ $ret LF@%condition bool@true" \
+    "\nDEFVAR LF@%condition" \
+    "\nLT LF@%condition LF@%length int@0" \
+    "\nJUMPIFEQ $ret LF@%condition bool@true" \
+    "\nDEFVAR LF@%condition" \
+    "\nGT LF@%condition LF@%length LF@%strlength" \
+    "\nJUMPIFEQ $ret LF@%condition bool@true" \
+    "\nDEFVAR LF@%return" \
+    "\nDEFVAR LF@%i" \
+    "\nMOVE LF@%i int@0" \
+    "\nDEFVAR LF@%char" \
+    "\nDEFVAR LF@%substr" \
+    "\nMOVE LF@%substr string@" \
+    "\nLABEL $while" \
+    "\nDEFVAR LF@%condition" \
+    "\nLT LF@%condition LF@%i LF@%length" \
+    "\nJUMPIFEQ $endwhile LF@%condition bool@false" \
+    "\nGETCHAR LF@%char LF@%string LF@%index" \
+    "\nCONCAT LF@%substr LF@%substr LF@%char" \
+    "\nADD LF@%i LF@%i int@1" \
+    "\nADD LF@%index LF@%index int@1"   \
+    "\nJUMP $while" \
+    "\nLABEL $endwhile" \
+    "\nMOVE LF@%return LF@%substr" \
+    "\nLABEL $ret" \
+    "\nPOPFRAME" \
+    "\nRETURN\n"       \
 
 #define BUILTIN_INT2DOUBLE \
     "\nLABEL $int2double" \
@@ -95,4 +137,7 @@
 void generator_start(void);
 void generator_end(void);
 void generator_builtin(void);
+void generate_var_declaration(item_data data);
+void generate_var_definition(item_data data);
+
 #endif //GENERATOR_H
