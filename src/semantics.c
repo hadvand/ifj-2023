@@ -188,6 +188,8 @@ int func_call(parser_data_t* data) {
 item_type get_type_from_params(item_data *data,int position, bool *nil_possibility){
     UNUSED(nil_possibility);
     *nil_possibility = false;
+    if(!strcmp(data->id,"write"))
+        return IT_ANY;
     if(data->params == NULL)
         return IT_UNDEF;
     if(position > data->params->last_index)
@@ -753,7 +755,10 @@ int check_param(parser_data_t* data, int position){
     } else{
         bool param_nil_possibility = false;
         item_type type = get_type(data->token_ptr,data,&param_nil_possibility,false);
-        if(type != IT_UNDEF && type != get_type_from_params(data->id_type,position,&param_nil_possibility)) {
+        item_type param_type = get_type_from_params(data->id_type,position,&param_nil_possibility);
+        if(type != IT_UNDEF
+            && type != param_type
+            && param_type != IT_ANY) {
             if(type == IT_NIL && param_nil_possibility)
                 return ER_NONE;
             return ER_PARAMS;
@@ -767,6 +772,7 @@ int check_func_call(parser_data_t *data, int position){
     int ret_code;
 //    if(position >= data->id_type->params->last_index)
 //        return ER_PARAMS;
+    bool its_write = !strcmp(data->id_type->id,"write");
     GET_TOKEN()
     if(data->token_ptr->token_type != T_BRACKET_CLOSE && data->id_type->params->string == NULL)
         return ER_PARAMS;
@@ -780,7 +786,7 @@ int check_func_call(parser_data_t *data, int position){
             return check_param(data,position);
 
         }
-        else if ((data->id_type->id_names && !strcmp(data->id_type->id_names[position],"_")) || !strcmp(data->id_type->id,"write")){
+        else if ((data->id_type->id_names && !strcmp(data->id_type->id_names[position],"_")) || its_write){
             return check_param(data,position);
         } else
             return ER_PARAMS;
@@ -789,7 +795,7 @@ int check_func_call(parser_data_t *data, int position){
             || data->token_ptr->token_type == T_DEMICAL
             || data->token_ptr->token_type == T_STRING
             || (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_nil)){
-        if(position+1 > data->id_type->params->last_index)
+        if(position+1 > data->id_type->params->last_index && !its_write)
             return ER_PARAMS;
         else if(data->id_type->id_names && strcmp(data->id_type->id_names[position],"_"))
             return ER_OTHER_SEM_2;

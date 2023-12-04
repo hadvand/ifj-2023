@@ -488,6 +488,7 @@ int  call_params(parser_data_t *data) {
 //<call_params> -> var_id <call_params_n>
 int call_params_n(parser_data_t *data) {
     int ret_code;
+    bool its_write = !strcmp(data->id_type->id,"write");
 
     if (data->token_ptr->token_type == T_BRACKET_CLOSE) {
         return ER_NONE;
@@ -501,7 +502,7 @@ int call_params_n(parser_data_t *data) {
         CHECK_RULE(call_params)
     }
     else if (data->token_ptr->token_type == T_BRACKET_CLOSE) {
-        if(data->param_index+1 != data->id_type->params->last_index)
+        if(data->param_index+1 != data->id_type->params->last_index && !its_write)
             return ER_PARAMS;
         return ER_NONE;
     }
