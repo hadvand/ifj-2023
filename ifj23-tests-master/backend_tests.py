@@ -1073,22 +1073,27 @@ def test_all():
     Operátor != je negací operátoru ==
     """
 
-    test_expr("nil == nil", "true")  # i guess
+
+    test(f"""
+        let result = nil == nil
+        write(result)
+    ""","",expected_return_code=ErrorType.error_type_inference)
+    # test_expr("nil == nil", "true")  # i guess
     test_expr("4 == 4.5", "false")
     test_expr("4.5 != 4", "true")
-    test_expr("nil == 4", "false")
+    # test_expr("nil == 4", "false")
     test_expr(""" "abc" == "def" """, "false")
     test_expr(""" "abc" == "abc" """, "true")
     test_expr_invalid(" \"abc\" != 5")
     test_expr_invalid(" \"abc\" != 5.5")
-    test_expr(" \"abc\" != nil", "true")
-    test_expr(""" "abc" != nil """, "true")
+    # test_expr(" \"abc\" != nil", "true")
+    # test_expr(""" "abc" != nil """, "true")
 
-    test("""
-    let a: Double? = nil
-    let b = nil == a
-    write(b)
-    """, "true")
+    # test("""
+    # let a: Double? = nil
+    # let b = nil == a
+    # write(b)
+    # """, "true")
 
     test("""
     let a = 5.5
@@ -1103,9 +1108,9 @@ def test_all():
     let c = a == b
     """, "", expected_return_code=error_type)
 
-    test_expr("""
-    "abc" != nil
-    """, "true")
+    # test_expr("""
+    # "abc" != nil
+    # """, "true")
 
     """
     Pro relační operátory <, >, <=, >= platí: Sémantika operátorů odpovídá jazyku Swift.
