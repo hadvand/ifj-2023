@@ -252,6 +252,11 @@ int reduce(){
         op1 = stack.top;
         rule = check_rule(count_symbols_before_stop,op1,op2,op3);
     }
+    else if(count_symbols_before_stop == 2 && stop_is_founded){
+        op1 = stack.top->next;
+        op2 = stack.top;
+        rule = check_rule(count_symbols_before_stop,op1,op2,op3);
+    }
     else if(count_symbols_before_stop == 3 && stop_is_founded){
         op1 = stack.top->next->next;
         op2 = stack.top->next;
@@ -397,7 +402,10 @@ int expression(parser_data_t* data){
 #endif
                     FREE(ret_code);
                 }
-                last_action_is_reduce = false;
+                if(actual_symbol == EX_MARK)
+                    last_action_is_reduce = true;
+                else
+                    last_action_is_reduce = false;
                 break;
             case '>':
                 if((ret_code = reduce()))
@@ -467,7 +475,11 @@ static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_
             }
 
             return NOT_A_RULE;
-
+        case(2):
+            if(operand_1->symbol == N_TERMINAL && operand_2->symbol == EX_MARK){
+                return NT_F_UNWRAP;
+            }
+            return NOT_A_RULE;
         case(3):
 
             if (operand_1->symbol == LEFT_BRACKET && operand_2->symbol == N_TERMINAL
@@ -549,7 +561,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
     }
 
     if (rule != OPERAND && rule != LBR_NT_RBR && rule != NT_EQ_NT){
-        if (operand_1->item.type == IT_UNDEF || operand_3->item.type == IT_UNDEF){
+        if (operand_1->item.type == IT_UNDEF || ( operand_3 != NULL && operand_3->item.type == IT_UNDEF)){
             return ER_UNDEF_VAR;
         }
     }
@@ -644,7 +656,12 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             if (operand_1->item.type == IT_UNDEF || operand_1->item.type == IT_NIL) {
                 return ER_UNDEF_VAR;
             }
+
+            //NIL_POSSIBILITY_CHECK();
+            type_final->nil_possibility = operand_1->item.nil_possibility;
+            type_final->defined = true;
             type_final->type = operand_1->item.type;
+            type_final->it_is_nil = operand_2->item.it_is_nil;
             break;
         case NT_NEQ_NT:
         case NT_LEQ_NT:
