@@ -12,7 +12,7 @@ typedef enum
     MINUS,			// -
     MUL,			// *
     DIV,			// /
-    EQUAL,			// =
+    EQUAL,			// ==
     N_EQUAL,		// !=
     L_EQUAL,		// <=
     LESS,		    // <
@@ -29,12 +29,14 @@ typedef enum
     NIL = 14,           // nil
     DOLLAR,			// $
     STOP,			// stop symbol used when reducing
-    N_TERMINAL		// non-terminal
+    N_TERMINAL,		// non-terminal
+    ASSIGMENT      // =
 } Precedence_table_symbol;
 
 typedef enum
 {
-    NT_EQ_NT,       // E -> E = E
+    NT_AS_NT,       // E -> E = E
+    NT_EQ_NT,       // E -> E == E
     NT_NEQ_NT,      // E -> E != E
     NT_LEQ_NT,      // E -> E <= E
     NT_LTN_NT,      // E -> E < E
