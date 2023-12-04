@@ -199,13 +199,13 @@ parser_data_t *init_data()
         if (!string_append(tmp->params, 'i')) {
             return NULL;
         }
-        if((tmp->id_names[1] = (char*)realloc(tmp->id_names[0],strlen("startingAt"))) == NULL)
+        if((tmp->id_names[1] = (char*)realloc(tmp->id_names[1],strlen("startingAt"))) == NULL)
             return NULL;
         strcpy(tmp->id_names[1],"startingAt");
         if (!string_append(tmp->params, 'i')) {
             return NULL;
         }
-        if((tmp->id_names[2] = (char*)realloc(tmp->id_names[0],strlen("endingBefore"))) == NULL)
+        if((tmp->id_names[2] = (char*)realloc(tmp->id_names[2],strlen("endingBefore"))) == NULL)
             return NULL;
         strcpy(tmp->id_names[2],"endingBefore");
     }
@@ -544,7 +544,7 @@ int func_params(parser_data_t *data) {
     int ret_code = ER_NONE;
 
 
-    if ((data->id->id_names = (char**)realloc(data->id->id_names,data->param_index+1 * sizeof(char*)))==NULL)
+    if ((data->id->id_names = (char**)realloc(data->id->id_names,(data->param_index+1) * sizeof(char*)))==NULL)
         return ER_INTERNAL;
     GET_TOKEN()
 
