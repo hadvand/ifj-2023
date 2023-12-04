@@ -302,8 +302,7 @@ int expression(parser_data_t* data){
     stack_init(&stack);
     //init item_data
     item_data tmp_item;
-    tmp_item.type = IT_UNDEF;
-    tmp_item.nil_possibility = false;
+
     //tmp_item.it_is_nil = false;
     stack_push(&stack, tmp_item, DOLLAR);
 
@@ -316,6 +315,9 @@ int expression(parser_data_t* data){
 
 
     do {
+        tmp_item.type = IT_UNDEF;
+        tmp_item.nil_possibility = false;
+        tmp_item.defined = false;
         top_terminal = stack_top_terminal(&stack);
         if(top_terminal->symbol == IDENTIFIER && data->id_type != NULL && data->id_type->is_function) {
 
@@ -547,6 +549,7 @@ static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_
 static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3,
                     item_data *type_final){
 
+    type_final->type = IT_UNDEF;
     //bool operand_1_to_int = false;
     //bool operand_3_to_int = false;
     bool operand_1_to_double = false;
@@ -643,16 +646,39 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             // dealing with ?? monster
         case NT_COALESCE_NT:
 
-            if (operand_1->item.type == IT_UNDEF && operand_3->item.type == IT_NIL) {
-                // Operand_1 is undefined, but Operand_3 is nil
-                type_final->type = IT_NIL;
-            } else if (operand_1->item.type == IT_UNDEF) {
-                // Operand_1 is undefined
-                type_final->type = operand_3->item.type;
-            } else {
-                // Operand_1 is defined
-                type_final->type = operand_1->item.type;
+            if(operand_1->item.type != operand_3->item.type){
+                if(((operand_1_to_double = operand_1->item.type == IT_INT) && operand_3->item.type == IT_DOUBLE && !operand_1->item.defined) ||
+                   ((operand_3_to_double = operand_3->item.type == IT_INT) && operand_1->item.type == IT_DOUBLE && !operand_3->item.defined)){
+                    //todo translate Int2Double
+
+
+                    type_final->type = IT_DOUBLE;
+                }
+                else if(operand_1->item.type == IT_NIL){
+                    //if(operand_3->item.type == IT_NIL)
+                    type_final->type = operand_3->item.type;
+                }
+                else
+                    return ER_TYPE_COMP;
             }
+
+            if(type_final->type == IT_UNDEF){
+                if((operand_1->item.nil_possibility || !operand_1->item.defined) && (operand_3->item.nil_possibility || !operand_3->item.defined)){
+                    type_final->type = operand_1->item.type;
+                } else
+                    return ER_TYPE_COMP;
+            }
+
+//            if (operand_1->item.type == IT_UNDEF && operand_3->item.type == IT_NIL) {
+//                // Operand_1 is undefined, but Operand_3 is nil
+//                type_final->type = IT_NIL;
+//            } else if (operand_1->item.type == IT_UNDEF) {
+//                // Operand_1 is undefined
+//                type_final->type = operand_3->item.type;
+//            } else {
+//                // Operand_1 is defined
+//                type_final->type = operand_1->item.type;
+//            }
             break;
             //dealing with ! monster
         case NT_F_UNWRAP:
