@@ -748,8 +748,8 @@ int check_param(parser_data_t* data, int position){
 
 int check_func_call(parser_data_t *data, int position){
     int ret_code;
-    if(position >= data->id_type->params->last_index)
-        return ER_PARAMS;
+//    if(position >= data->id_type->params->last_index)
+//        return ER_PARAMS;
     GET_TOKEN()
     if(data->token_ptr->token_type != T_BRACKET_CLOSE && data->id_type->params->string == NULL)
         return ER_PARAMS;
@@ -772,10 +772,14 @@ int check_func_call(parser_data_t *data, int position){
             || data->token_ptr->token_type == T_DEMICAL
             || data->token_ptr->token_type == T_STRING
             || (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_nil)){
-        if(data->id_type->id_names && strcmp(data->id_type->id_names[position],"_"))
+        if(position+1 > data->id_type->params->last_index)
+            return ER_PARAMS;
+        else if(data->id_type->id_names && strcmp(data->id_type->id_names[position],"_"))
             return ER_OTHER_SEM_2;
         return check_param(data,position);
     }
+    else if(data->token_ptr->token_type == T_BRACKET_CLOSE && (data->id_type->params == NULL || data->id_type->params->last_index == 0))
+        return ER_NONE;
     return ER_PARAMS;
 }
 
