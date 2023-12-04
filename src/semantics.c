@@ -304,7 +304,7 @@ int expression(parser_data_t* data){
     item_data tmp_item;
     tmp_item.type = IT_UNDEF;
     tmp_item.nil_possibility = false;
-    tmp_item.it_is_nil = false;
+    //tmp_item.it_is_nil = false;
     stack_push(&stack, tmp_item, DOLLAR);
 
     data->id_type = NULL;
@@ -347,7 +347,7 @@ int expression(parser_data_t* data){
                 tmp_item.type = get_type(data->token_ptr,data,&(tmp_item.nil_possibility),&(tmp_item.defined));
                 if(actual_symbol == IDENTIFIER && data->token_ptr->token_type == T_ID && !tmp_item.defined)
                     return ER_UNDEF_VAR;
-                tmp_item.it_is_nil = data->token_ptr->attribute.keyword == k_nil;
+                //tmp_item.it_is_nil = data->token_ptr->attribute.keyword == k_nil;
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
 #ifdef SEM_DEBUG
@@ -382,7 +382,7 @@ int expression(parser_data_t* data){
                 tmp_item.type = get_type(data->token_ptr,data,&(tmp_item.nil_possibility),&(tmp_item.defined));
                 if(actual_symbol == IDENTIFIER && data->token_ptr->token_type == T_ID && !tmp_item.defined)
                     return ER_UNDEF_VAR;
-                tmp_item.it_is_nil = (data->token_ptr->attribute.keyword == k_nil || (data->id_type != NULL && data->id_type->it_is_nil));
+                //tmp_item.it_is_nil = (data->token_ptr->attribute.keyword == k_nil || (data->id_type != NULL && data->id_type->it_is_nil));
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
 #ifdef SEM_DEBUG
@@ -575,14 +575,14 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             type_final->type = operand_1->item.type;
             type_final->nil_possibility = operand_1->item.nil_possibility;
             type_final->defined = operand_1->item.defined;
-            type_final->it_is_nil = operand_1->item.it_is_nil;
+            //type_final->it_is_nil = operand_1->item.it_is_nil;
             break;
 
         case LBR_NT_RBR:
             type_final->type = operand_2->item.type;
             type_final->nil_possibility = operand_2->item.nil_possibility;
             type_final->defined = true;
-            type_final->it_is_nil = operand_2->item.it_is_nil;
+            //type_final->it_is_nil = operand_2->item.it_is_nil;
             break;
 
         case NT_DIV_NT:
@@ -592,7 +592,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
             if(operand_1->item.type == IT_NIL || operand_3->item.type == IT_NIL)
                 return ER_OTHER_SEM;
-            type_final->it_is_nil = false;
+            //type_final->it_is_nil = false;
             // concatenation
             if (operand_1->item.type == IT_STRING && operand_3->item.type == IT_STRING && rule == NT_PLUS_NT){
                 type_final->type = IT_STRING;
@@ -666,7 +666,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             type_final->nil_possibility = operand_1->item.nil_possibility;
             type_final->defined = true;
             type_final->type = operand_1->item.type;
-            type_final->it_is_nil = operand_2->item.it_is_nil;
+            //type_final->it_is_nil = operand_2->item.it_is_nil;
             break;
         case NT_EQ_NT:
         case NT_NEQ_NT:
@@ -680,7 +680,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
             type_final->type = operand_3->item.type;
             type_final->nil_possibility = false;
-            type_final->it_is_nil = false;
+            //type_final->it_is_nil = false;
             type_final->defined = true;
             break;
         case NT_LEQ_NT:
@@ -712,7 +712,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
             type_final->type = operand_3->item.type;
             type_final->nil_possibility = false;
-            type_final->it_is_nil = false;
+            //type_final->it_is_nil = false;
             type_final->defined = true;
             break;
         case NT_AS_NT:
@@ -734,8 +734,8 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             if(operand_1->item.type == IT_UNDEF && operand_3->item.type == IT_NIL)
                 return ER_OTHER_SEM;
 
-            if(operand_3->item.type == IT_NIL)
-                operand_1->item.it_is_nil = true;
+//            if(operand_3->item.type == IT_NIL)
+//                operand_1->item.it_is_nil = true;
             //type_final->type = operand_3->item.type;
             if(operand_1->item.type == IT_UNDEF){
                 operand_1->item.type = operand_3->item.type;

@@ -24,7 +24,7 @@ typedef struct
     char* id;
     item_type type; // return type/ var type
     bool nil_possibility;
-    bool it_is_nil;
+    //bool it_is_nil;
     bool defined;
     bool global;
     bool is_function;

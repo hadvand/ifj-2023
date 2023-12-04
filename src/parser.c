@@ -285,7 +285,7 @@ int stm(parser_data_t *data) {
             else if (data->eol_flag) {
                 data->is_in_declaration = false;
                 if(data->id->nil_possibility) {
-                    data->id->it_is_nil = true;
+                    //data->id->it_is_nil = true;
                     data->id->defined = true;
                 }
                 return stm(data);
@@ -721,7 +721,7 @@ item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibil
 
 int insert_data_type(parser_data_t *data){
     item_type type  = get_type(data->token_ptr,data,false,false);
-    data->id->it_is_nil = false;
+    //data->id->it_is_nil = false;
 
     //var declaration
     if(data->is_in_declaration && !data->is_in_function && !data->is_in_params){
