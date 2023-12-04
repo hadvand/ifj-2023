@@ -501,6 +501,8 @@ int call_params_n(parser_data_t *data) {
         CHECK_RULE(call_params)
     }
     else if (data->token_ptr->token_type == T_BRACKET_CLOSE) {
+        if(data->param_index+1 != data->id_type->params->last_index)
+            return ER_PARAMS;
         return ER_NONE;
     }
     else {
