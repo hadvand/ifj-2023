@@ -603,14 +603,14 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             }
             else if (operand_1->item.type == IT_INT && operand_3->item.type == IT_INT){
                 type_final->type = IT_INT;
-                NIL_POSSIBILITY_CHECK();
+                //NIL_POSSIBILITY_CHECK();
                 type_final->nil_possibility = operand_1->item.nil_possibility;
                 type_final->defined = true;
                 break;
             }
             else if (operand_1->item.type == IT_DOUBLE && operand_3->item.type == IT_DOUBLE){
                 type_final->type = IT_DOUBLE;
-                NIL_POSSIBILITY_CHECK();
+                //NIL_POSSIBILITY_CHECK();
                 type_final->nil_possibility = operand_1->item.nil_possibility;
                 type_final->defined = true;
                 break;
