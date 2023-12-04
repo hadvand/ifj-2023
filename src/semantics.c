@@ -657,10 +657,11 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             //dealing with ! monster
         case NT_F_UNWRAP:
 
-            if (operand_1->item.type == IT_UNDEF || operand_1->item.type == IT_NIL) {
+            if (operand_1->item.type == IT_UNDEF) {
                 return ER_UNDEF_VAR;
             }
-
+            if(operand_1->item.type == IT_NIL)
+                return ER_OTHER_SEM;
             //NIL_POSSIBILITY_CHECK();
             type_final->nil_possibility = operand_1->item.nil_possibility;
             type_final->defined = true;
