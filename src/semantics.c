@@ -666,29 +666,34 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             type_final->it_is_nil = operand_2->item.it_is_nil;
             break;
         case NT_NEQ_NT:
+            break;
         case NT_LEQ_NT:
         case NT_LTN_NT:
         case NT_MEQ_NT:
         case NT_MTN_NT:
             // Type check
-            if ((operand_1->item.type != operand_3->item.type && operand_1->item.type != IT_UNDEF) ||
-                (!operand_1->item.nil_possibility && operand_3->item.type == IT_NIL)) {
+            if (operand_1->item.type != operand_3->item.type && operand_1->item.type != IT_UNDEF){
                 return ER_TYPE_COMP;
             }
 
-            if ((operand_1->item.type == IT_NIL || operand_3->item.type == IT_NIL) &&
-                    (!operand_1->item.nil_possibility && operand_3->item.type == IT_NIL)) {
+            if(operand_1->item.nil_possibility || operand_3->item.nil_possibility)
+                return ER_TYPE_COMP;
+
+            if ((operand_1->item.type == IT_NIL || operand_3->item.type == IT_NIL)) {
                 return ER_TYPE_COMP;
             }
 
-            if (operand_1->item.type == IT_STRING) {
-                if (rule == NT_LEQ_NT || rule == NT_MEQ_NT) {
-                    // <= and >= are not supported for strings for some reason
-                    return ER_TYPE_COMP;
-                }
-            }
+//            if (operand_1->item.type == IT_STRING) {
+//                if (rule == NT_LEQ_NT || rule == NT_MEQ_NT) {
+//                    // <= and >= are not supported for strings for some reason
+//                    return ER_TYPE_COMP;
+//                }
+//            }
 
             type_final->type = operand_3->item.type;
+            type_final->nil_possibility = false;
+            type_final->it_is_nil = false;
+            type_final->defined = true;
             break;
         case NT_EQ_NT:
 
