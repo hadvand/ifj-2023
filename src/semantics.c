@@ -590,13 +590,13 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         case NT_MINUS_NT:
         case NT_MUL_NT:
 
-            if(operand_1->item.it_is_nil || operand_3->item.it_is_nil)
+            if(operand_1->item.type == IT_NIL || operand_3->item.type == IT_NIL)
                 return ER_OTHER_SEM;
             type_final->it_is_nil = false;
             // concatenation
             if (operand_1->item.type == IT_STRING && operand_3->item.type == IT_STRING && rule == NT_PLUS_NT){
                 type_final->type = IT_STRING;
-                NIL_POSSIBILITY_CHECK();
+                //NIL_POSSIBILITY_CHECK();
                 type_final->nil_possibility = operand_1->item.nil_possibility;
                 type_final->defined = true;
                 break;
