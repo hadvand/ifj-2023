@@ -284,6 +284,10 @@ int stm(parser_data_t *data) {
             }
             else if (data->eol_flag) {
                 data->is_in_declaration = false;
+                if(data->id->nil_possibility) {
+                    data->id->it_is_nil = true;
+                    data->id->defined = true;
+                }
                 return stm(data);
             }
             else return ER_SYNTAX;
