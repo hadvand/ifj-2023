@@ -768,15 +768,14 @@ int check_func_call(parser_data_t *data, int position){
         } else
             return ER_PARAMS;
     }
-    else if(data->id_type->id_names && !strcmp(data->id_type->id_names[position],"_")
-            && (data->token_ptr->token_type == T_INT
+    else if(data->token_ptr->token_type == T_INT
             || data->token_ptr->token_type == T_DEMICAL
             || data->token_ptr->token_type == T_STRING
-            || (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_nil))){
+            || (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_nil)){
+        if(data->id_type->id_names && strcmp(data->id_type->id_names[position],"_"))
+            return ER_OTHER_SEM_2;
         return check_param(data,position);
     }
-    else if(data->token_ptr->token_type == T_BRACKET_CLOSE && position < data->id_type->params->last_index )
-        return ER_PARAMS;
-    return ER_NONE;
+    return ER_PARAMS;
 }
 
