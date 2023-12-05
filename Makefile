@@ -31,8 +31,14 @@ semantic-build: $(SEMANTIC_PROGS) $(PARSER_PROGS) $(PROGS) src/main.c
 semantic-tests: $(PROGS) $(PARSER_PROGS) $(SEM_TESTS)
 	$(CC) $(CFLAGS) $^ -o $@ -lm -DSEM_DEBUG -DPARS_DEBUG
 
-generator-tests: $(GENERATOR_PROGS)
-	$(CC) $(CFLAGS) $^ -o gen_tests -lm
+#generator-tests: $(GENERATOR_PROGS)
+#	$(CC) $(CFLAGS) $^ -o gen_tests -lm
+generator-debug: $(SEMANTIC_PROGS) $(PARSER_PROGS) $(PROGS) $(GENERATOR_PROGS) src/main.c
+	$(CC) $(CFLAGS) $^ -o $@ -lm
+
+test: generator-debug
+	./generator-debug < testFile > generator_out
+	./ifj23-tests-master/ic23int generator_out
 
 compiler: $(PARSER_PROGS) $(PROGS) src/main.c
 	$(CC) $(CFLAGS) $^ -o $@ -lm

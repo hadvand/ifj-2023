@@ -243,10 +243,14 @@ int analyse() {
 
     parser_data->line_cnt = 1;
 
+    generator_start();
+
     if ((parser_data->token_ptr = next_token(&(parser_data->line_cnt), &ret_code, &flag)) != NULL)
     {
         ret_code = program(parser_data);
     }
+
+    generator_end();
 
     string_free(string);
     free_data(parser_data);

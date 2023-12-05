@@ -11,6 +11,7 @@
 #include "scanner.h"
 #include "table_stack.h"
 #include <stdbool.h>
+#include "generator.h"
 
 /**
  * @brief

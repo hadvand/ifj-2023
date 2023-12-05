@@ -76,9 +76,9 @@ void generate_var_definition(item_data data){
 
 
 
-int main(void){
-    generator_start();
-    // CODE HERE
-    //generator_builtin();
-    generator_end();
-}
+//int main(void){
+//    generator_start();
+//    // CODE HERE
+//    //generator_builtin();
+//    generator_end();
+//}
