@@ -267,19 +267,17 @@ int program(parser_data_t *data) {
 
 int stm(parser_data_t *data) {
     int ret_code = ER_NONE;
+    bool is_let = false;
 
     // <stm> -> var + let id : <var_type> = <expression> \n <stm>
     // <stm> -> var + let id : <var_type> \n <stm>
     // <stm> -> var + let id = <expression> \n <stm>
-    if (data->token_ptr->token_type == T_KEYWORD && (data->token_ptr->attribute.keyword == k_var || data->token_ptr->attribute.keyword == k_let)) {
+    if (data->token_ptr->token_type == T_KEYWORD && ( data->token_ptr->attribute.keyword == k_var || (is_let = data->token_ptr->attribute.keyword == k_let))) {
         data->is_in_declaration = true;
         VERIFY_TOKEN(T_ID)
         INSERT_SYM()
         data->id->defined = false;
-        if(data->token_ptr->attribute.keyword == k_var || data->token_ptr->attribute.keyword == k_let)
-            data->id->is_let = true;
-        else
-            data->id->is_let = false;
+        data->id->is_let = is_let;
         GET_TOKEN()
         if (data->token_ptr->token_type == T_COLON) {
             GET_TOKEN()

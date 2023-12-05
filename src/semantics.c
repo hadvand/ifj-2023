@@ -306,7 +306,7 @@ int expression(parser_data_t* data){
 #endif
 
 
-    if(data->id == NULL || data->id->is_let)
+    if(data->id == NULL || (data->id->is_let && data->id->defined))
         return ER_OTHER_SEM_2;
 
     stack_init(&stack);
