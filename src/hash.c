@@ -7,6 +7,20 @@
 #include "hash.h"
 #include <string.h>
 
+item_data create_default_item(void){
+    item_data tmp_item;
+    tmp_item.params = NULL;
+    tmp_item.id_names = NULL;
+    tmp_item.id = NULL;
+    tmp_item.type = IT_UNDEF;
+    tmp_item.nil_possibility = false;
+    tmp_item.is_let = false;
+    tmp_item.defined = false;
+    tmp_item.is_function = false;
+
+    return tmp_item;
+}
+
 hash_table* create_hash_table() {
     hash_table* ht = (hash_table*)malloc(sizeof(hash_table));
     ht->size = MAX_TABLE_SIZE;

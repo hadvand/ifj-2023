@@ -250,7 +250,7 @@ int reduce(){
     t_stack_elem *op1 = NULL;
     t_stack_elem *op2 = NULL;
     t_stack_elem *op3 = NULL;
-    item_data final_item;
+    item_data final_item = create_default_item();
     Precedence_rules rule;
     bool stop_is_founded;
 
@@ -311,7 +311,7 @@ int expression(parser_data_t* data){
 
     stack_init(&stack);
     //init item_data
-    item_data tmp_item;
+    item_data tmp_item = create_default_item();
 
     //tmp_item.it_is_nil = false;
     stack_push(&stack, tmp_item, DOLLAR);
@@ -325,9 +325,6 @@ int expression(parser_data_t* data){
 
 
     do {
-        tmp_item.type = IT_UNDEF;
-        tmp_item.nil_possibility = false;
-        tmp_item.defined = false;
         top_terminal = stack_top_terminal(&stack);
         if(top_terminal->symbol == IDENTIFIER && data->id_type != NULL && data->id_type->is_function) {
 
@@ -460,7 +457,7 @@ int expression(parser_data_t* data){
     op2.symbol = ASSIGNMENT;
     t_stack_elem op3;
     op3 = *(stack.top);
-    item_data final_type;
+    item_data final_type = create_default_item();
     if((ret_code =check_semantics(NT_AS_NT,&op1,&op2,&op3,&final_type))){
 #ifdef SEM_DEBUG
         printf("semantic analysis finish with error\n");
@@ -828,7 +825,7 @@ int check_param(parser_data_t* data, int position){
 
     } else{
         bool param_nil_possibility = false;
-        item_data tmp_item;
+        item_data tmp_item = create_default_item();
         item_type type = get_type(data->token_ptr,data,&tmp_item);
         item_type param_type = get_type_from_params(data->id_type,position,&param_nil_possibility);
         if(type != IT_UNDEF

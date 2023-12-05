@@ -39,7 +39,6 @@ typedef struct
     bool is_let;
     //bool it_is_nil;
     bool defined;
-    bool global;
     bool is_function;
 } item_data;
 
@@ -89,5 +88,10 @@ symbol* find_symbol(hash_table* ht, char* name);
  * @brief
  */
 void remove_symbol(hash_table* ht, char* name);
+
+/**
+ * @brief
+ */
+item_data create_default_item(void);
 
 #endif

@@ -567,9 +567,8 @@ int condition(parser_data_t *data) {
         GET_TOKEN()
         return ret_code;
     }
-    item_data tmp_data;
+    item_data tmp_data = create_default_item();
     tmp_data.type = IT_BOOL;
-    tmp_data.is_let = false;
     data->id = &tmp_data;
     CHECK_RULE(expression)
 
@@ -625,8 +624,7 @@ int func_params(parser_data_t *data) {
             data->exp_type->defined = true;
         }
         else if(data->token_ptr->token_type == T_UNDERLINE){
-            item_data tmp_item;
-            tmp_item.defined = true;
+            item_data tmp_item = create_default_item();
 
             if((data->exp_type = (item_data *) malloc(sizeof(item_data))) == NULL) {
                 return ER_INTERNAL;
@@ -780,7 +778,7 @@ item_type get_type(struct token* token, parser_data_t * data, item_data* item){
 }
 
 int insert_data_type(parser_data_t *data){
-    item_data tmp_item;
+    item_data tmp_item = create_default_item();
     item_type type;
     type = get_type(data->token_ptr,data,&tmp_item);
     //data->id->it_is_nil = false;
