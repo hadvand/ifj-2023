@@ -31,6 +31,7 @@ typedef struct {
     item_data *id;                   // current id that is being processed
     item_data *id_type;              // left side (variable)
     item_data *exp_type;             // right side (expression)
+    item_data *func_id;              // current func
 } parser_data_t;
 
 
