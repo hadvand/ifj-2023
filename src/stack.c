@@ -125,7 +125,7 @@ void stack_free(t_stack* s)
 
 char* get_string_to_table_symbol(Precedence_table_symbol symbol){
     switch (symbol) {
-        case ASSIGMENT:
+        case ASSIGNMENT:
             return "=";
         case PLUS:
             return "+";
