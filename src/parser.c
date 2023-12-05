@@ -71,7 +71,7 @@ parser_data_t *init_data()
     parser_data->is_in_function = false;
     parser_data->is_void_function = false;
     parser_data->is_in_declaration = false;
-    parser_data->is_in_condition = false;
+    parser_data->is_it_let_condition = false;
     parser_data->eol_flag = false;
 
     parser_data->param_index = 0;
@@ -425,11 +425,10 @@ int stm(parser_data_t *data) {
 
     // <stm> -> if ( <condition> ) { <stm> } \n else { <stm> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_if) {
-        data->is_in_condition = true;
+        data->is_it_let_condition = true;
 
         GET_TOKEN()
         CHECK_RULE(condition)
-
         hash_table *local_table = create_hash_table();
         table_stack_push(data->tableStack,local_table);
 
@@ -440,6 +439,7 @@ int stm(parser_data_t *data) {
 
         if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
 
+        data->is_it_let_condition = false;
         table_stack_pop(data->tableStack);
 
 
@@ -466,7 +466,6 @@ int stm(parser_data_t *data) {
 
     // <stm> -> while ( <condition> ) { <stm> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_while) {
-        data->is_in_condition = true;
 
         GET_TOKEN()
         CHECK_RULE(condition)
@@ -737,7 +736,10 @@ item_type get_type(struct token* token, parser_data_t * data, item_data* item){
                 return IT_UNDEF;
             }
             data->id_type = &(symbol->data);
-            item->nil_possibility = symbol->data.nil_possibility;
+            if(data->is_it_let_condition)
+                item->nil_possibility = false;
+            else
+                item->nil_possibility = symbol->data.nil_possibility;
             item->defined = symbol->data.defined;
             item->is_function = symbol->data.is_function;
             return symbol->data.type;
