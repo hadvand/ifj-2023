@@ -15,7 +15,9 @@
 #define PRINTABLE_MIN 32
 #define PRINTABLE_MAX 126
 
-
+/**
+ * @brief
+ */
 typedef enum state{
     S_START,
     S_KEYWORD,
@@ -53,6 +55,9 @@ typedef enum state{
     S_NESTED_COMMENT
 } state_t;
 
+/**
+ * @brief
+ */
 typedef enum token_type{
     T_ITS_NOT_A_TOKEN,
     T_EXPONENT,
@@ -94,6 +99,9 @@ typedef enum token_type{
 
 #define COUNT_KEYWORDS_BEFORE_QMARK 11
 
+/**
+ * @brief
+ */
 typedef enum keyword{
     k_double,
     k_else,
@@ -111,6 +119,9 @@ typedef enum keyword{
     k_qmark_String
 } keyword_t;
 
+/**
+ * @brief
+ */
 typedef union attribute{
     int integer;
     double decimal;
@@ -118,6 +129,9 @@ typedef union attribute{
     keyword_t keyword;
 } attribute_t;
 
+/**
+ * @brief
+ */
 typedef struct token
 {
     token_type_t token_type;
@@ -125,5 +139,7 @@ typedef struct token
     unsigned int line;
 } *token_t_ptr;
 
-
+/**
+ * @brief
+ */
 token_t_ptr next_token(int *line_cnt, int* error, bool *flag);

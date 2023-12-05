@@ -668,7 +668,7 @@ int return_rule(parser_data_t *data) {
     if (data->token_ptr->token_type == T_CURVED_BRACKET_CLOSE) return ER_FUNC_RETURN;
     CHECK_RULE(expression)
 
-    return nil_flag(data);
+    return ret_code;
 }
 
 // <return_void> -> return
