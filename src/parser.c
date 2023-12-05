@@ -351,6 +351,13 @@ int stm(parser_data_t *data) {
         VERIFY_TOKEN(T_ID)
         data->is_in_declaration = true;
 
+        symbol *idFromTable = NULL;
+
+        if((idFromTable = find_symbol(data->tableStack->top->table, data->token_ptr->attribute.string)) != NULL){
+            if(idFromTable->data.is_function)
+                return ER_OTHER_SEM_2;
+        }
+
         INSERT_SYM()
         data->func_id = data->id;
         VERIFY_TOKEN(T_BRACKET_OPEN)
