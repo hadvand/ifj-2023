@@ -4,7 +4,6 @@
  * @author Oleg Borsh (xborsh00)
  * @brief code generation
  */
-
 #ifndef GENERATOR_H
 #define GENERATOR_H
 
@@ -31,43 +30,37 @@
     "\nLABEL $substr" \
     "\nPUSHFRAME" \
     "\nDEFVAR LF@%return" \
-    "\nDEFVAR LF@%length" \
-    "\nDEFVAR LF@%index" \
+    "\nDEFVAR LF@%end_index" \
+    "\nDEFVAR LF@%start_index" \
     "\nDEFVAR LF@%string" \
     "\nMOVE LF@%string LF@%0" \
-    "\nMOVE LF@%index LF@%1" \
-    "\nMOVE LF@%length LF@%2" \
+    "\nMOVE LF@%start_index LF@%1" \
+    "\nMOVE LF@%end_index LF@%2" \
     "\nDEFVAR LF@%strlength" \
     "\nSTRLEN LF@%strlength LF@%string" \
     "\nDEFVAR LF@%condition" \
-    "\nLT LF@%condition LF@%index int@0" \
-    "\nJUMPIFEQ $ret LF@%condition bool@true" \
-    "\nGT LF@%condition LF@%index LF@%strlength" \
-    "\nJUMPIFEQ $ret LF@%condition bool@true" \
-    "\nDEFVAR LF@%condition" \
-    "\nLT LF@%condition LF@%length int@0" \
-    "\nJUMPIFEQ $ret LF@%condition bool@true" \
-    "\nDEFVAR LF@%condition" \
-    "\nGT LF@%condition LF@%length LF@%strlength" \
-    "\nJUMPIFEQ $ret LF@%condition bool@true" \
-    "\nDEFVAR LF@%return" \
-    "\nDEFVAR LF@%i" \
-    "\nMOVE LF@%i int@0" \
+    "\nLT LF@%condition LF@%start_index int@0" \
+    "\nJUMPIFEQ $error_ret LF@%condition bool@true" \
+    "\nGT LF@%condition LF@%start_index LF@%strlength" \
+    "\nJUMPIFEQ $error_ret LF@%condition bool@true" \
+    "\nLT LF@%condition LF@%end_index int@0" \
+    "\nJUMPIFEQ $error_ret LF@%condition bool@true" \
+    "\nGT LF@%condition LF@%end_index LF@%strlength" \
+    "\nJUMPIFEQ $error_ret LF@%condition bool@true" \
     "\nDEFVAR LF@%char" \
     "\nDEFVAR LF@%substr" \
     "\nMOVE LF@%substr string@" \
     "\nLABEL $while" \
-    "\nDEFVAR LF@%condition" \
-    "\nLT LF@%condition LF@%i LF@%length" \
+    "\nLT LF@%condition LF@%start_index LF@%end_index" \
     "\nJUMPIFEQ $endwhile LF@%condition bool@false" \
-    "\nGETCHAR LF@%char LF@%string LF@%index" \
+    "\nGETCHAR LF@%char LF@%string LF@%start_index" \
     "\nCONCAT LF@%substr LF@%substr LF@%char" \
-    "\nADD LF@%i LF@%i int@1" \
-    "\nADD LF@%index LF@%index int@1"   \
-    "\nJUMP $while" \
+    "\nADD LF@%start_index LF@%start_index int@1" \
+    "\nJUMP $while"    \
+    "\nLABEL $error_ret"  \
+    "\nMOVE LF@%substr nil@nil" \
     "\nLABEL $endwhile" \
     "\nMOVE LF@%return LF@%substr" \
-    "\nLABEL $ret" \
     "\nPOPFRAME" \
     "\nRETURN\n"       \
 
@@ -122,7 +115,7 @@
     "\nLABEL $ord" \
     "\nPUSHFRAME"  \
     "\nDEFVAR LF@%return"  \
-    "\nSTRI2INT LF@%return LF@%0 LF@%1" \
+    "\nSTRI2INT LF@%return LF@%0 int@0" \
     "\nPOPFRAME"   \
     "\nRETURN\n"     \
 
