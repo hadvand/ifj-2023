@@ -365,6 +365,9 @@ int stm(parser_data_t *data) {
         CHECK_RULE(func_params)
         data->is_in_params = false;
 
+        HashTable *local_table2 = createHashTable();
+        table_stack_push(data->tableStack,local_table2);
+
         if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
 
         GET_TOKEN()
@@ -383,6 +386,7 @@ int stm(parser_data_t *data) {
 
             if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
             table_stack_pop(data->tableStack);
+            table_stack_pop(data->tableStack);
 
             GET_TOKEN()
 
@@ -395,6 +399,7 @@ int stm(parser_data_t *data) {
             GET_TOKEN()
             CHECK_RULE(stm)
 
+            table_stack_pop(data->tableStack);
             table_stack_pop(data->tableStack);
 
             GET_TOKEN()
@@ -560,23 +565,38 @@ int func_params(parser_data_t *data) {
         else
             strcpy(data->id->id_names[data->param_index],data->token_ptr->attribute.string);
 
-        VERIFY_TOKEN(T_ID)
+        GET_TOKEN()
+        if(data->token_ptr->token_type == T_ID){
 
-        // if there is function named as parameter
-        if(table_count_elements_in_stack(data->tableStack) != 2)
-            return ER_INTERNAL;
-        if (findSymbol(data->tableStack->top->table, data->token_ptr->attribute.string))
-            return ER_UNDEF_VAR;
 
-        // if we are in definition, we need to add_LitInt_LitInt parameters to the local symtable
-        bool internal_error;
-        if(table_count_elements_in_stack(data->tableStack) == 0)
-            return ER_INTERNAL;
-        if (!(data->exp_type = insertSymbol(data->tableStack->top->table, data->token_ptr->attribute.string, &internal_error))) {
-            if (internal_error) return ER_INTERNAL;
-            else return ER_UNDEF_VAR;
+
+            // if there is function named as parameter
+            if(table_count_elements_in_stack(data->tableStack) != 2)
+                return ER_INTERNAL;
+            if (findSymbol(data->tableStack->top->table, data->token_ptr->attribute.string))
+                return ER_UNDEF_VAR;
+
+            // if we are in definition, we need to add_LitInt_LitInt parameters to the local symtable
+            bool internal_error;
+            if(table_count_elements_in_stack(data->tableStack) == 0)
+                return ER_INTERNAL;
+            if (!(data->exp_type = insertSymbol(data->tableStack->top->table, data->token_ptr->attribute.string, &internal_error))) {
+                if (internal_error) return ER_INTERNAL;
+                else return ER_UNDEF_VAR;
+            }
+            data->exp_type->defined = true;
         }
-        data->exp_type->defined = true;
+        else if(data->token_ptr->token_type == T_UNDERLINE){
+            item_data tmp_item;
+            tmp_item.defined = true;
+
+            if((data->exp_type = (item_data *) malloc(sizeof(item_data))) == NULL) {
+                return ER_INTERNAL;
+            }
+
+            *(data->exp_type) = tmp_item;
+        } else
+            return ER_SYNTAX;
 
         VERIFY_TOKEN(T_COLON)
 
@@ -679,11 +699,13 @@ item_type get_type(struct token* token, parser_data_t * data, item_data* item){
             if (symbol == NULL){
                 item->nil_possibility = false;
                 item->defined = false;
+                item->is_function = false;
                 return IT_UNDEF;
             }
             data->id_type = &(symbol->data);
             item->nil_possibility = symbol->data.nil_possibility;
             item->defined = symbol->data.defined;
+            item->is_function = symbol->data.is_function;
             return symbol->data.type;
         case T_INT:
             item->defined = false;
