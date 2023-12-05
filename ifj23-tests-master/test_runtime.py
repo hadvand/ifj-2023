@@ -2,7 +2,7 @@ import traceback
 import subprocess
 from enum import Enum
 
-COMPILER_PATH = "../gen_tests"
+COMPILER_PATH = "../compiler"
 INTERPRETER_PATH = "./ic23int"
 
 # gtfo python

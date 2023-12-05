@@ -1,3 +1,10 @@
+/**
+ * @file generator.c
+ * @author Neonila Mashlai (xmashl00)
+ * @author Oleg Borsh (xborsh00)
+ * @brief code generation
+ */
+
 #include "generator.h"
 #include <stdbool.h>
 #include "string.h"
@@ -72,6 +79,6 @@ void generate_var_definition(item_data data){
 int main(void){
     generator_start();
     // CODE HERE
-    generator_builtin();
+    //generator_builtin();
     generator_end();
 }

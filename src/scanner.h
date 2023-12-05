@@ -1,3 +1,9 @@
+/**
+ * @file scanner.h
+ * @author Nikita Vetluzhskikh (xvetlu00)
+ * @author Neonila Mashlai (xmashl00)
+ * @brief lexical analysis
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +15,9 @@
 #define PRINTABLE_MIN 32
 #define PRINTABLE_MAX 126
 
-
+/**
+ * @brief
+ */
 typedef enum state{
     S_START,
     S_KEYWORD,
@@ -30,16 +38,16 @@ typedef enum state{
     S_MULTILINE_STRING,
     S_INT,
     S_NUMBER_POINT,
-    S_DEMICAL,
+    S_DECIMAL,
     S_EXPONENT_POSSIBLY,
     S_EXPONENT_SING,
     S_EXPONENT,
-    S_ASSINGMENT,
+    S_ASSIGNMENT,
     S_EXCLAMATION_MARK,
     S_DIVISION,
     S_COMMENT_STRING,
     S_COMMENT_BLOCK_START,
-    S_COMMENT_BLOCK_BOSSIBLY_FINISHED,
+    S_COMMENT_BLOCK_POSSIBLY_FINISHED,
     S_POSSIBLY_TERN,
     S_MINUS,
     S_LESS,
@@ -47,10 +55,13 @@ typedef enum state{
     S_NESTED_COMMENT
 } state_t;
 
+/**
+ * @brief
+ */
 typedef enum token_type{
     T_ITS_NOT_A_TOKEN,
     T_EXPONENT,
-    T_DEMICAL,
+    T_DECIMAL,
     T_INT,
     T_EQUALS,
     T_ASSIGMENT,
@@ -88,16 +99,19 @@ typedef enum token_type{
 
 #define COUNT_KEYWORDS_BEFORE_QMARK 11
 
+/**
+ * @brief
+ */
 typedef enum keyword{
-    k_Double,
+    k_double,
     k_else,
     k_func,
     k_if,
-    k_Int,
+    k_int,
     k_let,
     k_nil,
     k_return,
-    k_String,
+    k_string,
     k_var,
     k_while,
     k_qmark_Double,
@@ -105,6 +119,9 @@ typedef enum keyword{
     k_qmark_String
 } keyword_t;
 
+/**
+ * @brief
+ */
 typedef union attribute{
     int integer;
     double decimal;
@@ -112,6 +129,9 @@ typedef union attribute{
     keyword_t keyword;
 } attribute_t;
 
+/**
+ * @brief
+ */
 typedef struct token
 {
     token_type_t token_type;
@@ -119,5 +139,7 @@ typedef struct token
     unsigned int line;
 } *token_t_ptr;
 
-
+/**
+ * @brief
+ */
 token_t_ptr next_token(int *line_cnt, int* error, bool *flag);

@@ -1,3 +1,10 @@
+/**
+ * @file table_stack.c
+ * @author Neonila Mashlai (xmashl00)
+ * @author Nikita Vetluzhskikh (xvetlu00)
+ * @brief syntax and semantic analysis
+ */
+
 #include "table_stack.h"
 
 t_table_stack* table_stack_init()
@@ -14,7 +21,7 @@ bool table_stack_is_empty(t_table_stack *s)
     return s->top == NULL;
 }
 
-bool table_stack_push(t_table_stack *s, HashTable *table)
+bool table_stack_push(t_table_stack *s, hash_table *table)
 {
     t_table_stack_elem *new_elem = (t_table_stack_elem *)malloc(sizeof(t_table_stack_elem));
 
@@ -66,11 +73,11 @@ int table_count_elements_in_stack(t_table_stack *s){
     return count;
 }
 
-Symbol *findSymbol_global(t_table_stack *s, char *name)
+symbol *find_symbol_global(t_table_stack *s, char *name)
 {
     for (t_table_stack_elem *tmp = s->top; tmp != NULL; tmp = tmp->next)
     {
-        Symbol *symbol = findSymbol(tmp->table, name);
+        symbol *symbol = find_symbol(tmp->table, name);
         if(symbol != NULL)
             return symbol;
     }

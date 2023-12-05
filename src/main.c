@@ -1,7 +1,15 @@
+/**
+ * @file main.c
+ * @author Nelia Mashlai (xmashl00)
+ * @author Nikita Vetluzhskikh (xvetlu00)
+ * @author Oleg Borsh (xborsh00)
+ * @author Murad Mikogaziev (xmikog00)
+ * @brief main brain
+ */
+
 #include "parser.h"
 #include "error.h"
 #include <stdio.h>
-
 
 int main()
 {

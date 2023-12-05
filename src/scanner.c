@@ -1,3 +1,10 @@
+/**
+ * @file scanner.c
+ * @author Nikita Vetluzhskikh (xvetlu00)
+ * @author Neonila Mashlai (xmashl00)
+ * @brief lexical analysis
+ */
+
 #include "error.h"
 #include "scanner.h"
 
@@ -17,7 +24,7 @@ void delete_token(token_t_ptr token){
     }
 }
 
-char *tokens[] = {"T_ITS_NOT_A_TOKEN", "T_EXPONENT", "T_DEMICAL", "T_INT", "T_EQUALS",
+char *tokens[] = {"T_ITS_NOT_A_TOKEN", "T_EXPONENT", "T_DECIMAL", "T_INT", "T_EQUALS",
                   "T_ASSIGMENT", "T_UNDERLINE", "T_KEYWORD", "T_ID",
                   "T_KEYWORD_NIL_POSSIBILITY", "T_EXCLAMATION_MARK", "T_STRING", "T_MORE", "T_MORE_EQUAL",
                   "T_LESS", "T_LESS_EQUAL", "T_MINUS", "T_ARROW",
@@ -43,7 +50,7 @@ void single_token(token_t_ptr token ,int line_cnt, token_type_t token_type,strin
         case(T_INT):
             printf(": content is %i\n",token->attribute.integer);
             break;
-        case(T_DEMICAL):
+        case(T_DECIMAL):
             printf(": content is %f\n",token->attribute.decimal);
             break;
         case(T_KEYWORD):
@@ -191,7 +198,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     continue;
                 }
                 else if(c == '='){
-                    state = S_ASSINGMENT;
+                    state = S_ASSIGNMENT;
                     continue;
                 }
                 else if(c == '-'){
@@ -266,7 +273,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                 continue;
             case(S_COMMENT_BLOCK_START):
                 if(c == '*'){
-                    state = S_COMMENT_BLOCK_BOSSIBLY_FINISHED;
+                    state = S_COMMENT_BLOCK_POSSIBLY_FINISHED;
                 }
                 else if(c == '/'){
                     state = S_NESTED_COMMENT;
@@ -288,7 +295,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                 }
                 state = S_COMMENT_BLOCK_START;
                 continue;
-            case(S_COMMENT_BLOCK_BOSSIBLY_FINISHED):
+            case(S_COMMENT_BLOCK_POSSIBLY_FINISHED):
                 if(c == '/'){
                     comment_count--;
                     if(comment_count == 0){
@@ -369,20 +376,20 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                         scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
                         return NULL;
                     }
-                    state = S_DEMICAL;
+                    state = S_DECIMAL;
                     continue;
                 }
                 else{
                     scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
-            case(S_DEMICAL):
+            case(S_DECIMAL):
                 if(c >=48 && c<= 57){
                     if(!string_append(additional_string,c)){
                         scanning_finish_with_error(token,additional_string,err_type, ER_INTERNAL);
                         return NULL;
                     }
-                    state = S_DEMICAL;
+                    state = S_DECIMAL;
                     continue;
                 }
                 else if(c == 69 || c == 101){
@@ -396,7 +403,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                 else{
                     ungetc(c, stdin);
                     token->attribute.decimal = strtod(additional_string->string,NULL);
-                    single_token(token,*line_cnt,T_DEMICAL,additional_string);
+                    single_token(token, *line_cnt, T_DECIMAL, additional_string);
                     return token;
                 }
             case(S_EXPONENT_POSSIBLY):
@@ -529,7 +536,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     single_token(token, *line_cnt, T_MINUS,additional_string);
                     return token;
                 }
-            case(S_ASSINGMENT):
+            case(S_ASSIGNMENT):
                 if(c == '='){
                     single_token(token,*line_cnt,T_EQUALS,additional_string);
                     return token;

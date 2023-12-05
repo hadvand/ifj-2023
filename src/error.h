@@ -1,6 +1,15 @@
+/**
+ * @file error.h
+ * @author Nikita Vetluzhskikh (xvetlu00)
+ * @brief error codes list
+ */
+
 #ifndef ERROR_HEADER_G
 #define ERROR_HEADER_G
 
+/**
+ * @brief enum for readable code errors
+ */
 typedef enum error{
     ER_NONE          = 0,
     ER_LEX           = 1,
@@ -14,11 +23,5 @@ typedef enum error{
     ER_OTHER_SEM_2   = 9,
     ER_INTERNAL      = 99
 } error_t;
-
-/**
- * @brief external variable for assigning the error type
- * 
- */
-extern error_t err_type;
 
 #endif

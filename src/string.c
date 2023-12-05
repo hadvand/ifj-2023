@@ -1,3 +1,10 @@
+/**
+ * @file string.c
+ * @author Oleg Borsh (xborsh00)
+ * @author Murad Mikogaziev (xmikog00)
+ * @brief syntax and semantic analysis
+ */
+
 #include "string.h"
 
 string_ptr string_init()

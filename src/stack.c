@@ -1,3 +1,10 @@
+/**
+ * @file stack.c
+ * @author Nikita Vetluzhskikh (xvetlu00)
+ * @author Murad Mikogaziev (xmikog00)
+ * @brief syntax and semantic analysis
+ */
+
 #include "stack.h"
 #include "stdio.h"
 
@@ -118,6 +125,8 @@ void stack_free(t_stack* s)
 
 char* get_string_to_table_symbol(Precedence_table_symbol symbol){
     switch (symbol) {
+        case ASSIGNMENT:
+            return "=";
         case PLUS:
             return "+";
         case MINUS:
@@ -127,7 +136,7 @@ char* get_string_to_table_symbol(Precedence_table_symbol symbol){
         case DIV:
             return "/";
         case EQUAL:
-            return "=";
+            return "==";
         case N_EQUAL:
             return "!=";
         case L_EQUAL:

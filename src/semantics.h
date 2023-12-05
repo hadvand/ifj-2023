@@ -1,3 +1,9 @@
+/**
+ * @file semantics.h
+ * @author Nikita Vetluzhskikh (xvetlu00)
+ * @author Oleg Borsh (xborsh00)
+ * @brief semantic analysis
+ */
 
 #ifndef IFJ_NEW_BEGINNING_SEMANTICS_H
 #define IFJ_NEW_BEGINNING_SEMANTICS_H
@@ -6,13 +12,16 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+/**
+ * @brief
+ */
 typedef enum
 {
     PLUS,			// +
     MINUS,			// -
     MUL,			// *
     DIV,			// /
-    EQUAL,			// =
+    EQUAL,			// ==
     N_EQUAL,		// !=
     L_EQUAL,		// <=
     LESS,		    // <
@@ -29,12 +38,17 @@ typedef enum
     NIL = 14,           // nil
     DOLLAR,			// $
     STOP,			// stop symbol used when reducing
-    N_TERMINAL		// non-terminal
+    N_TERMINAL,		// non-terminal
+    ASSIGNMENT      // =
 } Precedence_table_symbol;
 
+/**
+ * @brief
+ */
 typedef enum
 {
-    NT_EQ_NT,       // E -> E = E
+    NT_AS_NT,       // E -> E = E
+    NT_EQ_NT,       // E -> E == E
     NT_NEQ_NT,      // E -> E != E
     NT_LEQ_NT,      // E -> E <= E
     NT_LTN_NT,      // E -> E < E
@@ -51,9 +65,14 @@ typedef enum
     NOT_A_RULE      // rule doesn't exist
 } Precedence_rules;
 
-
+/**
+ * @brief
+ */
 int expression(parser_data_t* data);
 
+/**
+ * @brief
+ */
 int check_func_call(parser_data_t *data, int position);
 
 #endif //IFJ_NEW_BEGINNING_SEMANTICS_H
