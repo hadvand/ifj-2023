@@ -569,7 +569,9 @@ int func_params(parser_data_t *data) {
         if(data->token_ptr->token_type == T_ID){
 
 
-
+            if(!strcmp(data->id->id_names[data->param_index],data->token_ptr->attribute.string)){
+                return ER_OTHER_SEM_2;
+            }
             // if there is function named as parameter
             if(table_count_elements_in_stack(data->tableStack) != 2)
                 return ER_INTERNAL;
