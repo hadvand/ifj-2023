@@ -814,7 +814,10 @@ int check_param(parser_data_t* data, int position){
                 && data->id_type->type != IT_ANY){
                 return ER_PARAMS;
             }
-            return ER_NONE;
+            if(sym->data.defined)
+                return ER_NONE;
+            else
+                return ER_UNDEF_VAR;
         }
         else{
             GET_TOKEN()
