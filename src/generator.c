@@ -9,8 +9,6 @@
 #include <stdbool.h>
 #include "string.h"
 
-#define MAX_DIGITS 64
-
 string_ptr code;
 
 
@@ -40,6 +38,27 @@ void generator_end(void){
     GENERATE_CODE("CLEARS\n");
 }
 
+bool main_scope_start()
+{
+    GENERATE_CODE("\n# Main scope starts");
+
+    GENERATE_CODE("LABEL $$main");
+    GENERATE_CODE("CREATEFRAME");
+    GENERATE_CODE("PUSHFRAME");
+
+    return true;
+}
+
+
+bool main_scope_end()
+{
+    GENERATE_CODE("# Main scope ends ");
+
+    GENERATE_CODE("POPFRAME");
+    GENERATE_CODE("CLEARS");
+
+    return true;
+}
 
 
 void generate_var_declaration(item_data data){
@@ -74,11 +93,3 @@ void generate_var_definition(item_data data){
     }
 }
 
-
-
-//int main(void){
-//    generator_start();
-//    // CODE HERE
-//    //generator_builtin();
-//    generator_end();
-//}

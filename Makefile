@@ -40,7 +40,7 @@ test: generator-debug
 	./generator-debug < testFile > generator_out
 	./ifj23-tests-master/ic23int generator_out
 
-compiler: $(PARSER_PROGS) $(PROGS) src/main.c
+compiler: $(PARSER_PROGS) $(PROGS) $(GENERATOR_PROGS) src/main.c
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 
 clean:

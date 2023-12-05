@@ -86,7 +86,7 @@
     "\nDEFVAR LF@%return"													\
     "\nREAD LF@%return string"												\
     "\nPOPFRAME"															\
-    "\nRETURN\n"                                                             \
+    "\nRETURN\n"                                                            \
 
 #define BUILTIN_READINT                                                     \
     "\nLABEL $readInt"														\
@@ -106,10 +106,23 @@
 
 #define BUILTIN_WRITE                                                       \
     "\nLABEL $write"                                                        \
-    "\nPUSHFRAME"      \
-    "\nWRITE LF@%0"    \
-    "\nPOPFRAME"       \
-    "\nRETURN\n"         \
+    "PUSHFRAME\n"                               \
+	"DEFVAR LF@to_write\n"                      \
+	"DEFVAR LF@type\n"                          \
+	"TYPE LF@type LF@arg_count\n"                  \
+	"JUMPIFNEQ !write_end LF@type string@int\n" \
+	"DEFVAR LF@cond\n"                          \
+	"LT LF@cond LF@arg_count int@1\n"              \
+	"JUMPIFEQ !write_end LF@cond bool@true\n"   \
+	"LABEL !write_loop\n"                       \
+	"POPS LF@to_write\n"                          \
+	"WRITE LF@to_write\n"                         \
+	"SUB LF@arg_count LF@arg_count int@1\n"           \
+	"GT LF@cond LF@arg_count int@0\n"              \
+	"JUMPIFEQ !write_loop LF@cond bool@true\n"  \
+	"LABEL !write_end\n"                        \
+	"POPFRAME\n"                                \
+	"RETURN\n"                                  \
 
 #define BUILTIN_ORD \
     "\nLABEL $ord" \
@@ -123,14 +136,14 @@
 	"\nLABEL $chr"															\
 	"\nPUSHFRAME"															\
 	"\nDEFVAR LF@%return"													\
-	"\nMOVE LF@%return string@"											\
-	"\nDEFVAR LF@condition"												\
-	"\nLT LF@condition LF@%0 int@0"										\
-	"\nJUMPIFEQ $ret LF@condition bool@true"						\
+	"\nMOVE LF@%return string@"											    \
+	"\nDEFVAR LF@condition"												    \
+	"\nLT LF@condition LF@%0 int@0"										    \
+	"\nJUMPIFEQ $ret LF@condition bool@true"						        \
 	"\nGT LF@condition LF@%0 int@255"										\
-	"\nJUMPIFEQ $ret LF@condition bool@true"						\
+	"\nJUMPIFEQ $ret LF@condition bool@true"						        \
 	"\nINT2CHAR LF@%return LF@%0"											\
-	"\nLABEL $ret"													\
+	"\nLABEL $ret"													        \
 	"\nPOPFRAME"															\
 	"\nRETURN\n\n"
 
