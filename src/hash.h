@@ -36,6 +36,7 @@ typedef struct
     char* id;
     item_type type; // return type/ var type
     bool nil_possibility;
+    bool is_let;
     //bool it_is_nil;
     bool defined;
     bool global;

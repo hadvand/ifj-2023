@@ -276,6 +276,10 @@ int stm(parser_data_t *data) {
         VERIFY_TOKEN(T_ID)
         INSERT_SYM()
         data->id->defined = false;
+        if(data->token_ptr->attribute.keyword == k_var || data->token_ptr->attribute.keyword == k_let)
+            data->id->is_let = true;
+        else
+            data->id->is_let = false;
         GET_TOKEN()
         if (data->token_ptr->token_type == T_COLON) {
             GET_TOKEN()
@@ -565,6 +569,7 @@ int condition(parser_data_t *data) {
     }
     item_data tmp_data;
     tmp_data.type = IT_BOOL;
+    tmp_data.is_let = false;
     data->id = &tmp_data;
     CHECK_RULE(expression)
 
@@ -742,6 +747,7 @@ item_type get_type(struct token* token, parser_data_t * data, item_data* item){
                 item->nil_possibility = symbol->data.nil_possibility;
             item->defined = symbol->data.defined;
             item->is_function = symbol->data.is_function;
+            item->is_let = symbol->data.is_let;
             return symbol->data.type;
         case T_INT:
             item->defined = false;

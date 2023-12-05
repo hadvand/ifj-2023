@@ -305,6 +305,10 @@ int expression(parser_data_t* data){
     printf("semantic analysis starts\n");
 #endif
 
+
+    if(data->id == NULL || data->id->is_let)
+        return ER_OTHER_SEM_2;
+
     stack_init(&stack);
     //init item_data
     item_data tmp_item;
@@ -447,8 +451,7 @@ int expression(parser_data_t* data){
 
     }while(!success);
 
-    if(data->id == NULL)
-        return ER_OTHER_SEM_2;
+
 
     t_stack_elem op1;
     op1.symbol = N_TERMINAL;
@@ -820,7 +823,7 @@ int check_param(parser_data_t* data, int position){
             GET_TOKEN()
             if(data->token_ptr->token_type == T_COLON)
                 return ER_OTHER_SEM_2;
-            return ER_PARAMS;
+            return ER_UNDEF_VAR;
         }
 
     } else{
