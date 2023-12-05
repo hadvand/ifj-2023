@@ -381,13 +381,6 @@ int stm(parser_data_t *data) {
             GET_TOKEN()
             CHECK_RULE(stm)
 
-//            if (data->is_void_function) {
-//                CHECK_RULE(return_void_rule)
-//            }
-//            else {
-//                CHECK_RULE(return_rule)
-//            }
-
             if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
             table_stack_pop(data->tableStack);
 
@@ -412,7 +405,6 @@ int stm(parser_data_t *data) {
     }
 
     // <stm> -> if ( <condition> ) { <stm> } \n else { <stm> } \n <stm>
-    // <stm> -> if ( <condition> ) { <stm> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_if) {
         data->is_in_condition = true;
 
@@ -427,24 +419,19 @@ int stm(parser_data_t *data) {
         if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
 
         GET_TOKEN()
+        if (!(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_else)) return ER_SYNTAX;
 
-        if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_else) {
-            VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
+        VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
 
-            GET_TOKEN()
-            CHECK_RULE(stm)
+        GET_TOKEN()
+        CHECK_RULE(stm)
 
-            if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+        if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
 
-            GET_TOKEN()
-//            if (!data->eol_flag) return ER_SYNTAX;
+        GET_TOKEN()
 
-            return stm(data);
-        }
-        else {
-            GET_TOKEN()
-            return stm(data);
-        }
+        return stm(data);
+
     }
 
     // <stm> -> while ( <condition> ) { <stm> } \n <stm>
@@ -466,7 +453,7 @@ int stm(parser_data_t *data) {
 
         return stm(data);
     }
-    //return ....
+    //return ...
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return) {
         if (data->is_void_function) {
             CHECK_RULE(return_void_rule)
@@ -654,6 +641,8 @@ int return_rule(parser_data_t *data) {
     if (!(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return)) return ER_SYNTAX;
     GET_TOKEN()
     data->id = data->func_id;
+
+    if (data->token_ptr->token_type == T_CURVED_BRACKET_CLOSE) return ER_FUNC_RETURN;
     CHECK_RULE(expression)
 
     return nil_flag(data);
