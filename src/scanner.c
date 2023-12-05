@@ -1,6 +1,7 @@
 /**
  * @file scanner.c
  * @author Nikita Vetluzhskikh (xvetlu00)
+ * @author Neonila Mashlai (xmashl00)
  * @brief lexical analysis
  */
 

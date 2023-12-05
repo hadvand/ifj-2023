@@ -1,6 +1,6 @@
 /**
  * @file table_stack.c
- * @author Nelia Mashlai (xmashl00)
+ * @author Neonila Mashlai (xmashl00)
  * @author Nikita Vetluzhskikh (xvetlu00)
  * @brief syntax and semantic analysis
  */
