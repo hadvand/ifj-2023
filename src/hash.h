@@ -13,6 +13,9 @@
 
 #define MAX_TABLE_SIZE 101
 
+/**
+ * @brief enum for readable code errors
+ */
 typedef enum {
     IT_DOUBLE,
     IT_INT,
@@ -22,7 +25,9 @@ typedef enum {
     IT_UNDEF
 } item_type;
 
-
+/**
+ * @brief enum for readable code errors
+ */
 typedef struct
 {
     string_ptr params;      // i - int, s - string, d - double, a - any; if BIG, then may be NULL
@@ -36,27 +41,51 @@ typedef struct
     bool is_function;
 } item_data;
 
+/**
+ * @brief
+ */
 typedef struct symbol {
     char *name;
     item_data data;
     struct symbol* next;
 } symbol;
 
+/**
+ * @brief
+ */
 typedef struct HashTable {
     int size;
     symbol** table;
 } hash_table;
 
+/**
+ * @brief
+ */
 hash_table* create_hash_table();
 
+/**
+ * @brief
+ */
 void destroy_hash_table(hash_table* ht);
 
+/**
+ * @brief
+ */
 unsigned int hash(char* str, int size);
 
+/**
+ * @brief
+ */
 item_data* insert_symbol(hash_table* ht, char* name, bool *internal_error);
 
+/**
+ * @brief
+ */
 symbol* find_symbol(hash_table* ht, char* name);
 
+/**
+ * @brief
+ */
 void remove_symbol(hash_table* ht, char* name);
 
 #endif

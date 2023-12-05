@@ -12,6 +12,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+/**
+ * @brief
+ */
 typedef enum
 {
     PLUS,			// +
@@ -39,6 +42,9 @@ typedef enum
     ASSIGNMENT      // =
 } Precedence_table_symbol;
 
+/**
+ * @brief
+ */
 typedef enum
 {
     NT_AS_NT,       // E -> E = E
@@ -59,9 +65,14 @@ typedef enum
     NOT_A_RULE      // rule doesn't exist
 } Precedence_rules;
 
-
+/**
+ * @brief
+ */
 int expression(parser_data_t* data);
 
+/**
+ * @brief
+ */
 int check_func_call(parser_data_t *data, int position);
 
 #endif //IFJ_NEW_BEGINNING_SEMANTICS_H

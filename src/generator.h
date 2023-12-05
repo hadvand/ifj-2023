@@ -134,10 +134,29 @@
 	"\nPOPFRAME"															\
 	"\nRETURN\n\n"
 
+/**
+ * @brief
+ */
 void generator_start(void);
+
+/**
+ * @brief
+ */
 void generator_end(void);
+
+/**
+ * @brief
+ */
 void generator_builtin(void);
+
+/**
+ * @brief
+ */
 void generate_var_declaration(item_data data);
+
+/**
+ * @brief
+ */
 void generate_var_definition(item_data data);
 
 #endif //GENERATOR_H
