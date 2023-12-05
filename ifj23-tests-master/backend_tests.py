@@ -736,13 +736,13 @@ def test_all():
 
     test_invalid("""
     func a(_ i: Int) { }
-    var a: Int = 5
-    a = a(42)
+    var b: Int = 5
+    b = a(42)
     """, ErrorType.error_type)
 
     test_invalid("""
     func a(_ i: Int) { }
-    let a = a(42)
+    let b = a(42)
     """, ErrorType.error_type)
 
     # return evaluation
