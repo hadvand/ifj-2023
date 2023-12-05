@@ -696,7 +696,7 @@ item_type get_type(struct token* token, parser_data_t * data, item_data* item){
         case T_ID:
             if(table_count_elements_in_stack(data->tableStack) == 0)
                 return IT_UNDEF;
-            symbol = find_symbol(data->tableStack->top->table, token->attribute.string);
+            symbol = find_symbol_global(data->tableStack, token->attribute.string);
             if (symbol == NULL){
                 item->nil_possibility = false;
                 item->defined = false;
