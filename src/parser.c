@@ -726,6 +726,7 @@ item_type get_type(struct token* token, parser_data_t * data, item_data* item){
 
 
     symbol* symbol;
+    *item = create_default_item();
 
     switch(token -> token_type){
         case T_ID:
