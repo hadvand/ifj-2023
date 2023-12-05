@@ -562,7 +562,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
     bool operand_3_to_double = false;
 
     if (rule == OPERAND){
-        if (operand_1->item.type == IT_UNDEF){
+        if (operand_1->item.type == IT_UNDEF && !operand_1->item.is_function){
             return ER_UNDEF_VAR;
         }
     }
@@ -584,6 +584,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             type_final->type = operand_1->item.type;
             type_final->nil_possibility = operand_1->item.nil_possibility;
             type_final->defined = operand_1->item.defined;
+            type_final->is_function = operand_1->item.is_function;
             //type_final->it_is_nil = operand_1->item.it_is_nil;
             break;
 
@@ -748,7 +749,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         case NT_AS_NT:
 
             if(operand_3->item.type == IT_UNDEF)
-                return ER_OTHER_SEM;
+                return ER_TYPE_COMP;
 
             if(operand_1->item.type != operand_3->item.type && operand_1->item.type != IT_UNDEF && operand_3->item.type != IT_NIL){
                 if(operand_1->item.type == IT_DOUBLE && operand_3->item.type == IT_INT && !operand_3->item.defined)
@@ -800,11 +801,13 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 }
 
 int check_param(parser_data_t* data, int position){
+    int ret_code = 0;
     if(data->token_ptr->token_type == T_ID){
         Symbol* sym = NULL;
         if(table_count_elements_in_stack(data->tableStack) == 0)
             return ER_INTERNAL;
-        if((sym = findSymbol(data->tableStack->top->table,data->token_ptr->attribute.string)) != NULL){
+
+        if((sym = findSymbol_global(data->tableStack,data->token_ptr->attribute.string)) != NULL){
             bool param_nil_possibility = false;
             if((sym->data.type != get_type_from_params(data->id_type,position, &param_nil_possibility)
                 || sym->data.nil_possibility != param_nil_possibility)
@@ -812,6 +815,12 @@ int check_param(parser_data_t* data, int position){
                 return ER_PARAMS;
             }
             return ER_NONE;
+        }
+        else{
+            GET_TOKEN()
+            if(data->token_ptr->token_type == T_COLON)
+                return ER_OTHER_SEM_2;
+            return ER_PARAMS;
         }
 
     } else{
