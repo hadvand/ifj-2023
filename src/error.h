@@ -1,3 +1,9 @@
+/**
+ * @file error.h
+ * @author Nikita Vetluzhskikh (xvetlu00)
+ * @brief error codes list
+ */
+
 #ifndef ERROR_HEADER_G
 #define ERROR_HEADER_G
 

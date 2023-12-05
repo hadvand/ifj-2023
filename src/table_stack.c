@@ -1,3 +1,10 @@
+/**
+ * @file table_stack.c
+ * @author Neonila Mashlai (xmashl00)
+ * @author Nikita Vetluzhskikh (xvetlu00)
+ * @brief syntax and semantic analysis
+ */
+
 #include "table_stack.h"
 
 t_table_stack* table_stack_init()

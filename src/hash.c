@@ -1,3 +1,9 @@
+/**
+ * @file hash.c
+ * @author Oleg Borsh (xborsh00)
+ * @brief symtable for parser
+ */
+
 #include "hash.h"
 #include <string.h>
 

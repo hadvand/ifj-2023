@@ -1,3 +1,10 @@
+/**
+ * @file table_stack.h
+ * @author Neonila Mashlai (xmashl00)
+ * @author Nikita Vetluzhskikh (xvetlu00)
+ * @brief syntax and semantic analysis
+ */
+
 #include "hash.h"
 
 #ifndef TABLE_STACK_H

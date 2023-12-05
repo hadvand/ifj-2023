@@ -1,3 +1,9 @@
+/**
+ * @file semantics.h
+ * @author Nikita Vetluzhskikh (xvetlu00)
+ * @author Oleg Borsh (xborsh00)
+ * @brief semantic analysis
+ */
 
 #ifndef IFJ_NEW_BEGINNING_SEMANTICS_H
 #define IFJ_NEW_BEGINNING_SEMANTICS_H
