@@ -166,8 +166,8 @@ def test_all():
 
     test_invalid("""
     func a(_ a: Int) {}
-    let a: Int
-    a(a)
+    let b: Int
+    a(b)
     """, error_undefined_var)
 
     test_invalid("""
