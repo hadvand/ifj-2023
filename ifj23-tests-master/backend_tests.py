@@ -853,16 +853,16 @@ def test_all():
     func a() -> Int {
         return 4
     }
-    let a = a()
-    write(a)
+    let b = a()
+    write(b)
     """, "4")
 
     test_invalid("""
     func a() -> Int {
         return 4.5
     }
-    let a = a()
-    write(a)
+    let b = a()
+    write(b)
     """, error_call)
 
     test_invalid("""
@@ -870,64 +870,64 @@ def test_all():
         let a: String? = nil
         return a
     }
-    let a = a()
-    write(a)
+    let b = a()
+    write(b)
     """, error_call)
 
     test_invalid("""
     func a() -> Int {
         return nil
     }
-    let a = a()
-    write(a)
+    let b = a()
+    write(b)
     """, error_call)
 
     test("""
     func a() -> Int? {
         return 4
     }
-    let a = a()
-    write(a)
+    let b = a()
+    write(b)
     """, "4")
 
     test("""
     func a() -> Int? {
         return nil
     }
-    let a = a()
-    write(a)
+    let b = a()
+    write(b)
     """, "")
 
     test("""
     func a() -> Double {
         return 4
     }
-    let a = a()
-    write(a)
+    let b = a()
+    write(b)
     """, hexfloat(4.0))
 
     test("""
     func a() -> Double? {
         return 4
     }
-    let a = a()
-    write(a)
+    let b = a()
+    write(b)
     """, hexfloat(4.0))
 
     test("""
     func a() -> Double? {
         return 4.5
     }
-    let a = a()
-    write(a)
+    let b = a()
+    write(b)
     """, hexfloat(4.5))
 
     test("""
     func a() -> Double? {
         return 4.5
     }
-    let a = a()
-    write(a)
+    let b = a()
+    write(b)
     """, hexfloat(4.5))
 
     test_invalid("""
