@@ -665,14 +665,14 @@ def test_all():
 
     test_valid("""
     func a(_ i: Int?) {}
-    let a: Int? = 4
-    a(a)
+    let b: Int? = 4
+    a(b)
     """)
 
     test_valid("""
     func a(_ i: Int?) {}
-    let a: Int?
-    a(a)
+    let b: Int?
+    a(b)
     """)
 
     test_invalid("""
