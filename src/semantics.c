@@ -29,6 +29,8 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         }\
     while(0) \
 
+#define UNUSED(x) (void)(x)
+
 #define NIL_POSSIBILITY_CHECK() \
                 if(operand_1->item.nil_possibility != operand_3->item.nil_possibility) \
                     return ER_TYPE_COMP;                                               \
@@ -57,16 +59,16 @@ int precedence_table[TABLE_SIZE][TABLE_SIZE] =
 {
     //      | + |  - |  * |  / |  == | != | < |  > | <= | >= | ?? |  ! |  ( |  ) |  i |  $ |
 
-            {'>', '>', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '<', '>', '<', '>'},   // |+|
-            {'>', '>', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '<', '>', '<', '>'},   // |-|
-            {'>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '<', '>', '<', '>'},   // |*|
-            {'>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '<', '<', '>', '<', '>'},   // |/|
-            {'<', '<', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '<', '>', '<', '>'},   // |==|
-            {'<', '<', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '<', '>', '<', '>'},   // |!=|
-            {'<', '<', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '<', '>', '<', '>'},   // |<|
-            {'<', '<', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '<', '>', '<', '>'},   // |>|
-            {'<', '<', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '<', '>', '<', '>'},   // |<=|
-            {'<', '<', '<', '<', '>', '>', '>', '>', '>', '>', '>', '<', '<', '>', '<', '>'},   // |>=|
+            {'>', '>', '<', '<', ' ', ' ', ' ', ' ', ' ', ' ', '>', '<', '<', '>', '<', '>'},   // |+|
+            {'>', '>', '<', '<', ' ', ' ', ' ', ' ', ' ', ' ', '>', '<', '<', '>', '<', '>'},   // |-|
+            {'>', '>', '>', '>', ' ', ' ', ' ', ' ', ' ', ' ', '>', '<', '<', '>', '<', '>'},   // |*|
+            {'>', '>', '>', '>', ' ', ' ', ' ', ' ', ' ', ' ', '>', '<', '<', '>', '<', '>'},   // |/|
+            {'<', '<', '<', '<', ' ', ' ', ' ', ' ', ' ', ' ', '>', '<', '<', '>', '<', '>'},   // |==|
+            {'<', '<', '<', '<', ' ', ' ', ' ', ' ', ' ', ' ', '>', '<', '<', '>', '<', '>'},   // |!=|
+            {'<', '<', '<', '<', ' ', ' ', ' ', ' ', ' ', ' ', '>', '<', '<', '>', '<', '>'},   // |<|
+            {'<', '<', '<', '<', ' ', ' ', ' ', ' ', ' ', ' ', '>', '<', '<', '>', '<', '>'},   // |>|
+            {'<', '<', '<', '<', ' ', ' ', ' ', ' ', ' ', ' ', '>', '<', '<', '>', '<', '>'},   // |<=|
+            {'<', '<', '<', '<', ' ', ' ', ' ', ' ', ' ', ' ', '>', '<', '<', '>', '<', '>'},   // |>=|
             {'<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '>', '<', '>'},   // |??|
             {'>', '>', '>', '>', '>', '>', '>', '>', '>', '>', '>', ' ', ' ', '>', ' ', '>'},   // |!|
             {'<', '<', '<', '<', '<', '<', '<', '<', '<', '<', '<', ' ', '<', '=', '<', ' '},   // |(|
@@ -101,7 +103,7 @@ Precedence_table_symbol convert_token_into_symbol(parser_data_t *data, bool last
             return L_EQUAL;
         case T_MORE_EQUAL:
             return G_EQUAL;
-        case T_KEYWORD_NIL_POSSIBILITY:
+        case T_TERN:
             return DQ_MARK;
         case T_EXCLAMATION_MARK:
             return EX_MARK;
@@ -183,20 +185,30 @@ int func_call(parser_data_t* data) {
 }
 
 
-item_type get_type_from_params(item_data *data,int position){
+item_type get_type_from_params(item_data *data,int position, bool *nil_possibility){
+    UNUSED(nil_possibility);
+    *nil_possibility = false;
+    if(!strcmp(data->id,"write"))
+        return IT_ANY;
     if(data->params == NULL)
         return IT_UNDEF;
     if(position > data->params->last_index)
         return IT_UNDEF;
     switch (data->params->string[position]) {
         case 's':
+            return IT_STRING;
         case 'S':
+            *nil_possibility = true;
             return IT_STRING;
         case 'd':
+            return IT_DOUBLE;
         case 'D':
+            *nil_possibility = true;
             return IT_DOUBLE;
         case 'i':
+            return IT_INT;
         case 'I':
+            *nil_possibility = true;
             return IT_INT;
     }
     return IT_UNDEF;
@@ -240,6 +252,11 @@ int reduce(){
 
     if(count_symbols_before_stop == 1 && stop_is_founded){
         op1 = stack.top;
+        rule = check_rule(count_symbols_before_stop,op1,op2,op3);
+    }
+    else if(count_symbols_before_stop == 2 && stop_is_founded){
+        op1 = stack.top->next;
+        op2 = stack.top;
         rule = check_rule(count_symbols_before_stop,op1,op2,op3);
     }
     else if(count_symbols_before_stop == 3 && stop_is_founded){
@@ -287,8 +304,10 @@ int expression(parser_data_t* data){
     item_data tmp_item;
     tmp_item.type = IT_UNDEF;
     tmp_item.nil_possibility = false;
+    tmp_item.it_is_nil = false;
     stack_push(&stack, tmp_item, DOLLAR);
 
+    data->id_type = NULL;
     bool success = false;
 
     bool last_action_is_reduce = false;
@@ -298,10 +317,23 @@ int expression(parser_data_t* data){
 
     do {
         top_terminal = stack_top_terminal(&stack);
-        if(top_terminal->symbol == IDENTIFIER && data->id_type != NULL && data->id_type->is_function)
-            call_params(data);
+        if(top_terminal->symbol == IDENTIFIER && data->id_type != NULL && data->id_type->is_function) {
+
+            if (data->token_ptr->token_type == T_BRACKET_OPEN) {
+
+                data->param_index = 0;
+
+                if ((ret_code = call_params(data))) return ret_code;
+
+                if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
+
+                GET_TOKEN()
+            }
+            else
+                return ER_SYNTAX;
+        }
         actual_symbol = convert_token_into_symbol(data,last_action_is_reduce);
-        if(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let)
+        if(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let && !data->eol_flag)
             return ret_code;
         if(top_terminal == NULL){
 #ifdef SEM_DEBUG
@@ -313,6 +345,9 @@ int expression(parser_data_t* data){
         switch (precedence_table[get_index(top_terminal->symbol)][get_index(actual_symbol)]) {
             case '=':
                 tmp_item.type = get_type(data->token_ptr,data,&(tmp_item.nil_possibility),&(tmp_item.defined));
+                if(actual_symbol == IDENTIFIER && data->token_ptr->token_type == T_ID && !tmp_item.defined)
+                    return ER_UNDEF_VAR;
+                tmp_item.it_is_nil = data->token_ptr->attribute.keyword == k_nil;
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
 #ifdef SEM_DEBUG
@@ -345,6 +380,9 @@ int expression(parser_data_t* data){
                     FREE(ER_INTERNAL);
                 }
                 tmp_item.type = get_type(data->token_ptr,data,&(tmp_item.nil_possibility),&(tmp_item.defined));
+                if(actual_symbol == IDENTIFIER && data->token_ptr->token_type == T_ID && !tmp_item.defined)
+                    return ER_UNDEF_VAR;
+                tmp_item.it_is_nil = (data->token_ptr->attribute.keyword == k_nil || (data->id_type != NULL && data->id_type->it_is_nil));
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
 #ifdef SEM_DEBUG
@@ -366,7 +404,10 @@ int expression(parser_data_t* data){
 #endif
                     FREE(ret_code);
                 }
-                last_action_is_reduce = false;
+                if(actual_symbol == EX_MARK)
+                    last_action_is_reduce = true;
+                else
+                    last_action_is_reduce = false;
                 break;
             case '>':
                 if((ret_code = reduce()))
@@ -390,7 +431,7 @@ int expression(parser_data_t* data){
 #ifdef SEM_DEBUG
                     printf("semantic analysis finish with error\n");
 #endif
-                    FREE(ER_SYNTAX);
+                    FREE(ER_SEMAN);
                 }
                 last_action_is_reduce = false;
                 break;
@@ -398,6 +439,8 @@ int expression(parser_data_t* data){
 
     }while(!success);
 
+    if(data->id == NULL)
+        return ER_OTHER_SEM;
 
     t_stack_elem op1;
     op1.symbol = N_TERMINAL;
@@ -413,8 +456,7 @@ int expression(parser_data_t* data){
 #endif
         FREE(ret_code);
     }
-
-
+    *(data->id) = op1.item;
 #ifdef SEM_DEBUG
     printf("semantic analysis finish\n");
 #endif
@@ -435,7 +477,11 @@ static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_
             }
 
             return NOT_A_RULE;
-
+        case(2):
+            if(operand_1->symbol == N_TERMINAL && operand_2->symbol == EX_MARK){
+                return NT_F_UNWRAP;
+            }
+            return NOT_A_RULE;
         case(3):
 
             if (operand_1->symbol == LEFT_BRACKET && operand_2->symbol == N_TERMINAL
@@ -517,7 +563,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
     }
 
     if (rule != OPERAND && rule != LBR_NT_RBR && rule != NT_EQ_NT){
-        if (operand_1->item.type == IT_UNDEF || operand_3->item.type == IT_UNDEF){
+        if (operand_1->item.type == IT_UNDEF || ( operand_3 != NULL && operand_3->item.type == IT_UNDEF)){
             return ER_UNDEF_VAR;
         }
     }
@@ -527,12 +573,14 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             type_final->type = operand_1->item.type;
             type_final->nil_possibility = operand_1->item.nil_possibility;
             type_final->defined = operand_1->item.defined;
+            type_final->it_is_nil = operand_1->item.it_is_nil;
             break;
 
         case LBR_NT_RBR:
             type_final->type = operand_2->item.type;
             type_final->nil_possibility = operand_2->item.nil_possibility;
             type_final->defined = true;
+            type_final->it_is_nil = operand_2->item.it_is_nil;
             break;
 
         case NT_DIV_NT:
@@ -540,6 +588,9 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         case NT_MINUS_NT:
         case NT_MUL_NT:
 
+            if(operand_1->item.it_is_nil || operand_3->item.it_is_nil)
+                return ER_OTHER_SEM;
+            type_final->it_is_nil = false;
             // concatenation
             if (operand_1->item.type == IT_STRING && operand_3->item.type == IT_STRING && rule == NT_PLUS_NT){
                 type_final->type = IT_STRING;
@@ -607,7 +658,12 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             if (operand_1->item.type == IT_UNDEF || operand_1->item.type == IT_NIL) {
                 return ER_UNDEF_VAR;
             }
+
+            //NIL_POSSIBILITY_CHECK();
+            type_final->nil_possibility = operand_1->item.nil_possibility;
+            type_final->defined = true;
             type_final->type = operand_1->item.type;
+            type_final->it_is_nil = operand_2->item.it_is_nil;
             break;
         case NT_NEQ_NT:
         case NT_LEQ_NT:
@@ -639,19 +695,28 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             if(operand_3->item.type == IT_UNDEF)
                 return ER_OTHER_SEM;
 
-            if(operand_1->item.type != operand_3->item.type && operand_1->item.type != IT_UNDEF){
-                return ER_TYPE_COMP;
+            if(operand_1->item.type != operand_3->item.type && operand_1->item.type != IT_UNDEF && operand_3->item.type != IT_NIL){
+                if(operand_1->item.type == IT_DOUBLE && operand_3->item.type == IT_INT && !operand_3->item.defined)
+                    ; // TODO Generate int2Double
+                else
+                    return ER_TYPE_COMP;
             }
-            if(!operand_1->item.nil_possibility && operand_3->item.nil_possibility)
+            if(operand_1->item.type != IT_UNDEF &&
+                !operand_1->item.nil_possibility &&
+                    operand_3->item.nil_possibility)
                 return ER_TYPE_COMP;
 
-            type_final->type = operand_3->item.type;
+            if(operand_1->item.type == IT_UNDEF && operand_3->item.type == IT_NIL)
+                return ER_OTHER_SEM;
+
+            if(operand_3->item.type == IT_NIL)
+                operand_1->item.it_is_nil = true;
+            //type_final->type = operand_3->item.type;
             if(operand_1->item.type == IT_UNDEF){
-                operand_1->item.type = type_final->type;
+                operand_1->item.type = operand_3->item.type;
                 operand_1->item.nil_possibility = operand_3->item.nil_possibility;
-                operand_1->item.defined = true;
             }
-
+            operand_1->item.defined = true;
             break;
 
         default:
@@ -678,45 +743,66 @@ int check_param(parser_data_t* data, int position){
         if(table_count_elements_in_stack(data->tableStack) == 0)
             return ER_INTERNAL;
         if((sym = findSymbol(data->tableStack->top->table,data->token_ptr->attribute.string)) != NULL){
-            data->id_type = &(sym->data);
-            if(data->id_type->type != get_type_from_params(data->id,position) && data->id->type != IT_ANY){
-                //TODO check error code
+            bool param_nil_possibility = false;
+            if((sym->data.type != get_type_from_params(data->id_type,position, &param_nil_possibility)
+                || sym->data.nil_possibility != param_nil_possibility)
+                && data->id_type->type != IT_ANY){
                 return ER_PARAMS;
             }
             return ER_NONE;
         }
 
     } else{
-        item_type type = get_type(data->token_ptr,data,false,false);
-        if(type != IT_UNDEF && type != get_type_from_params(data->id,position))
-            //TODO check error code
+        bool param_nil_possibility = false;
+        item_type type = get_type(data->token_ptr,data,&param_nil_possibility,false);
+        item_type param_type = get_type_from_params(data->id_type,position,&param_nil_possibility);
+        if(type != IT_UNDEF
+            && type != param_type
+            && param_type != IT_ANY) {
+            if(type == IT_NIL && param_nil_possibility)
+                return ER_NONE;
             return ER_PARAMS;
+        }
         return ER_NONE;
     }
-    return ER_SYNTAX;
+    return ER_PARAMS;
 }
 
 int check_func_call(parser_data_t *data, int position){
     int ret_code;
+//    if(position >= data->id_type->params->last_index)
+//        return ER_PARAMS;
+    bool its_write = !strcmp(data->id_type->id,"write");
     GET_TOKEN()
-    if(data->token_ptr->token_type != T_BRACKET_CLOSE && data->id->params->string == NULL)
-        return ER_SEMAN;
+    if(data->token_ptr->token_type != T_BRACKET_CLOSE && data->id_type->params->string == NULL)
+        return ER_PARAMS;
     else if(data->token_ptr->token_type == T_ID){
 
 //        printf("id_name[position]: %s AND %s\n",data->id->id_names[position],data->token_ptr->attribute.string);
-
-        if(data->id->id_names && !strcmp(data->id->id_names[position],data->token_ptr->attribute.string)){
+        if(data->id_type->id_names && !strcmp(data->id_type->id_names[position],data->token_ptr->attribute.string)){
             //name_id : id/const
             VERIFY_TOKEN(T_COLON)
             GET_TOKEN()
             return check_param(data,position);
 
         }
-        else{
+        else if ((data->id_type->id_names && !strcmp(data->id_type->id_names[position],"_")) || its_write){
             return check_param(data,position);
-        }
+        } else
+            return ER_PARAMS;
     }
-    
-    return ER_NONE;
+    else if(data->token_ptr->token_type == T_INT
+            || data->token_ptr->token_type == T_DEMICAL
+            || data->token_ptr->token_type == T_STRING
+            || (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_nil)){
+        if(position+1 > data->id_type->params->last_index && !its_write)
+            return ER_PARAMS;
+        else if(data->id_type->id_names && strcmp(data->id_type->id_names[position],"_"))
+            return ER_OTHER_SEM_2;
+        return check_param(data,position);
+    }
+    else if(data->token_ptr->token_type == T_BRACKET_CLOSE && (data->id_type->params == NULL || data->id_type->params->last_index == 0))
+        return ER_NONE;
+    return ER_PARAMS;
 }
 

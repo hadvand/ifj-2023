@@ -30,7 +30,7 @@
         data->id = insertSymbol(data->tableStack->top->table,data->token_ptr->attribute.string,&internal_error);\
         if(!data->id){\
             if(internal_error) return ER_INTERNAL;\
-        else return ER_UNDEF_VAR;\
+        else return ER_SEMAN;\
 }                       \
 
 
@@ -75,9 +75,10 @@ parser_data_t *init_data()
     item_data *tmp;
     bool internal_error;
 
-    // readString() -> str?
+
     if(table_count_elements_in_stack(parser_data->tableStack) == 1){
         HashTable *global_table = parser_data->tableStack->top->table;
+        // readString() -> str?
         if ((tmp = insertSymbol(global_table, "readString", &internal_error)) == NULL) return NULL;
         tmp->defined = true;
         tmp->type = IT_STRING;
@@ -106,16 +107,6 @@ parser_data_t *init_data()
         tmp->is_function = true;
         if (!string_append(tmp->params, 'a')) return NULL;
 
-        // print(...)
-        tmp = insertSymbol(global_table, "print", &internal_error);
-        tmp->defined = true;
-        tmp->type = IT_ANY;
-        tmp->nil_possibility = false;
-        tmp->is_function = true;
-        if (!string_append(tmp->params, 'a')) {
-            return NULL;
-        }
-
         // Int2Double(int) -> double
         tmp = insertSymbol(global_table, "Int2Double", &internal_error);
         tmp->defined = true;
@@ -125,6 +116,11 @@ parser_data_t *init_data()
         if (!string_append(tmp->params, 'i')) {
             return NULL;
         }
+        if ((tmp->id_names = (char**)realloc(tmp->id_names,1 * sizeof(char*)))==NULL)
+            return NULL;
+        if((tmp->id_names[0] = (char*)realloc(tmp->id_names[0],strlen("_"))) == NULL)
+            return NULL;
+        strcpy(tmp->id_names[0],"_");
         // Double2Int(double) -> int
         tmp = insertSymbol(global_table, "Double2Int", &internal_error);
         tmp->defined = true;
@@ -134,7 +130,11 @@ parser_data_t *init_data()
         if (!string_append(tmp->params, 'd')) {
             return NULL;
         }
-
+        if ((tmp->id_names = (char**)realloc(tmp->id_names,1 * sizeof(char*)))==NULL)
+            return NULL;
+        if((tmp->id_names[0] = (char*)realloc(tmp->id_names[0],strlen("_"))) == NULL)
+            return NULL;
+        strcpy(tmp->id_names[0],"_");
         // ord(str) -> int
         tmp = insertSymbol(global_table, "ord", &internal_error);
         tmp->defined = true;
@@ -145,7 +145,11 @@ parser_data_t *init_data()
         if (!string_append(tmp->params, 's')) {
             return NULL;
         }
-
+        if ((tmp->id_names = (char**)realloc(tmp->id_names,1 * sizeof(char*)))==NULL)
+            return NULL;
+        if((tmp->id_names[0] = (char*)realloc(tmp->id_names[0],strlen("_"))) == NULL)
+            return NULL;
+        strcpy(tmp->id_names[0],"_");
         // chr(int) -> str
         tmp = insertSymbol(global_table, "chr", &internal_error);
         tmp->defined = true;
@@ -156,6 +160,11 @@ parser_data_t *init_data()
         if (!string_append(tmp->params, 'i')) {
             return NULL;
         }
+        if ((tmp->id_names = (char**)realloc(tmp->id_names,1 * sizeof(char*)))==NULL)
+            return NULL;
+        if((tmp->id_names[0] = (char*)realloc(tmp->id_names[0],strlen("_"))) == NULL)
+            return NULL;
+        strcpy(tmp->id_names[0],"_");
 
         // length(str) -> int
         tmp = insertSymbol(global_table, "length", &internal_error);
@@ -167,7 +176,11 @@ parser_data_t *init_data()
         if (!string_append(tmp->params, 's')) {
             return NULL;
         }
-
+        if ((tmp->id_names = (char**)realloc(tmp->id_names,1 * sizeof(char*)))==NULL)
+            return NULL;
+        if((tmp->id_names[0] = (char*)realloc(tmp->id_names[0],strlen("_"))) == NULL)
+            return NULL;
+        strcpy(tmp->id_names[0],"_");
         // substring(str, int, int) -> str?
         tmp = insertSymbol(global_table, "substring", &internal_error);
         tmp->defined = true;
@@ -178,12 +191,23 @@ parser_data_t *init_data()
         if (!string_append(tmp->params, 's')) {
             return NULL;
         }
+        if ((tmp->id_names = (char**)realloc(tmp->id_names,3 * sizeof(char*)))==NULL)
+            return NULL;
+        if((tmp->id_names[0] = (char*)realloc(tmp->id_names[0],strlen("of"))) == NULL)
+            return NULL;
+        strcpy(tmp->id_names[0],"of");
         if (!string_append(tmp->params, 'i')) {
             return NULL;
         }
+        if((tmp->id_names[1] = (char*)realloc(tmp->id_names[1],strlen("startingAt"))) == NULL)
+            return NULL;
+        strcpy(tmp->id_names[1],"startingAt");
         if (!string_append(tmp->params, 'i')) {
             return NULL;
         }
+        if((tmp->id_names[2] = (char*)realloc(tmp->id_names[2],strlen("endingBefore"))) == NULL)
+            return NULL;
+        strcpy(tmp->id_names[2],"endingBefore");
     }
 
 
@@ -244,7 +268,7 @@ int stm(parser_data_t *data) {
         data->is_in_declaration = true;
         VERIFY_TOKEN(T_ID)
         INSERT_SYMBOL()
-        data->id->defined = true;
+        data->id->defined = false;
         GET_TOKEN()
         if (data->token_ptr->token_type == T_COLON) {
             GET_TOKEN()
@@ -282,12 +306,13 @@ int stm(parser_data_t *data) {
         if(table_count_elements_in_stack(data->tableStack) == 0)
             return ER_INTERNAL;
         Symbol *idFromTable = NULL;
-        if((idFromTable = findSymbol(data->tableStack->top->table,data->token_ptr->attribute.string))== NULL)
+
+        if((idFromTable = findSymbol_global(data->tableStack,data->token_ptr->attribute.string))== NULL)
             return ER_UNDEF_VAR;
         data->id = &(idFromTable->data);
         GET_TOKEN()
         if (data->token_ptr->token_type == T_BRACKET_OPEN) {
-
+            data->id_type = data->id;
             data->param_index = 0;
 
             CHECK_RULE(call_params)
@@ -364,18 +389,9 @@ int stm(parser_data_t *data) {
             GET_TOKEN()
             CHECK_RULE(stm)
 
-            if (data->is_void_function) {
-                CHECK_RULE(return_void_rule)
-            }
-            else {
-                CHECK_RULE(return_rule)
-            }
-
-            VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
             table_stack_pop(data->tableStack);
 
             GET_TOKEN()
-//            if (!data->eol_flag) return ER_SYNTAX;
 
             return stm(data);
         }
@@ -441,9 +457,11 @@ int stm(parser_data_t *data) {
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return) {
         if (data->is_void_function) {
             CHECK_RULE(return_void_rule)
+            if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_FUNC_RETURN;
         }
         else {
             CHECK_RULE(return_rule)
+            VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
         }
         return ER_NONE;
     }
@@ -454,7 +472,7 @@ int stm(parser_data_t *data) {
 
 //<call_params> -> var_name : var_id <call_params_n>
 //<call_params> -> var_id <call_params_n>
-int call_params(parser_data_t *data) {
+int  call_params(parser_data_t *data) {
     int ret_code = ER_NONE;
 
     if((ret_code = check_func_call(data,data->param_index))){
@@ -470,9 +488,9 @@ int call_params(parser_data_t *data) {
 //<call_params> -> var_id <call_params_n>
 int call_params_n(parser_data_t *data) {
     int ret_code;
+    bool its_write = !strcmp(data->id_type->id,"write");
 
     if (data->token_ptr->token_type == T_BRACKET_CLOSE) {
-        GET_TOKEN()
         return ER_NONE;
     }
 
@@ -484,6 +502,8 @@ int call_params_n(parser_data_t *data) {
         CHECK_RULE(call_params)
     }
     else if (data->token_ptr->token_type == T_BRACKET_CLOSE) {
+        if(data->param_index+1 != data->id_type->params->last_index && !its_write)
+            return ER_PARAMS;
         return ER_NONE;
     }
     else {
@@ -527,7 +547,7 @@ int func_params(parser_data_t *data) {
     int ret_code = ER_NONE;
 
 
-    if ((data->id->id_names = (char**)realloc(data->id->id_names,data->param_index+1 * sizeof(char*)))==NULL)
+    if ((data->id->id_names = (char**)realloc(data->id->id_names,(data->param_index+1) * sizeof(char*)))==NULL)
         return ER_INTERNAL;
     GET_TOKEN()
 
@@ -556,6 +576,7 @@ int func_params(parser_data_t *data) {
             if (internal_error) return ER_INTERNAL;
             else return ER_UNDEF_VAR;
         }
+        data->exp_type->defined = true;
 
         VERIFY_TOKEN(T_COLON)
 
@@ -628,10 +649,14 @@ int return_rule(parser_data_t *data) {
 // <return_void> -> return
 // <return_void> -> ε
 int return_void_rule(parser_data_t *data) {
+    int ret_code;
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return) {
+        GET_TOKEN()
         return ER_NONE;
     }
+    // eps
     else if (data->eol_flag) {
+        GET_TOKEN()
         return ER_NONE;
     }
     else {
@@ -681,6 +706,7 @@ item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibil
                 case k_qmark_Double:
                     return IT_DOUBLE;
                 case k_nil:
+                    *nil_possibility = true;
                     return IT_NIL;
                 default:
                     return IT_UNDEF;
@@ -691,6 +717,7 @@ item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibil
 
 int insert_data_type(parser_data_t *data){
     item_type type  = get_type(data->token_ptr,data,false,false);
+    data->id->it_is_nil = false;
 
     //var declaration
     if(data->is_in_declaration && !data->is_in_function && !data->is_in_params){

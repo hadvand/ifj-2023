@@ -1,0 +1,5 @@
+func test_func(of a: Int, by b: Int) -> Int{
+    return a
+}
+
+test_func(of:1,by:2)

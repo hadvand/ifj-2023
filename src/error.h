@@ -11,6 +11,7 @@ typedef enum error{
     ER_FUNC_RETURN   = 6,
     ER_TYPE_COMP     = 7,
     ER_OTHER_SEM     = 8,
+    ER_OTHER_SEM_2       = 9,
     ER_INTERNAL      = 99
 } error_t;
 

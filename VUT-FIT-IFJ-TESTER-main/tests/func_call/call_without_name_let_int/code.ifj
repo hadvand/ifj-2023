@@ -1,0 +1,5 @@
+func test_func(_ a: Int) -> Int{
+    return a
+}
+
+test_func(10)

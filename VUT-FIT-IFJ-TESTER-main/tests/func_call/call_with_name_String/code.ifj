@@ -1,0 +1,5 @@
+func test_func(of a: String) -> String{
+    return a
+}
+var ggwp: String = "ABC"
+test_func(of:ggwp)

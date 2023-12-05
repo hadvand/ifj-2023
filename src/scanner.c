@@ -707,16 +707,20 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     return NULL;
                 }
             case(S_STRING):
-                if(additional_string->string != NULL){
+                if(c == '"') {
+                    state = S_MULTILINE_OPEN;
+                    continue;
+                }
+                else if(additional_string != NULL){
                     ungetc(c,stdin);
-                    token->attribute.string = additional_string->string;
+                    if(additional_string->string == NULL)
+                        token->attribute.string = "";
+                    else
+                        token->attribute.string = additional_string->string;
                     single_token(token,*line_cnt,T_STRING,additional_string);
                     return token;
                 }
-                else if(c == '"'){
-                    state = S_MULTILINE_OPEN;
-                    continue;
-                } else {
+                else {
                     scanning_finish_with_error(token,additional_string,err_type,ER_LEX);
                     return NULL;
                 }
