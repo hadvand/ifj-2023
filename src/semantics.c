@@ -352,7 +352,7 @@ int expression(parser_data_t* data){
 
         switch (precedence_table[get_index(top_terminal->symbol)][get_index(actual_symbol)]) {
             case '=':
-                tmp_item.type = get_type(data->token_ptr,data,&(tmp_item.nil_possibility),&(tmp_item.defined));
+                tmp_item.type = get_type(data->token_ptr,data,&tmp_item);
                 if(actual_symbol == IDENTIFIER && data->token_ptr->token_type == T_ID && !tmp_item.defined)
                     return ER_UNDEF_VAR;
                 //tmp_item.it_is_nil = data->token_ptr->attribute.keyword == k_nil;
@@ -387,7 +387,7 @@ int expression(parser_data_t* data){
 #endif
                     FREE(ER_INTERNAL);
                 }
-                tmp_item.type = get_type(data->token_ptr,data,&(tmp_item.nil_possibility),&(tmp_item.defined));
+                tmp_item.type = get_type(data->token_ptr,data,&tmp_item);
                 if(actual_symbol == IDENTIFIER && data->token_ptr->token_type == T_ID && !tmp_item.defined)
                     return ER_UNDEF_VAR;
                 //tmp_item.it_is_nil = (data->token_ptr->attribute.keyword == k_nil || (data->id_type != NULL && data->id_type->it_is_nil));
@@ -816,7 +816,8 @@ int check_param(parser_data_t* data, int position){
 
     } else{
         bool param_nil_possibility = false;
-        item_type type = get_type(data->token_ptr,data,&param_nil_possibility,false);
+        item_data tmp_item;
+        item_type type = get_type(data->token_ptr,data,&tmp_item);
         item_type param_type = get_type_from_params(data->id_type,position,&param_nil_possibility);
         if(type != IT_UNDEF
             && type != param_type

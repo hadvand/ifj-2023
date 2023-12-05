@@ -677,10 +677,8 @@ int return_void_rule(parser_data_t *data) {
     }
 }
 
-item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibility, bool* defined){
+item_type get_type(struct token* token, parser_data_t * data, item_data* item){
 
-    UNUSED(nil_possibility);
-    UNUSED(defined);
 
     Symbol* symbol;
 
@@ -690,22 +688,22 @@ item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibil
                 return IT_UNDEF;
             symbol = findSymbol(data->tableStack->top->table, token->attribute.string);
             if (symbol == NULL){
-                *nil_possibility = false;
-                *defined = false;
+                item->nil_possibility = false;
+                item->defined = false;
                 return IT_UNDEF;
             }
             data->id_type = &(symbol->data);
-            *nil_possibility = symbol->data.nil_possibility;
-            *defined = symbol->data.defined;
+            item->nil_possibility = symbol->data.nil_possibility;
+            item->defined = symbol->data.defined;
             return symbol->data.type;
         case T_INT:
-            defined = false;
+            item->defined = false;
             return IT_INT;
         case T_STRING:
-            defined = false;
+            item->defined = false;
             return IT_STRING;
         case T_DEMICAL:
-            defined = false;
+            item->defined = false;
             return IT_DOUBLE;
         default:
             switch (token->attribute.keyword) {
@@ -719,7 +717,7 @@ item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibil
                 case k_qmark_Double:
                     return IT_DOUBLE;
                 case k_nil:
-                    *nil_possibility = true;
+                    item->nil_possibility = true;
                     return IT_NIL;
                 default:
                     return IT_UNDEF;
@@ -729,7 +727,9 @@ item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibil
 }
 
 int insert_data_type(parser_data_t *data){
-    item_type type  = get_type(data->token_ptr,data,false,false);
+    item_data tmp_item;
+    item_type type;
+    type = get_type(data->token_ptr,data,&tmp_item);
     //data->id->it_is_nil = false;
 
     //var declaration
