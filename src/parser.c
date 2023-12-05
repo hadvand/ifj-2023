@@ -323,6 +323,10 @@ int stm(parser_data_t *data) {
         data->id = &(idFromTable->data);
         GET_TOKEN()
         if (data->token_ptr->token_type == T_BRACKET_OPEN) {
+
+            if(!data->id->is_function)
+                return ER_SEMAN;
+
             data->id_type = data->id;
             data->param_index = 0;
 
@@ -348,6 +352,8 @@ int stm(parser_data_t *data) {
     // <stm> -> func func_id( <func_params> ) -> <var_type> { <stm> <return> } \n <stm>
     // <stm> -> func func_id( <func_params> ) { <stm> <return_void> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_func) {
+        if(data->func_id != NULL)
+            return ER_OTHER_SEM_2;
         VERIFY_TOKEN(T_ID)
         data->is_in_declaration = true;
 
@@ -402,6 +408,7 @@ int stm(parser_data_t *data) {
         }
         else if (data->token_ptr->token_type == T_CURVED_BRACKET_OPEN) {
             data->is_void_function = true;
+            data->is_in_function = false;
 
             GET_TOKEN()
             CHECK_RULE(stm)
@@ -475,6 +482,7 @@ int stm(parser_data_t *data) {
             CHECK_RULE(return_rule)
             if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return stm(data);
         }
+        data->func_id = NULL;
         return ER_NONE;
     }
     // <statement> -> ε
@@ -541,7 +549,7 @@ int condition(parser_data_t *data) {
         return ret_code;
     }
     item_data tmp_data;
-    tmp_data.type = IT_INT;
+    tmp_data.type = IT_BOOL;
     data->id = &tmp_data;
     CHECK_RULE(expression)
 

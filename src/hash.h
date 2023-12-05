@@ -22,7 +22,8 @@ typedef enum {
     IT_STRING,
     IT_ANY,
     IT_NIL,
-    IT_UNDEF
+    IT_UNDEF,
+    IT_BOOL
 } item_type;
 
 /**

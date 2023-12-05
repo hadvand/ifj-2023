@@ -741,7 +741,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 //                }
 //            }
 
-            type_final->type = operand_3->item.type;
+            type_final->type = IT_BOOL;
             type_final->nil_possibility = false;
             //type_final->it_is_nil = false;
             type_final->defined = true;
