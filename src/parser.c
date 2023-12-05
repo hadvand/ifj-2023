@@ -430,6 +430,9 @@ int stm(parser_data_t *data) {
         GET_TOKEN()
         CHECK_RULE(condition)
 
+        hash_table *local_table = create_hash_table();
+        table_stack_push(data->tableStack,local_table);
+
         if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
 
         GET_TOKEN()
@@ -437,8 +440,14 @@ int stm(parser_data_t *data) {
 
         if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
 
+        table_stack_pop(data->tableStack);
+
+
         GET_TOKEN()
         if (!(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_else)) return ER_SYNTAX;
+
+        local_table = create_hash_table();
+        table_stack_push(data->tableStack,local_table);
 
         VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
 
@@ -446,6 +455,8 @@ int stm(parser_data_t *data) {
         CHECK_RULE(stm)
 
         if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+
+        table_stack_pop(data->tableStack);
 
         GET_TOKEN()
 
@@ -460,12 +471,17 @@ int stm(parser_data_t *data) {
         GET_TOKEN()
         CHECK_RULE(condition)
 
+        hash_table *local_table = create_hash_table();
+        table_stack_push(data->tableStack,local_table);
+
         if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
 
         GET_TOKEN()
         CHECK_RULE(stm)
 
         if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+
+        table_stack_pop(data->tableStack);
 
         GET_TOKEN()
 //        if (!data->eol_flag) return ER_SYNTAX;
