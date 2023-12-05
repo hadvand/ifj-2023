@@ -1,6 +1,9 @@
-//
-// Created by dargo on 28.10.2023.
-//
+/**
+ * @file parser.h
+ * @author Nikita Vetluzhskikh (xvetlu00)
+ * @author Murad Mikogaziev (xmikog00)
+ * @brief syntax and semantic analysis
+ */
 
 #ifndef IFJ_2023_PARSER_H
 #define IFJ_2023_PARSER_H

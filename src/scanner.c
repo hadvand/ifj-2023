@@ -1,3 +1,9 @@
+/**
+ * @file scanner.c
+ * @author Nikita Vetluzhskikh (xvetlu00)
+ * @brief lexical analysis
+ */
+
 #include "error.h"
 #include "scanner.h"
 

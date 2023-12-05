@@ -1,3 +1,10 @@
+/**
+ * @file parser.c
+ * @author Nikita Vetluzhskikh (xvetlu00)
+ * @author Murad Mikogaziev (xmikog00)
+ * @brief syntax and semantic analysis
+ */
+
 #include "string.h"
 #include "error.h"
 #include "hash.h"
@@ -465,7 +472,7 @@ int stm(parser_data_t *data) {
         }
         else {
             CHECK_RULE(return_rule)
-            VERIFY_TOKEN(T_CURVED_BRACKET_CLOSE)
+            if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
         }
         return ER_NONE;
     }

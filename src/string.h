@@ -1,3 +1,10 @@
+/**
+ * @file string.h
+ * @author Oleg Borsh (xborsh00)
+ * @author Murad Mikogaziev (xmikog00)
+ * @brief syntax and semantic analysis
+ */
+
 #ifndef STRING_HEADER_G
 #define STRING_HEADER_G
 

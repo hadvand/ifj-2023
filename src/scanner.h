@@ -1,3 +1,8 @@
+/**
+ * @file scanner.h
+ * @author Nikita Vetluzhskikh (xvetlu00)
+ * @brief lexical analysis
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

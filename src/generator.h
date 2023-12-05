@@ -1,3 +1,10 @@
+/**
+ * @file generator.h
+ * @author Nelia Mashlai (xmashl00)
+ * @author Oleg Borsh (xborsh00)
+ * @brief code generation
+ */
+
 #ifndef GENERATOR_H
 #define GENERATOR_H
 

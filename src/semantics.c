@@ -1,9 +1,15 @@
+/**
+ * @file semantics.c
+ * @author Nikita Vetluzhskikh (xvetlu00)
+ * @author Oleg Borsh (xborsh00)
+ * @brief semantic analysis
+ */
+
 #include "semantics.h"
 #include "stack.h"
 #include "error.h"
 
 #define TABLE_SIZE 16
-
 
 t_stack stack;
 

@@ -1,3 +1,10 @@
+/**
+ * @file stack.c
+ * @author Nikita Vetluzhskikh (xvetlu00)
+ * @author Murad Mikogaziev (xmikog00)
+ * @brief syntax and semantic analysis
+ */
+
 #include "stack.h"
 #include "stdio.h"
 

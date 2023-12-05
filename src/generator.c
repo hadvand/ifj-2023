@@ -1,3 +1,10 @@
+/**
+ * @file generator.c
+ * @author Nelia Mashlai (xmashl00)
+ * @author Oleg Borsh (xborsh00)
+ * @brief code generation
+ */
+
 #include "generator.h"
 
 void generator_builtin(void){
