@@ -448,7 +448,7 @@ int expression(parser_data_t* data){
     }while(!success);
 
     if(data->id == NULL)
-        return ER_OTHER_SEM;
+        return ER_OTHER_SEM_2;
 
     t_stack_elem op1;
     op1.symbol = N_TERMINAL;
@@ -599,27 +599,26 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         case NT_MINUS_NT:
         case NT_MUL_NT:
 
-            if(operand_1->item.type == IT_NIL || operand_3->item.type == IT_NIL)
-                return ER_OTHER_SEM;
+//            if(operand_1->item.type == IT_NIL || operand_3->item.type == IT_NIL)
+//                return ER_OTHER_SEM;
             //type_final->it_is_nil = false;
+            if(operand_1->item.nil_possibility || operand_3->item.nil_possibility)
+                return ER_TYPE_COMP;
             // concatenation
             if (operand_1->item.type == IT_STRING && operand_3->item.type == IT_STRING && rule == NT_PLUS_NT){
                 type_final->type = IT_STRING;
-                //NIL_POSSIBILITY_CHECK();
                 type_final->nil_possibility = operand_1->item.nil_possibility;
                 type_final->defined = true;
                 break;
             }
             else if (operand_1->item.type == IT_INT && operand_3->item.type == IT_INT){
                 type_final->type = IT_INT;
-                //NIL_POSSIBILITY_CHECK();
                 type_final->nil_possibility = operand_1->item.nil_possibility;
                 type_final->defined = true;
                 break;
             }
             else if (operand_1->item.type == IT_DOUBLE && operand_3->item.type == IT_DOUBLE){
                 type_final->type = IT_DOUBLE;
-                //NIL_POSSIBILITY_CHECK();
                 type_final->nil_possibility = operand_1->item.nil_possibility;
                 type_final->defined = true;
                 break;
@@ -628,8 +627,6 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                 return ER_TYPE_COMP;
             }
             else if(operand_1->item.type != operand_3->item.type){
-                if(rule == NT_DIV_NT)
-                    return ER_TYPE_COMP;
                 if((operand_1->item.type == IT_INT && operand_3->item.type == IT_DOUBLE && !operand_1->item.defined) ||
                    (operand_3->item.type == IT_INT && operand_1->item.type == IT_DOUBLE && !operand_3->item.defined))
                     ; //todo translate Int2Double
@@ -695,9 +692,10 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             if(operand_1->item.type == IT_NIL)
                 return ER_TYPE_COMP;
             //NIL_POSSIBILITY_CHECK();
-            type_final->nil_possibility = operand_1->item.nil_possibility;
+            type_final->nil_possibility = false;
             type_final->defined = true;
             type_final->type = operand_1->item.type;
+
             //type_final->it_is_nil = operand_2->item.it_is_nil;
             break;
         case NT_EQ_NT:
@@ -755,13 +753,20 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             if(operand_1->item.type != operand_3->item.type && operand_1->item.type != IT_UNDEF && operand_3->item.type != IT_NIL){
                 if(operand_1->item.type == IT_DOUBLE && operand_3->item.type == IT_INT && !operand_3->item.defined)
                     ; // TODO Generate int2Double
-                else
+                else{
+                    if(operand_1->item.is_function)
+                        return ER_PARAMS;
                     return ER_TYPE_COMP;
+                }
+
             }
             if(operand_1->item.type != IT_UNDEF &&
                 !operand_1->item.nil_possibility &&
-                    operand_3->item.nil_possibility)
+                    operand_3->item.nil_possibility){
+                if(operand_1->item.is_function)
+                    return ER_PARAMS;
                 return ER_TYPE_COMP;
+            }
 
             if(operand_1->item.type == IT_UNDEF && operand_3->item.type == IT_NIL)
                 return ER_OTHER_SEM;

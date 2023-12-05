@@ -352,12 +352,14 @@ int stm(parser_data_t *data) {
         data->is_in_declaration = true;
 
         INSERT_SYMBOL()
+        data->func_id = data->id;
         VERIFY_TOKEN(T_BRACKET_OPEN)
         data->is_in_params = true;
         data->param_index = 0;
         data->id->is_function = true;
         data->id->id_names = NULL;
         data->is_in_function = true;
+        data->id->defined = true;
         HashTable *local_table = createHashTable();
         table_stack_push(data->tableStack,local_table);
         CHECK_RULE(func_params)
@@ -638,6 +640,7 @@ int return_rule(parser_data_t *data) {
 
     if (!(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return)) return ER_SYNTAX;
     GET_TOKEN()
+    data->id = data->func_id;
 
     if (data->token_ptr->token_type == T_CURVED_BRACKET_CLOSE) return ER_FUNC_RETURN;
     CHECK_RULE(expression)
@@ -731,6 +734,8 @@ int insert_data_type(parser_data_t *data){
     //return func type
     else if(data->is_in_declaration && data->is_in_function && !data->is_in_params){
         data->id->type = type;
+        if(data->token_ptr->token_type == T_KEYWORD_NIL_POSSIBILITY)
+            data->id->nil_possibility = true;
     }
     //func params
     else if(data->is_in_declaration && data->is_in_function && data->is_in_params) {

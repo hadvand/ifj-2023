@@ -1,6 +1,6 @@
 /**
  * @file generator.c
- * @author Nelia Mashlai (xmashl00)
+ * @author Neonila Mashlai (xmashl00)
  * @author Oleg Borsh (xborsh00)
  * @brief code generation
  */
