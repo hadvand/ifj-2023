@@ -36,27 +36,27 @@ typedef struct
     bool is_function;
 } item_data;
 
-typedef struct Symbol {
+typedef struct symbol {
     char *name;
     item_data data;
-    struct Symbol* next;
-} Symbol;
+    struct symbol* next;
+} symbol;
 
 typedef struct HashTable {
     int size;
-    Symbol** table;
-} HashTable;
+    symbol** table;
+} hash_table;
 
-HashTable* createHashTable();
+hash_table* create_hash_table();
 
-void destroyHashTable(HashTable* ht);
+void destroy_hash_table(hash_table* ht);
 
 unsigned int hash(char* str, int size);
 
-item_data* insertSymbol(HashTable* ht, char* name, bool *internal_error);
+item_data* insert_symbol(hash_table* ht, char* name, bool *internal_error);
 
-Symbol* findSymbol(HashTable* ht, char* name);
+symbol* find_symbol(hash_table* ht, char* name);
 
-void removeSymbol(HashTable* ht, char* name);
+void remove_symbol(hash_table* ht, char* name);
 
 #endif

@@ -7,21 +7,21 @@
 #include "hash.h"
 #include <string.h>
 
-HashTable* createHashTable() {
-    HashTable* ht = (HashTable*)malloc(sizeof(HashTable));
+hash_table* create_hash_table() {
+    hash_table* ht = (hash_table*)malloc(sizeof(hash_table));
     ht->size = MAX_TABLE_SIZE;
-    ht->table = (Symbol**)malloc(sizeof(Symbol*) * MAX_TABLE_SIZE);
+    ht->table = (symbol**)malloc(sizeof(symbol*) * MAX_TABLE_SIZE);
     for (int i = 0; i < MAX_TABLE_SIZE; ++i) {
         ht->table[i] = NULL;
     }
     return ht;
 }
 
-void destroyHashTable(HashTable* ht) {
+void destroy_hash_table(hash_table* ht) {
     for (int i = 0; i < ht->size; ++i) {
-        Symbol* current = ht->table[i];
+        symbol* current = ht->table[i];
         while (current != NULL) {
-            Symbol* temp = current;
+            symbol* temp = current;
             current = current->next;
             free(temp->name);
             free(temp);
@@ -39,15 +39,15 @@ unsigned int hash(char* str, int size) {
     return hashValue % size;
 }
 
-item_data* insertSymbol(HashTable* ht, char* name, bool *internal_error) {
-    if (findSymbol(ht, name)) {
+item_data* insert_symbol(hash_table* ht, char* name, bool *internal_error) {
+    if (find_symbol(ht, name)) {
         *internal_error = false;
         return NULL;
     }
 
     unsigned int index = hash(name, ht->size);
 
-    Symbol* newSymbol = (Symbol*)malloc(sizeof(Symbol));
+    symbol* newSymbol = (symbol*)malloc(sizeof(symbol));
 
     if (newSymbol == NULL) {
         *internal_error = true;
@@ -100,9 +100,9 @@ item_data* insertSymbol(HashTable* ht, char* name, bool *internal_error) {
     return &newSymbol->data;
 }
 
-Symbol* findSymbol(HashTable* ht, char* name) {
+symbol* find_symbol(hash_table* ht, char* name) {
     unsigned int index = hash(name, ht->size);
-    Symbol* current = ht->table[index];
+    symbol* current = ht->table[index];
     while (current != NULL) {
         if (strcmp(current->name, name) == 0) {
             return current;
@@ -112,10 +112,10 @@ Symbol* findSymbol(HashTable* ht, char* name) {
     return NULL;
 }
 
-void removeSymbol(HashTable* ht, char* name) {
+void remove_symbol(hash_table* ht, char* name) {
     unsigned int index = hash(name, ht->size);
-    Symbol* current = ht->table[index];
-    Symbol* prev = NULL;
+    symbol* current = ht->table[index];
+    symbol* prev = NULL;
     while (current != NULL) {
         if (strcmp(current->name, name) == 0) {
             if (prev == NULL) {

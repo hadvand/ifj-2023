@@ -25,6 +25,5 @@ typedef enum error{
  * @brief external variable for assigning the error type
  * 
  */
-extern error_t err_type;
 
 #endif

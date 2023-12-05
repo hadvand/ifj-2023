@@ -36,7 +36,7 @@ typedef enum
     DOLLAR,			// $
     STOP,			// stop symbol used when reducing
     N_TERMINAL,		// non-terminal
-    ASSIGMENT      // =
+    ASSIGNMENT      // =
 } Precedence_table_symbol;
 
 typedef enum
