@@ -73,9 +73,12 @@ int table_count_elements_in_stack(t_table_stack *s){
     return count;
 }
 
-symbol *find_symbol_global(t_table_stack *s, char *name)
+symbol *find_symbol_global(t_table_stack *s, char *name, bool is_overlap)
 {
-    for (t_table_stack_elem *tmp = s->top; tmp != NULL; tmp = tmp->next)
+    t_table_stack_elem *tmp = s->top;
+    if(is_overlap)
+        tmp = tmp->next;
+    for (; tmp != NULL; tmp = tmp->next)
     {
         symbol *symbol = find_symbol(tmp->table, name);
         if(symbol != NULL)

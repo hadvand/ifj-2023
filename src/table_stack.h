@@ -66,6 +66,6 @@ int table_count_elements_in_stack(t_table_stack *s);
 /**
  * @brief function for finding symbol in the whole table stack
  */
-symbol *find_symbol_global(t_table_stack *s, char *name);
+symbol *find_symbol_global(t_table_stack *s, char *name, bool is_overlap);
 
 #endif //TABLE_STACK_H
