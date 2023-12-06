@@ -666,7 +666,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             }
 
             if(type_final->type == IT_UNDEF){
-                if((operand_1->item.nil_possibility || !operand_1->item.defined) && (operand_3->item.nil_possibility || !operand_3->item.defined)){
+                if(!operand_3->item.nil_possibility){
                     type_final->type = operand_1->item.type;
                 } else
                     return ER_TYPE_COMP;
@@ -708,7 +708,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                     return ER_TYPE_COMP;
             }
 
-            type_final->type = operand_3->item.type;
+            type_final->type = IT_BOOL;
             type_final->nil_possibility = false;
             //type_final->it_is_nil = false;
             type_final->defined = true;
