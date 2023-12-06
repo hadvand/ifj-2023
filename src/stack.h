@@ -32,7 +32,8 @@ typedef struct stack
 } t_stack;
 
 /**
- * @brief function for stack initialization
+ *  @brief Initializes a stack.
+ *  @param s The stack to initialize.
  */
 void stack_init(t_stack* stack);
 
@@ -42,42 +43,60 @@ void stack_init(t_stack* stack);
 bool stack_is_empty(t_stack *s);
 
 /**
- * @brief function for pushing element on top of the stack
+ *  @brief Pushes a new item onto the stack.
+ *  @param s The stack.
+ *  @param item The item data to push.
+ *  @param symbol The precedence table symbol associated with the item.
+ *  @return Returns true if the push operation is successful; otherwise, returns false.
  */
 bool stack_push(t_stack *s, item_data stack_item, Precedence_table_symbol  symbol);
 
 /**
- * @brief
+ *  @brief Pushes a new item after the top terminal in the stack.
+ *  @param s The stack.
+ *  @param item The item data to push.
+ *  @param symbol The precedence table symbol associated with the item.
+ *  @return Returns true if the push operation is successful; otherwise, returns false.
  */
 bool stack_push_after_top_term(t_stack *s, item_data stack_item, Precedence_table_symbol symbol);
 
 /**
- * @brief function for popping the top element of the stack
+ *  @brief Pops the top item from the stack.
+ *  @param s The stack.
+ *  @return Returns true if the pop operation is successful; otherwise, returns false.
  */
 bool stack_pop(t_stack *s);
 
 /**
- * @brief getter for top terminal of the stack
+ *  @brief Returns a pointer to the top terminal element in the stack.
+ *  @param s The stack.
+ *  @return Returns a pointer to the top terminal element or NULL if not found.
  */
 t_stack_elem* stack_top_terminal(t_stack* s);
 
 /**
- * @brief getter for top element of the stack
+ *  @brief Returns a pointer to the top element of the stack.
+ *  @param s The stack.
+ *  @return Returns a pointer to the top element of the stack.
  */
 t_stack_elem *get_top(t_stack *s);
 
 /**
- * @brief function for counting all element in the stack
+ *  @brief Counts the number of elements in the stack.
+ *  @param s The stack.
+ *  @return Returns the number of elements in the stack.
  */
 int stack_count_elements(t_stack *s);
 
 /**
- * @brief function for printing all symbols from stack
+ *  @brief Prints the string representation of all symbols in the stack.
+ *  @param s The stack to print.
  */
 void stack_print_all_symbols(t_stack *s);
 
 /**
- * @brief stack destructor
+ *  @brief Frees the memory allocated for the entire stack.
+ *  @param s The stack to free.
  */
 void stack_free(t_stack* s);
 

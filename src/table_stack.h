@@ -29,42 +29,57 @@ typedef struct table_stack
 } t_table_stack;
 
 /**
- * @brief function for initializing table stack
+ * @brief Initializes and returns a new table stack.
  */
 t_table_stack* table_stack_init();
 
 /**
- * @brief function for finding out if table stack is empty
+ *  @brief Checks if the table stack is empty.
+ *  @param s The table stack to check.
+ *  @return Returns true if the table stack is empty; otherwise, returns false.
  */
 bool table_stack_is_empty(t_table_stack *s);
 
 /**
- * @brief function for pushing new table on top of the table stack
+ *  @brief Pushes a new hash table onto the table stack.
+ *  @param s The table stack.
+ *  @param table The hash table to push.
+ *  @return Returns true if the push operation is successful; otherwise, returns false.
  */
 bool table_stack_push(t_table_stack *s, hash_table *table);
 
 /**
- * @brief function for popping table on top of the table stack
+ *  @brief Pops the top hash table from the table stack.
+ *  @param s The table stack.
+ *  @return Returns true if the pop operation is successful; otherwise, returns false.
  */
 bool table_stack_pop(t_table_stack *s);
 
 /**
- * @brief function for getting the table stack top element
+ *  @brief Returns a pointer to the top element of the table stack.
+ *  @param s The table stack.
+ *  @return Returns a pointer to the top element of the table stack.
  */
 t_table_stack_elem *table_stack_top(t_table_stack *s);
 
 /**
- * @brief table stack destructor
+ *  @brief Frees the memory allocated for the entire table stack.
+ *  @param s The table stack to free.
  */
 void table_stack_free(t_table_stack *s);
 
 /**
- * @brief function for counting elements in the table stack
+ *  @brief Counts the number of elements in the table stack.
+ *  @param s The table stack.
+ *  @return Returns the number of elements in the table stack.
  */
 int table_count_elements_in_stack(t_table_stack *s);
 
 /**
- * @brief function for finding symbol in the whole table stack
+ *  @brief Finds and returns a symbol globally in the table stack by name.
+ *  @param s The table stack.
+ *  @param name The name of the symbol to find.
+ *  @return Returns a pointer to the symbol if found; otherwise, returns NULL.
  */
 symbol *find_symbol_global(t_table_stack *s, char *name);
 

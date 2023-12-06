@@ -1,6 +1,6 @@
 /**
  * @file string.c
- * @author Oleg Borsh (xborsh00)
+ * @author Oleg Borshch (xborsh00)
  * @author Murad Mikogaziev (xmikog00)
  * @brief syntax and semantic analysis
  */
