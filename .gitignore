@@ -8,7 +8,6 @@ scanner_test
 scanner-build
 parser-build
 semantic-build
-testFile
 compiler
 generator-debug
 generator_out
