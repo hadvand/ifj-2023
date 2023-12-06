@@ -14,7 +14,7 @@
 #define BRACKET_STACK_MAX 1000
 
 /**
- * @brief
+ * @brief stack element representation
  */
 typedef struct stack_elem
 {
@@ -24,7 +24,7 @@ typedef struct stack_elem
 } t_stack_elem;
 
 /**
- * @brief
+ * @brief stack structure
  */
 typedef struct stack
 {
@@ -32,17 +32,17 @@ typedef struct stack
 } t_stack;
 
 /**
- * @brief
+ * @brief function for stack initialization
  */
 void stack_init(t_stack* stack);
 
 /**
- * @brief
+ * @brief function for finding out if stack is empty
  */
 bool stack_is_empty(t_stack *s);
 
 /**
- * @brief
+ * @brief function for pushing element on top of the stack
  */
 bool stack_push(t_stack *s, item_data stack_item, Precedence_table_symbol  symbol);
 
@@ -52,32 +52,32 @@ bool stack_push(t_stack *s, item_data stack_item, Precedence_table_symbol  symbo
 bool stack_push_after_top_term(t_stack *s, item_data stack_item, Precedence_table_symbol symbol);
 
 /**
- * @brief
+ * @brief function for popping the top element of the stack
  */
 bool stack_pop(t_stack *s);
 
 /**
- * @brief
+ * @brief getter for top terminal of the stack
  */
 t_stack_elem* stack_top_terminal(t_stack* s);
 
 /**
- * @brief
+ * @brief getter for top element of the stack
  */
 t_stack_elem *get_top(t_stack *s);
 
 /**
- * @brief
+ * @brief function for counting all element in the stack
  */
 int stack_count_elements(t_stack *s);
 
 /**
- * @brief
+ * @brief function for printing all symbols from stack
  */
 void stack_print_all_symbols(t_stack *s);
 
 /**
- * @brief
+ * @brief stack destructor
  */
 void stack_free(t_stack* s);
 

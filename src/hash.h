@@ -43,7 +43,7 @@ typedef struct
 } item_data;
 
 /**
- * @brief
+ * @brief hashtable item representation
  */
 typedef struct symbol {
     char *name;
@@ -52,7 +52,7 @@ typedef struct symbol {
 } symbol;
 
 /**
- * @brief
+ * @brief hashtable representation
  */
 typedef struct HashTable {
     int size;
@@ -60,37 +60,37 @@ typedef struct HashTable {
 } hash_table;
 
 /**
- * @brief
+ * @brief function for creating hashtable
  */
 hash_table* create_hash_table();
 
 /**
- * @brief
+ * @brief hashtable destructor
  */
 void destroy_hash_table(hash_table* ht);
 
 /**
- * @brief
+ * @brief function for generating hash
  */
 unsigned int hash(char* str, int size);
 
 /**
- * @brief
+ * @brief function for inserting a new symbol into the hashtable
  */
 item_data* insert_symbol(hash_table* ht, char* name, bool *internal_error);
 
 /**
- * @brief
+ * @brief function for finding needed symbol inside the hashtable
  */
 symbol* find_symbol(hash_table* ht, char* name);
 
 /**
- * @brief
+ * @brief function for removing a symbol from the hashtable
  */
 void remove_symbol(hash_table* ht, char* name);
 
 /**
- * @brief
+ * @brief function for creating temporary variable
  */
 item_data create_default_item(void);
 
