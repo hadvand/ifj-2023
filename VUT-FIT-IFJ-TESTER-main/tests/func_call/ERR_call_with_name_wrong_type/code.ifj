@@ -1,5 +1,0 @@
-func test_func(of a: Int) -> Int{
-    return a
-}
-var ggwp: Double = 10.0
-test_func(of:ggwp)

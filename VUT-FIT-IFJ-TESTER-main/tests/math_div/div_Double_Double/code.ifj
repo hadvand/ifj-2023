@@ -1,4 +1,0 @@
-var x: Double = 1.0
-var y: Double = 2.0
-var z: Double = x / y
-print(z)

@@ -1,2 +1,0 @@
-var input: String? = readString()
-print(input)

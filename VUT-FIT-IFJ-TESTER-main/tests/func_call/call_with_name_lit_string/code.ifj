@@ -1,5 +1,0 @@
-func test_func(of a: String) -> String{
-    return a
-}
-
-test_func(of:"abc")
