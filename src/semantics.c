@@ -439,7 +439,7 @@ int expression(parser_data_t* data){
 #ifdef SEM_DEBUG
                     printf("semantic analysis finish with error\n");
 #endif
-                    FREE(ER_UNDEF_FUNC_OR_REDEF_VAR);
+                    FREE(ER_SYNTAX);
                 }
                 last_action_is_reduce = false;
                 break;
