@@ -1,7 +1,7 @@
 /**
  * @file semantics.c
  * @author Nikita Vetluzhskikh (xvetlu00)
- * @author Oleg Borsh (xborsh00)
+ * @author Oleg Borshch (xborsh00)
  * @brief semantic analysis
  */
 

@@ -1,7 +1,7 @@
 /**
  * @file generator.h
  * @author Neonila Mashlai (xmashl00)
- * @author Oleg Borsh (xborsh00)
+ * @author Oleg Borshch (xborsh00)
  * @brief code generation
  */
 #ifndef GENERATOR_H
