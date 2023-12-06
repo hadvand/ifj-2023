@@ -72,7 +72,7 @@ parser_data_t *init_data()
     parser_data->is_in_function = false;
     parser_data->is_void_function = false;
     parser_data->is_in_declaration = false;
-    parser_data->is_in_condition = false;
+    parser_data->is_it_let_condition = false;
     parser_data->eol_flag = false;
 
     parser_data->param_index = 0;
@@ -270,15 +270,17 @@ int program(parser_data_t *data) {
 
 int stm(parser_data_t *data) {
     int ret_code = ER_NONE;
+    bool is_let = false;
 
     // <stm> -> var + let id : <var_type> = <expression> \n <stm>
     // <stm> -> var + let id : <var_type> \n <stm>
     // <stm> -> var + let id = <expression> \n <stm>
-    if (data->token_ptr->token_type == T_KEYWORD && (data->token_ptr->attribute.keyword == k_var || data->token_ptr->attribute.keyword == k_let)) {
+    if (data->token_ptr->token_type == T_KEYWORD && ( data->token_ptr->attribute.keyword == k_var || (is_let = data->token_ptr->attribute.keyword == k_let))) {
         data->is_in_declaration = true;
         VERIFY_TOKEN(T_ID)
         INSERT_SYM()
         data->id->defined = false;
+        data->id->is_let = is_let;
         GET_TOKEN()
         if (data->token_ptr->token_type == T_COLON) {
             GET_TOKEN()
@@ -327,6 +329,8 @@ int stm(parser_data_t *data) {
         GET_TOKEN()
         if (data->token_ptr->token_type == T_BRACKET_OPEN) {
 
+            if(!data->id->is_function)
+                return ER_SEMAN;
 
             data->id_type = data->id;
             data->param_index = 0;
@@ -356,8 +360,17 @@ int stm(parser_data_t *data) {
     // <stm> -> func func_id( <func_params> ) -> <var_type> { <stm> <return> } \n <stm>
     // <stm> -> func func_id( <func_params> ) { <stm> <return_void> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_func) {
+        if(data->func_id != NULL)
+            return ER_OTHER_SEM_2;
         VERIFY_TOKEN(T_ID)
         data->is_in_declaration = true;
+
+        symbol *idFromTable = NULL;
+
+        if((idFromTable = find_symbol(data->table_stack->top->table, data->token_ptr->attribute.string)) != NULL){
+            if(idFromTable->data.is_function)
+                return ER_OTHER_SEM_2;
+        }
 
         INSERT_SYM()
         data->func_id = data->id;
@@ -372,6 +385,9 @@ int stm(parser_data_t *data) {
         table_stack_push(data->table_stack, local_table);
         CHECK_RULE(func_params)
         data->is_in_params = false;
+
+        hash_table *local_table2 = create_hash_table();
+        table_stack_push(data->table_stack,local_table2);
 
         if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
 
@@ -391,6 +407,7 @@ int stm(parser_data_t *data) {
 
             if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
             table_stack_pop(data->table_stack);
+            table_stack_pop(data->table_stack);
 
             GET_TOKEN()
 
@@ -399,10 +416,12 @@ int stm(parser_data_t *data) {
         }
         else if (data->token_ptr->token_type == T_CURVED_BRACKET_OPEN) {
             data->is_void_function = true;
+            data->is_in_function = false;
 
             GET_TOKEN()
             CHECK_RULE(stm)
 
+            table_stack_pop(data->table_stack);
             table_stack_pop(data->table_stack);
 
             GET_TOKEN()
@@ -414,10 +433,12 @@ int stm(parser_data_t *data) {
 
     // <stm> -> if ( <condition> ) { <stm> } \n else { <stm> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_if) {
-        data->is_in_condition = true;
+        data->is_it_let_condition = true;
 
         GET_TOKEN()
         CHECK_RULE(condition)
+        hash_table *local_table = create_hash_table();
+        table_stack_push(data->table_stack,local_table);
 
         if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
 
@@ -426,8 +447,15 @@ int stm(parser_data_t *data) {
 
         if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
 
+        data->is_it_let_condition = false;
+        table_stack_pop(data->table_stack);
+
+
         GET_TOKEN()
         if (!(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_else)) return ER_SYNTAX;
+
+        local_table = create_hash_table();
+        table_stack_push(data->table_stack,local_table);
 
         VERIFY_TOKEN(T_CURVED_BRACKET_OPEN)
 
@@ -435,6 +463,8 @@ int stm(parser_data_t *data) {
         CHECK_RULE(stm)
 
         if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+
+        table_stack_pop(data->table_stack);
 
         GET_TOKEN()
 
@@ -444,10 +474,12 @@ int stm(parser_data_t *data) {
 
     // <stm> -> while ( <condition> ) { <stm> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_while) {
-        data->is_in_condition = true;
 
         GET_TOKEN()
         CHECK_RULE(condition)
+
+        hash_table *local_table = create_hash_table();
+        table_stack_push(data->table_stack,local_table);
 
         if (data->token_ptr->token_type != T_CURVED_BRACKET_OPEN) return ER_SYNTAX;
 
@@ -455,6 +487,8 @@ int stm(parser_data_t *data) {
         CHECK_RULE(stm)
 
         if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
+
+        table_stack_pop(data->table_stack);
 
         GET_TOKEN()
 //        if (!data->eol_flag) return ER_SYNTAX;
@@ -471,6 +505,7 @@ int stm(parser_data_t *data) {
             CHECK_RULE(return_rule)
             if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return stm(data);
         }
+        data->func_id = NULL;
         return ER_NONE;
     }
     // <statement> -> ε
@@ -536,8 +571,8 @@ int condition(parser_data_t *data) {
         GET_TOKEN()
         return ret_code;
     }
-    item_data tmp_data;
-    tmp_data.type = IT_INT;
+    item_data tmp_data = create_default_item();
+    tmp_data.type = IT_BOOL;
     data->id = &tmp_data;
     CHECK_RULE(expression)
 
@@ -568,24 +603,40 @@ int func_params(parser_data_t *data) {
         else
             strcpy(data->id->id_names[data->param_index],data->token_ptr->attribute.string);
 
-        VERIFY_TOKEN(T_ID)
+        GET_TOKEN()
+        if(data->token_ptr->token_type == T_ID){
 
-        // if there is function named as parameter
-        if(table_count_elements_in_stack(data->table_stack) != 2)
-            return ER_INTERNAL;
-        if (find_symbol(data->table_stack->top->table, data->token_ptr->attribute.string))
-            return ER_UNDEF_VAR;
 
-        // if we are in definition, we need to add_LitInt_LitInt parameters to the local symtable
-        bool internal_error;
-        if(table_count_elements_in_stack(data->table_stack) == 0)
-            return ER_INTERNAL;
-        if (!(data->exp_type = insert_symbol(data->table_stack->top->table, data->token_ptr->attribute.string,
+            if(!strcmp(data->id->id_names[data->param_index],data->token_ptr->attribute.string)){
+                return ER_OTHER_SEM_2;
+            }
+            // if there is function named as parameter
+            if(table_count_elements_in_stack(data->table_stack) != 2)
+                return ER_INTERNAL;
+            if (find_symbol(data->table_stack->top->table, data->token_ptr->attribute.string))
+                return ER_UNDEF_VAR;
+
+            // if we are in definition, we need to add_LitInt_LitInt parameters to the local symtable
+            bool internal_error;
+            if(table_count_elements_in_stack(data->table_stack) == 0)
+                return ER_INTERNAL;
+            if (!(data->exp_type = insert_symbol(data->table_stack->top->table, data->token_ptr->attribute.string,
                                              &internal_error))) {
-            if (internal_error) return ER_INTERNAL;
-            else return ER_UNDEF_VAR;
+                if (internal_error) return ER_INTERNAL;
+                else return ER_UNDEF_VAR;
+            }
+            data->exp_type->defined = true;
         }
-        data->exp_type->defined = true;
+        else if(data->token_ptr->token_type == T_UNDERLINE){
+            item_data tmp_item = create_default_item();
+
+            if((data->exp_type = (item_data *) malloc(sizeof(item_data))) == NULL) {
+                return ER_INTERNAL;
+            }
+
+            *(data->exp_type) = tmp_item;
+        } else
+            return ER_SYNTAX;
 
         VERIFY_TOKEN(T_COLON)
 
@@ -675,35 +726,40 @@ int return_void_rule(parser_data_t *data) {
     }
 }
 
-item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibility, bool* defined){
+item_type get_type(struct token* token, parser_data_t * data, item_data* item){
 
-    UNUSED(nil_possibility);
-    UNUSED(defined);
 
     symbol* symbol;
+    *item = create_default_item();
 
     switch(token -> token_type){
         case T_ID:
             if(table_count_elements_in_stack(data->table_stack) == 0)
                 return IT_UNDEF;
-            symbol = find_symbol(data->table_stack->top->table, token->attribute.string);
+            symbol = find_symbol_global(data->table_stack, token->attribute.string);
             if (symbol == NULL){
-                *nil_possibility = false;
-                *defined = false;
+                item->nil_possibility = false;
+                item->defined = false;
+                item->is_function = false;
                 return IT_UNDEF;
             }
             data->id_type = &(symbol->data);
-            *nil_possibility = symbol->data.nil_possibility;
-            *defined = symbol->data.defined;
+            if(data->is_it_let_condition)
+                item->nil_possibility = false;
+            else
+                item->nil_possibility = symbol->data.nil_possibility;
+            item->defined = symbol->data.defined;
+            item->is_function = symbol->data.is_function;
+            item->is_let = symbol->data.is_let;
             return symbol->data.type;
         case T_INT:
-            defined = false;
+            item->defined = false;
             return IT_INT;
         case T_STRING:
-            defined = false;
+            item->defined = false;
             return IT_STRING;
         case T_DECIMAL:
-            defined = false;
+            item->defined = false;
             return IT_DOUBLE;
         default:
             switch (token->attribute.keyword) {
@@ -717,7 +773,7 @@ item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibil
                 case k_qmark_Double:
                     return IT_DOUBLE;
                 case k_nil:
-                    *nil_possibility = true;
+                    item->nil_possibility = true;
                     return IT_NIL;
                 default:
                     return IT_UNDEF;
@@ -727,7 +783,9 @@ item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibil
 }
 
 int insert_data_type(parser_data_t *data){
-    item_type type  = get_type(data->token_ptr,data,false,false);
+    item_data tmp_item = create_default_item();
+    item_type type;
+    type = get_type(data->token_ptr,data,&tmp_item);
     //data->id->it_is_nil = false;
 
     //var declaration

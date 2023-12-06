@@ -13,7 +13,7 @@
 #include <stdbool.h>
 
 /**
- * @brief
+ * @brief enum for precedence table symbols
  */
 typedef enum
 {
@@ -43,7 +43,7 @@ typedef enum
 } Precedence_table_symbol;
 
 /**
- * @brief
+ * @brief enum for precedence rules
  */
 typedef enum
 {
@@ -66,12 +66,12 @@ typedef enum
 } Precedence_rules;
 
 /**
- * @brief
+ * @brief function for expression parsing
  */
 int expression(parser_data_t* data);
 
 /**
- * @brief
+ * @brief function for parsing arguments of called function
  */
 int check_func_call(parser_data_t *data, int position);
 

@@ -16,7 +16,7 @@
 #define PRINTABLE_MAX 126
 
 /**
- * @brief
+ * @brief enum for fsm states in scanner
  */
 typedef enum state{
     S_START,
@@ -56,7 +56,7 @@ typedef enum state{
 } state_t;
 
 /**
- * @brief
+ * @brief enum for scanner token
  */
 typedef enum token_type{
     T_ITS_NOT_A_TOKEN,
@@ -100,7 +100,7 @@ typedef enum token_type{
 #define COUNT_KEYWORDS_BEFORE_QMARK 11
 
 /**
- * @brief
+ * @brief enum for keywords
  */
 typedef enum keyword{
     k_double,
@@ -120,7 +120,7 @@ typedef enum keyword{
 } keyword_t;
 
 /**
- * @brief
+ * @brief contents of a scanner token
  */
 typedef union attribute{
     int integer;
@@ -130,7 +130,7 @@ typedef union attribute{
 } attribute_t;
 
 /**
- * @brief
+ * @brief scanner token representation
  */
 typedef struct token
 {
@@ -140,6 +140,6 @@ typedef struct token
 } *token_t_ptr;
 
 /**
- * @brief
+ * @brief function for getting another token from stdin
  */
 token_t_ptr next_token(int *line_cnt, int* error, bool *flag);

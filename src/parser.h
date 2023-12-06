@@ -12,7 +12,6 @@
 #include "table_stack.h"
 #include <stdbool.h>
 
-
 /**
  * @brief internal parser data representation
  */
@@ -24,7 +23,7 @@ typedef struct {
     bool is_void_function;      // is in void function
     bool is_in_params;          // is in func_params rule
     bool is_in_declaration;     // is in ID declaration
-    bool is_in_condition;       // is in if/while/then construction
+    bool is_it_let_condition;       // is in if/while/then construction
     bool eol_flag;              // met EOL
 
     t_table_stack *table_stack;
@@ -105,6 +104,6 @@ int call_params_n(parser_data_t *data);
 /**
  * @brief token type getter
  */
-item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibility, bool* defined);
+item_type get_type(struct token* token, parser_data_t * data, item_data* item);
 
 #endif //IFJ_2023_PARSER_H
