@@ -10,6 +10,8 @@ parser-build
 semantic-build
 testFile
 compiler
+generator-debug
+generator_out
 
 .vscode
 CMakeLists.txt

@@ -930,13 +930,18 @@ def test_all():
     write(b)
     """, hexfloat(4.5))
 
+    # returns outside function are considered a parser error
+    # https://discord.com/channels/461541385204400138/753997224144404577/1176523592377319508
+
+    error_parser = ErrorType.error_parser
+
     test_invalid("""
     return
-    """, error_other_semantic)
+    """, error_parser)
 
     test_invalid("""
     return 4
-    """, error_other_semantic)
+    """, error_parser)
 
     # test_invalid("""
     # if true {

@@ -81,6 +81,6 @@ int table_count_elements_in_stack(t_table_stack *s);
  *  @param name The name of the symbol to find.
  *  @return Returns a pointer to the symbol if found; otherwise, returns NULL.
  */
-symbol *find_symbol_global(t_table_stack *s, char *name);
+symbol *find_symbol_global(t_table_stack *s, char *name, bool is_overlap);
 
 #endif //TABLE_STACK_H
