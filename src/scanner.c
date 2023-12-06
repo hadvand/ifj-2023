@@ -400,6 +400,10 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     state = S_EXPONENT_POSSIBLY;
                     continue;
                 }
+                else if(c == 46){
+                    scanning_finish_with_error(token,additional_string,err_type, ER_LEX);
+                    return NULL;
+                }
                 else{
                     ungetc(c, stdin);
                     token->attribute.decimal = strtod(additional_string->string,NULL);
