@@ -804,10 +804,10 @@ int check_param(parser_data_t* data, int position){
     int ret_code = 0;
     if(data->token_ptr->token_type == T_ID){
         symbol* sym = NULL;
-        if(table_count_elements_in_stack(data->tableStack) == 0)
+        if(table_count_elements_in_stack(data->table_stack) == 0)
             return ER_INTERNAL;
 
-        if((sym = find_symbol_global(data->tableStack,data->token_ptr->attribute.string)) != NULL){
+        if((sym = find_symbol_global(data->table_stack,data->token_ptr->attribute.string)) != NULL){
             bool param_nil_possibility = false;
             if((sym->data.type != get_type_from_params(data->id_type,position, &param_nil_possibility)
                 || sym->data.nil_possibility != param_nil_possibility)
