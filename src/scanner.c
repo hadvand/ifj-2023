@@ -127,6 +127,9 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
     *flag = false;
     while((c = getc(stdin))){
         //printf("%c\n",c);
+        if(c == 13){
+            continue;
+        }
         switch(state){
             case(S_START):
                 //printf("current sym %c\n",c);

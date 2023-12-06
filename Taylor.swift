@@ -1,2 +1,2 @@
-let result = 120
-write(result)
+let a = "abc"
+write(a)

@@ -33,11 +33,11 @@ semantic-tests: $(PROGS) $(PARSER_PROGS) $(SEM_TESTS)
 
 #generator-tests: $(GENERATOR_PROGS)
 #	$(CC) $(CFLAGS) $^ -o gen_tests -lm
-generator-debug: $(SEMANTIC_PROGS) $(PARSER_PROGS) $(PROGS) $(GENERATOR_PROGS) src/main.c
+generator-debug: $(PARSER_PROGS) $(PROGS) $(GENERATOR_PROGS) src/main.c
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 
-test: generator-debug
-	./generator-debug < Taylor.swift > generator_out
+test: compiler
+	./compiler < Taylor.swift > generator_out
 	./ifj23-tests/ic23int generator_out
 
 compiler: $(PARSER_PROGS) $(PROGS) $(GENERATOR_PROGS) src/main.c
