@@ -258,8 +258,16 @@ int analyse() {
 int program(parser_data_t *data) {
     int ret_code = ER_NONE;
 
+    int prev_line = 0;
     while (data->token_ptr->token_type != T_EOF) {
-        CHECK_RULE(stm)
+
+        if (data->line_cnt == prev_line) {
+            return ER_LEX;
+        }
+        else {
+            prev_line = data->line_cnt;
+            CHECK_RULE(stm)
+        }
     }
 
     return ret_code;
