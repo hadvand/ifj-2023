@@ -33,6 +33,12 @@ void string_free(string_ptr string)
     }
 }
 
+void string_clear(string_ptr str)
+{
+    str->mem_allocated = 0;
+    memset(str->string, 0, str->last_index);
+}
+
 bool string_append(string_ptr string, char c)
 {
     if((string->last_index + 1 == string->mem_allocated) || string->last_index == 0){
@@ -61,7 +67,12 @@ bool string_concat(string_ptr string, const char* src)
     int srclen = strlen(src);
     while (string->last_index + srclen > string->mem_allocated - 1)
     {
-        string->mem_allocated *= 2;
+        if(string->mem_allocated == 0){
+            string->mem_allocated = BYTES_TO_ALLOC;
+        }
+        else{
+            string->mem_allocated *= 2;
+        }
 
         if (!(string->string = realloc(string->string, string->mem_allocated)))
             return false;

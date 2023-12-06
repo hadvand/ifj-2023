@@ -335,9 +335,11 @@ int stm(parser_data_t *data) {
             data->id_type = data->id;
             data->param_index = 0;
 
+            gen_function_before_params();
+
             CHECK_RULE(call_params)
 
-            gen_function_pass_param_count(data->param_index);
+            gen_function_pass_param_count(data->param_index+1);
 
             if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
 

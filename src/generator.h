@@ -104,7 +104,7 @@
     "\nRETURN\n"                                                             \
 
 #define BUILTIN_WRITE                                                       \
-    "\nLABEL $write"                                                        \
+    "\nLABEL $write\n"                                                        \
     "PUSHFRAME\n"                               \
 	"DEFVAR LF@to_write\n"                      \
 	"DEFVAR LF@type\n"                          \
@@ -149,12 +149,12 @@
 /**
  * @brief
  */
-void generator_start();
+bool generator_start();
 
 /**
  * @brief
  */
-void generator_end();
+bool generator_end();
 
 /**
  * @brief
