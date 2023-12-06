@@ -276,6 +276,10 @@ int stm(parser_data_t *data) {
         data->is_in_declaration = true;
         VERIFY_TOKEN(T_ID)
         INSERT_SYM()
+        if(table_count_elements_in_stack(data->table_stack) == 1)
+            data->id->global = true;
+        else
+            data->id->global = false;
         data->id->defined = false;
         data->id->is_let = is_let;
         GET_TOKEN()
