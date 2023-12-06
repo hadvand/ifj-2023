@@ -38,27 +38,34 @@ typedef struct {
 } parser_data_t;
 
 /**
- * @brief initialization of parser data
+ * @brief Initializes parser data.
+ * @return A pointer to the initialized parser data.
  */
 parser_data_t *init_data();
 
 /**
- * @brief destruction of parser data
+ * @brief Frees the memory allocated for parser data.
+ * @param data A pointer to the parser data to be freed.
  */
 void free_data(parser_data_t *data);
 
 /**
- * @brief main function that launches the whole compiling process
+ * @brief Main function that launches the entire compilation process.
+ * @return Returns the result of the compilation process.
  */
 int analyse();
 
 /**
- * @brief program rule
+ * @brief Parses the 'program' rule in the grammar.
+ * @param data Pointer to the parser data structure.
+ * @return Returns the result code of the parsing process.
  */
 int program(parser_data_t *data);
 
 /**
- * @brief stm rule
+ * @brief Parses the 'stm' rule in the grammar.
+ * @param data Pointer to the parser data structure.
+ * @return Returns the result code of the parsing process.
  */
 int stm(parser_data_t *data);
 
@@ -68,17 +75,23 @@ int stm(parser_data_t *data);
 int stm_not_null(parser_data_t *data);
 
 /**
- * @brief condition rule
+ * @brief Parses the 'condition' rule in the grammar.
+ * @param data Pointer to the parser data structure.
+ * @return Returns the result code of the parsing process.
  */
 int condition(parser_data_t *data);
 
 /**
- * @brief func_params rule
+ * @brief Parses the 'func_params' rule in the grammar.
+ * @param data Pointer to the parser data structure.
+ * @return Returns the result code of the parsing process.
  */
 int func_params(parser_data_t *data);
 
 /**
- * @brief func_params_not_null rule
+ * @brief Parses the 'func_params_not_null' rule in the grammar.
+ * @param data Pointer to the parser data structure.
+ * @return Returns the result code of the parsing process.
  */
 int func_params_not_null(parser_data_t *data);
 
@@ -88,27 +101,39 @@ int func_params_not_null(parser_data_t *data);
 int var_type(parser_data_t *data);
 
 /**
- * @brief return rule
+ * @brief Parses the 'return_rule' rule in the grammar.
+ * @param data Pointer to the parser data structure.
+ * @return Returns the result code of the parsing process.
  */
 int return_rule(parser_data_t *data);
 
 /**
- * @brief return_void rule
+ * @brief Parses the 'return_void_rule' rule in the grammar.
+ * @param data Pointer to the parser data structure.
+ * @return Returns the result code of the parsing process.
  */
 int return_void_rule(parser_data_t *data);
 
 /**
- * @brief call_params rule
+ * @brief Parses the 'call_params' rule in the grammar.
+ * @param data Pointer to the parser data structure.
+ * @return Returns the result code of the parsing process.
  */
 int call_params(parser_data_t *data);
 
 /**
- * @brief call_params_n rule
+ * @brief Parses the 'call_params_n' rule in the grammar.
+ * @param data Pointer to the parser data structure.
+ * @return Returns the result code of the parsing process.
  */
 int call_params_n(parser_data_t *data);
 
 /**
- * @brief token type getter
+ * @brief Gets the item type associated with a token.
+ * @param token Pointer to the token.
+ * @param data Pointer to the parser data.
+ * @param item Pointer to the item_data structure.
+ * @return Returns the item type based on the token.
  */
 item_type get_type(struct token* token, parser_data_t * data, item_data* item);
 

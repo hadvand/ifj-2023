@@ -1,6 +1,6 @@
 /**
  * @file hash.c
- * @author Oleg Borsh (xborsh00)
+ * @author Oleg Borshch (xborsh00)
  * @brief symtable for parser
  */
 
