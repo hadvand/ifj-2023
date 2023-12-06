@@ -211,7 +211,7 @@ int func_call(parser_data_t* data) {
  * @param nil_possibility Pointer to a boolean indicating if nil is a possibility for the parameter
  * @return Data type of the parameter
  */
-item_type get_type_from_params(item_data *data,int position, bool *nil_possibility){
+item_type get_type_from_params(item_data *data,int position, bool *nil_possibility, bool is_let_condition){
     UNUSED(nil_possibility);
     *nil_possibility = false;
     if(!strcmp(data->id,"write"))
