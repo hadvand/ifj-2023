@@ -14,6 +14,15 @@
 
 #define UNUSED(x) (void)(x)
 
+#define INSERT_VAR() \
+            INSERT_SYM()\
+            if(table_count_elements_in_stack(data->table_stack) == 1)\
+                data->id->global = true;\
+            else\
+                data->id->global = false;\
+            data->id->defined = false;\
+            data->id->is_let = is_let;\
+
 #define GET_TOKEN() \
         if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code, &(data->eol_flag))) == NULL) {\
             return ret_code;                                               \
@@ -324,11 +333,14 @@ int stm(parser_data_t *data) {
             return ER_INTERNAL;
         symbol *idFromTable = NULL;
 
-        if((idFromTable = find_symbol_global(data->table_stack, data->token_ptr->attribute.string,false)) == NULL)
-            return ER_UNDEF_VAR_OR_NOTINIT_VAR;
-        data->id = &(idFromTable->data);
+        char *var_name = data->token_ptr->attribute.string;
+
         GET_TOKEN()
         if (data->token_ptr->token_type == T_BRACKET_OPEN) {
+
+            if((idFromTable = find_symbol_global(data->table_stack, var_name,false)) == NULL)
+                return ER_UNDEF_VAR_OR_NOTINIT_VAR;
+            data->id = &(idFromTable->data);
 
             if(!data->id->is_function)
                 return ER_UNDEF_FUNC_OR_REDEF_VAR;
@@ -346,13 +358,18 @@ int stm(parser_data_t *data) {
             return stm(data);
         }
         else if (data->token_ptr->token_type == T_ASSIGMENT) {
+            if((idFromTable = find_symbol_global(data->table_stack, var_name,false)) == NULL)
+                return ER_UNDEF_VAR_OR_NOTINIT_VAR;
+            data->id = &(idFromTable->data);
+
             GET_TOKEN()
             CHECK_RULE(expression)
 
             if (!data->eol_flag && data->token_ptr->token_type != T_EOF) return ER_SYNTAX;
 
             return stm(data);
-        }
+        } else
+            return ER_SYNTAX;
     }
 
     // <stm> -> func func_id( <func_params> ) -> <var_type> { <stm> <return> } \n <stm>
