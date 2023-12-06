@@ -457,6 +457,8 @@ int expression(parser_data_t* data){
 
     }while(!success);
 
+    if (ret_code == 2) return ret_code;
+
     t_stack_elem op1;
     op1.symbol = N_TERMINAL;
     op1.item = *(data->id);
