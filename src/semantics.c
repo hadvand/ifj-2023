@@ -43,6 +43,10 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                     return ER_TYPE_COMP;                                               \
                 type_final->nil_possibility = operand_1->item.nil_possibility\
 
+
+/**
+ * @brief Enum representing indices for the precedence table
+ */
 typedef enum {
     I_PLUS,
     I_MINUS,
@@ -62,6 +66,9 @@ typedef enum {
     I_DOLLAR
 } Precedence_table_indices;
 
+/**
+ * @brief Precedence table to determine operators precedence
+ */
 int precedence_table[TABLE_SIZE][TABLE_SIZE] =
 {
     //      | + |  - |  * |  / |  == | != | < |  > | <= | >= | ?? |  ! |  ( |  ) |  i |  $ |
@@ -86,6 +93,12 @@ int precedence_table[TABLE_SIZE][TABLE_SIZE] =
 };
 
 
+/**
+ * @brief Convert a token into its symbolic representation
+ * @param data Parser data
+ * @param last_action_is_reduce Flag indicating if the last action was a reduce operation
+ * @return Symbolic representation of the token
+ */
 Precedence_table_symbol convert_token_into_symbol(parser_data_t *data, bool last_action_is_reduce ){
 
     switch(data->token_ptr->token_type){
@@ -137,10 +150,10 @@ Precedence_table_symbol convert_token_into_symbol(parser_data_t *data, bool last
     }
 }
 
-/*
- *
- * getting the indices of the precedence table
- *
+/**
+ * @brief Get the index of a symbol in the precedence table
+ * @param symbol Symbol to get the index for
+ * @return Index of the symbol
  */
 Precedence_table_indices get_index(Precedence_table_symbol symbol){
 
@@ -192,6 +205,13 @@ int func_call(parser_data_t* data) {
 }
 
 
+/**
+ * @brief Get the data type of a parameter in a function or procedure call
+ * @param data Item data
+ * @param position Position of the parameter in the function or procedure declaration
+ * @param nil_possibility Pointer to a boolean indicating if nil is a possibility for the parameter
+ * @return Data type of the parameter
+ */
 item_type get_type_from_params(item_data *data,int position, bool *nil_possibility, bool is_let_condition){
     UNUSED(nil_possibility);
     *nil_possibility = false;
@@ -231,7 +251,11 @@ item_type get_type_from_params(item_data *data,int position, bool *nil_possibili
 }
 
 
-
+/**
+ * @brief Count the number of symbols after the STOP symbol in the stack
+ * @param found_stop Pointer to a boolean indicating if the STOP symbol is found
+ * @return Number of symbols after the STOP symbol
+ */
 int number_of_symbols_after_stop(bool* found_stop){
 
     t_stack_elem* item = get_top(&stack);
@@ -253,6 +277,11 @@ int number_of_symbols_after_stop(bool* found_stop){
     return counter;
 }
 
+
+/**
+ * @brief Reduce the stack based on precedence rules
+ * @return Error code indicating success or failure
+ */
 int reduce(){
 
     int ret_code;
@@ -308,6 +337,12 @@ int reduce(){
     return ER_NONE;
 }
 
+
+/**
+ * @brief Parse and analyze an expression in the input data
+ * @param data Parser data
+ * @return Error code indicating success or failure
+ */
 int expression(parser_data_t* data){
     int ret_code = ER_SYNTAX;
 
@@ -482,6 +517,14 @@ int expression(parser_data_t* data){
 }
 
 
+/**
+ * @brief Check the rule for a specific number of operands
+ * @param number Number of operands
+ * @param operand_1 First operand
+ * @param operand_2 Second operand
+ * @param operand_3 Third operand
+ * @return Precedence rule for the operands
+ */
 static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3){
 
     switch (number){
@@ -561,6 +604,16 @@ static Precedence_rules check_rule(int number, t_stack_elem* operand_1, t_stack_
     return NOT_A_RULE;
 }
 
+
+/**
+ * @brief Check the semantics for a specific precedence rule
+ * @param rule Precedence rule
+ * @param operand_1 First operand
+ * @param operand_2 Second operand
+ * @param operand_3 Third operand
+ * @param type_final Final type after semantics check
+ * @return Error code indicating success or failure
+ */
 static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_stack_elem* operand_2, t_stack_elem* operand_3,
                     item_data *type_final){
 
@@ -809,6 +862,12 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
 }
 
+/**
+ * @brief Check parameters for a function or procedure call
+ * @param data Parser data
+ * @param position Position of the parameter in the function or procedure declaration
+ * @return Error code indicating success or failure
+ */
 int check_param(parser_data_t* data, int position){
     int ret_code = 0;
     gen_function_pass_param_push(data->token_ptr, true);
@@ -853,6 +912,12 @@ int check_param(parser_data_t* data, int position){
     return ER_PARAMS;
 }
 
+/**
+ * @brief Check a function or procedure call
+ * @param data Parser data
+ * @param position Position of the parameter in the function or procedure declaration
+ * @return Error code indicating success or failure
+ */
 int check_func_call(parser_data_t *data, int position){
     int ret_code;
 //    if(position >= data->id_type->params->last_index)

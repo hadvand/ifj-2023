@@ -140,6 +140,10 @@ typedef struct token
 } *token_t_ptr;
 
 /**
- * @brief function for getting another token from stdin
+ * @brief Function for obtaining the next token from standard input.
+ * @param line_cnt Pointer to the line count variable to keep track of the current line number.
+ * @param error Pointer to the error indicator variable.
+ * @param flag Pointer to a boolean flag indicating whether the scanner should continue.
+ * @return A pointer to the obtained token.
  */
 token_t_ptr next_token(int *line_cnt, int* error, bool *flag);
