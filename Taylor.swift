@@ -1,2 +1,2 @@
-let a = "abc"
+let a = "abc" + "ggwp"
 write(a)

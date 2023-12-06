@@ -329,7 +329,10 @@ int reduce(){
 #endif
             return ret_code;
         }
-        generate_stack_operation(rule);
+        if(rule == NT_PLUS_NT && final_item.type == IT_STRING)
+            gen_concat_stack_strings();
+        else
+            gen_stack_operation(rule);
 
         for (int i = count_symbols_before_stop + 1; i > 0 ; i--) {
             stack_pop(&stack);

@@ -228,7 +228,7 @@ bool gen_function_call(const char* name);
 /**
  * @brief
  */
-bool generate_stack_operation(Precedence_rules rule);
+bool gen_stack_operation(Precedence_rules rule);
 
 /**
  * @brief
@@ -242,5 +242,7 @@ bool gen_push_token(token_t_ptr token, bool is_local_scope);
 bool gen_pop_expr_result(const char* var, const char* scope);
 
 bool gen_define_var(const char* var, bool is_local);
+
+bool gen_concat_stack_strings();
 
 #endif //GENERATOR_H

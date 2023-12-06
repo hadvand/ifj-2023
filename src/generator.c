@@ -35,6 +35,9 @@ void codegen_flush()
 bool generator_start(void){
     code = string_init();
     EMIT(".IFJcode23\n")
+    EMIT("DEFVAR GF@%tmp_op1\n");
+    EMIT("DEFVAR GF@%tmp_op2\n");
+    EMIT("DEFVAR GF@%tmp_op3\n");
     EMIT("JUMP $$main\n")
 
     generator_builtin();
@@ -153,6 +156,16 @@ bool gen_value_from_token(token_t_ptr token, bool local_frame) {
     return true;
 }
 
+bool gen_concat_stack_strings()
+{
+    EMIT("POPS GF@%tmp_op3\n");
+    EMIT("POPS GF@%tmp_op2\n");
+    EMIT("CONCAT GF@%tmp_op1 GF@%tmp_op2 GF@%tmp_op3\n");
+    EMIT("PUSHS GF@%tmp_op1\n");
+
+    return true;
+}
+
 bool gen_define_var(const char* var, bool is_local)
 {
     EMIT("DEFVAR ");
@@ -184,7 +197,7 @@ bool gen_function_call(const char* name)
     return true;
 }
 
-bool generate_stack_operation(Precedence_rules rule)
+bool gen_stack_operation(Precedence_rules rule)
 {
     switch (rule){
         case NT_AS_NT:
