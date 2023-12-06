@@ -320,7 +320,7 @@ int stm(parser_data_t *data) {
             return ER_INTERNAL;
         symbol *idFromTable = NULL;
 
-        if((idFromTable = find_symbol_global(data->table_stack, data->token_ptr->attribute.string)) == NULL)
+        if((idFromTable = find_symbol_global(data->table_stack, data->token_ptr->attribute.string,false)) == NULL)
             return ER_UNDEF_VAR_OR_NOTINIT_VAR;
         data->id = &(idFromTable->data);
         GET_TOKEN()
@@ -427,7 +427,7 @@ int stm(parser_data_t *data) {
 
     // <stm> -> if ( <condition> ) { <stm> } \n else { <stm> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_if) {
-        data->is_it_let_condition = true;
+
 
         GET_TOKEN()
         CHECK_RULE(condition)
@@ -441,7 +441,7 @@ int stm(parser_data_t *data) {
 
         if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
 
-        data->is_it_let_condition = false;
+
         table_stack_pop(data->table_stack);
 
 
@@ -455,6 +455,7 @@ int stm(parser_data_t *data) {
 
         GET_TOKEN()
         CHECK_RULE(stm)
+        data->is_it_let_condition = false;
 
         if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
 
@@ -563,6 +564,7 @@ int condition(parser_data_t *data) {
             return ER_UNDEF_VAR_OR_NOTINIT_VAR;
         }
         GET_TOKEN()
+        data->is_it_let_condition = true;
         return ret_code;
     }
     item_data tmp_data = create_default_item();
@@ -732,7 +734,7 @@ item_type get_type(struct token* token, parser_data_t * data, item_data* item){
         case T_ID:
             if(table_count_elements_in_stack(data->table_stack) == 0)
                 return IT_UNDEF;
-            symbol = find_symbol_global(data->table_stack, token->attribute.string);
+            symbol = find_symbol_global(data->table_stack, token->attribute.string,false);
             if (symbol == NULL){
                 item->nil_possibility = false;
                 item->defined = false;

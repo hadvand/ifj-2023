@@ -191,7 +191,7 @@ int func_call(parser_data_t* data) {
 }
 
 
-item_type get_type_from_params(item_data *data,int position, bool *nil_possibility){
+item_type get_type_from_params(item_data *data,int position, bool *nil_possibility, bool is_let_condition){
     UNUSED(nil_possibility);
     *nil_possibility = false;
     if(!strcmp(data->id,"write"))
@@ -204,17 +204,26 @@ item_type get_type_from_params(item_data *data,int position, bool *nil_possibili
         case 's':
             return IT_STRING;
         case 'S':
-            *nil_possibility = true;
+            if(is_let_condition)
+                *nil_possibility = false;
+            else
+                *nil_possibility = true;
             return IT_STRING;
         case 'd':
             return IT_DOUBLE;
         case 'D':
-            *nil_possibility = true;
+            if(is_let_condition)
+                *nil_possibility = false;
+            else
+                *nil_possibility = true;
             return IT_DOUBLE;
         case 'i':
             return IT_INT;
         case 'I':
-            *nil_possibility = true;
+            if(is_let_condition)
+                *nil_possibility = false;
+            else
+                *nil_possibility = true;
             return IT_INT;
     }
     return IT_UNDEF;
@@ -806,10 +815,10 @@ int check_param(parser_data_t* data, int position){
         if(table_count_elements_in_stack(data->table_stack) == 0)
             return ER_INTERNAL;
 
-        if((sym = find_symbol_global(data->table_stack,data->token_ptr->attribute.string)) != NULL){
+        if((sym = find_symbol_global(data->table_stack,data->token_ptr->attribute.string, !strcmp(data->id->id,data->token_ptr->attribute.string))) != NULL){
             bool param_nil_possibility = false;
-            if((sym->data.type != get_type_from_params(data->id_type,position, &param_nil_possibility)
-                || sym->data.nil_possibility != param_nil_possibility)
+            if((sym->data.type != get_type_from_params(data->id_type,position, &param_nil_possibility,data->is_it_let_condition)
+                || (data->is_it_let_condition ? false : sym->data.nil_possibility) != param_nil_possibility)
                 && data->id_type->type != IT_ANY){
                 return ER_PARAMS;
             }
@@ -829,7 +838,7 @@ int check_param(parser_data_t* data, int position){
         bool param_nil_possibility = false;
         item_data tmp_item = create_default_item();
         item_type type = get_type(data->token_ptr,data,&tmp_item);
-        item_type param_type = get_type_from_params(data->id_type,position,&param_nil_possibility);
+        item_type param_type = get_type_from_params(data->id_type,position,&param_nil_possibility,data->is_it_let_condition);
         if(type != IT_UNDEF
             && type != param_type
             && param_type != IT_ANY) {
