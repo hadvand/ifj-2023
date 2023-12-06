@@ -153,6 +153,18 @@ bool gen_value_from_token(token_t_ptr token, bool local_frame) {
     return true;
 }
 
+bool gen_define_var(const char* var, bool is_local)
+{
+    EMIT("DEFVAR ");
+    const char* frame = is_local ? "LF" : "GF";
+    EMIT(frame);
+    EMIT("@");
+    EMIT(var);
+    EMIT("\n");
+
+    return true;
+}
+
 bool gen_function_pass_param_count(int count)
 {
     EMIT("DEFVAR TF@arg_count\n");
@@ -175,6 +187,8 @@ bool gen_function_call(const char* name)
 bool generate_stack_operation(Precedence_rules rule)
 {
     switch (rule){
+        case NT_AS_NT:
+
         case NT_EQ_NT:
             EMIT("EQS\n");
             break;
@@ -215,7 +229,7 @@ bool generate_stack_operation(Precedence_rules rule)
     return true;
 }
 
-bool generate_stack_push(token_t_ptr token) {
+bool generate_stack_push(token_t_ptr token, bool is_local) {
     switch (token->token_type) {
         case T_INT:
         EMIT("PUSHS int@");
@@ -233,7 +247,13 @@ bool generate_stack_push(token_t_ptr token) {
             EMIT("\n");
             break;
         case T_ID:
-        EMIT("PUSHS LF@");
+            EMIT("PUSHS LF@");
+            if(is_local){
+                EMIT("LF@");
+            }
+            else{
+                EMIT("GF@");
+            }
             EMIT(token->attribute.string);
             EMIT("\n");
             break;
@@ -244,25 +264,27 @@ bool generate_stack_push(token_t_ptr token) {
     return true;
 }
 
-bool gen_check_var_defined(const char* id, bool local)
+bool gen_check_var_defined(token_t_ptr token)
 {
-    EMIT("TYPE GF@EXPR_TYPE ")
-    EMIT(local ? "LF@" : "GF@")
-    EMIT(id)
-    EMIT_NL()
-    EMIT_NL("JUMPIFEQ !*sem_error_five GF@EXPR_TYPE string@")
+    EMIT("PUSHS ")
 
+    char result[64];
+
+    switch (token->token_type) {
+        case T_INT:
+            sprintf(result, "%d", token->attribute.integer);
+            EMIT("int@")
+            EMIT(result)
+            EMIT("\n")
+            break;
+        default:
+            string_clear(code);
+            return false;
+    }
+
+    string_clear(code);
     return true;
-}
 
-bool gen_define_var(const char* var, bool is_local_scope)
-{
-    EMIT("DEFVAR ");
-    const char* frame = is_local_scope ? "LF" : "GF";
-    EMIT(frame);
-    EMIT("@");
-    EMIT(var);
-    EMIT("\n");
 
     return true;
 }

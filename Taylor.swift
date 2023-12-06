@@ -1,1 +1,2 @@
-write(1)
+let result = 120
+write(result)

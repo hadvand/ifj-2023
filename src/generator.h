@@ -233,26 +233,14 @@ bool generate_stack_operation(Precedence_rules rule);
 /**
  * @brief
  */
-bool generate_stack_push(token_t_ptr token);
+bool generate_stack_push(token_t_ptr token, bool is_local);
 
-/**
- * @brief
- */
-bool gen_define_var(const char* var, bool is_local_scope);
+bool gen_check_var_defined(token_t_ptr token);
 
-/**
- * @brief
- */
-bool gen_check_var_defined(const char* id, bool local);
-
-/**
- * @brief
- */
 bool gen_push_token(token_t_ptr token, bool is_local_scope);
 
-/**
- * @brief
- */
 bool gen_pop_expr_result(const char* var, const char* scope);
+
+bool gen_define_var(const char* var, bool is_local);
 
 #endif //GENERATOR_H

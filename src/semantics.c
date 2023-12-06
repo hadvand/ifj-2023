@@ -9,6 +9,7 @@
 #include "stack.h"
 #include "error.h"
 #include "generator.h"
+#include "stdlib.h"
 
 #define TABLE_SIZE 16
 
@@ -328,6 +329,8 @@ int reduce(){
 #endif
             return ret_code;
         }
+        generate_stack_operation(rule);
+
         for (int i = count_symbols_before_stop + 1; i > 0 ; i--) {
             stack_pop(&stack);
         }
@@ -444,11 +447,10 @@ int expression(parser_data_t* data){
                     FREE(ER_INTERNAL);
                 }
 
-                bool is_local = table_count_elements_in_stack(data->table_stack) - 1;  // will be 0 (false), if we are in a global table
                 if (actual_symbol == IDENTIFIER) {
-                    CODEGEN(gen_check_var_defined, data->token_ptr->attribute.string, is_local)
+                    CODEGEN(gen_push_token, data->token_ptr, !stack.top->item.global)
                 }
-                CODEGEN(gen_push_token, data->token_ptr, is_local)
+
 
 #ifdef SEM_DEBUG
                 stack_print_all_symbols(&stack);
@@ -880,7 +882,6 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
  */
 int check_param(parser_data_t* data, int position){
     int ret_code = 0;
-    gen_function_pass_param_push(data->token_ptr, true);
     if(data->token_ptr->token_type == T_ID){
         symbol* sym = NULL;
         if(table_count_elements_in_stack(data->table_stack) == 0)
@@ -893,8 +894,10 @@ int check_param(parser_data_t* data, int position){
                 && data->id_type->type != IT_ANY){
                 return ER_PARAMS;
             }
-            if(sym->data.defined)
+            if(sym->data.defined) {
+                gen_function_pass_param_push(data->token_ptr, !sym->data.global);
                 return ER_NONE;
+            }
             else
                 return ER_UNDEF_VAR_OR_NOTINIT_VAR;
         }

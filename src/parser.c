@@ -277,6 +277,7 @@ int stm(parser_data_t *data) {
     // <stm> -> var + let id = <expression> \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && ( data->token_ptr->attribute.keyword == k_var || (is_let = data->token_ptr->attribute.keyword == k_let))) {
         data->is_in_declaration = true;
+
         VERIFY_TOKEN(T_ID)
         INSERT_SYM()
         if(table_count_elements_in_stack(data->table_stack) == 1)
@@ -285,6 +286,8 @@ int stm(parser_data_t *data) {
             data->id->global = false;
         data->id->defined = false;
         data->id->is_let = is_let;
+
+        gen_define_var(data->id->id,!data->id->global);
         GET_TOKEN()
         if (data->token_ptr->token_type == T_COLON) {
             GET_TOKEN()
@@ -354,6 +357,7 @@ int stm(parser_data_t *data) {
             return stm(data);
         }
         else if (data->token_ptr->token_type == T_ASSIGMENT) {
+
             GET_TOKEN()
             CHECK_RULE(expression)
 
