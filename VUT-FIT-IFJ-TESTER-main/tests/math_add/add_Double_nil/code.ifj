@@ -1,0 +1,4 @@
+var x: Double = 1.0
+var y: Double? = nil
+var z: Double = x + y
+print(z)

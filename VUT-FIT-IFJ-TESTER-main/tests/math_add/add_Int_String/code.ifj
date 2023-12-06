@@ -1,0 +1,4 @@
+var x: Int = 1
+var y: String = "ABC"
+var z: Int = x + y
+print(z)

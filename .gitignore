@@ -1,5 +1,18 @@
 [.idea]
+.idea/
 [.vscode]
+
+# Created Binary files
+main
+scanner_test
+scanner-build
+parser-build
+semantic-build
+testFile
+compiler
+
+.vscode
+CMakeLists.txt
 
 # Prerequisites
 *.d
@@ -53,3 +66,4 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+[.idea/workspace.xml]
