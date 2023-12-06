@@ -5,6 +5,24 @@
  * @brief code generation
  */
 
+#define GENERATE_CODE(...) fprintf(stdout, __VA_ARGS__)
+
+#define EMIT(_text)\
+        if (!string_concat(code, (_text))) {\
+            return false; } else {}\
+        codegen_flush();
+
+#define EMIT_NL(_text)\
+            EMIT(_text"\n");
+
+#define EMIT_INT(_number) do {\
+            char _str[MAX];\
+            sprintf(_str, "%d", (_number));\
+            EMIT(_str);\
+        } while (0)
+
+#define MAX 64
+
 #include "generator.h"
 #include <stdbool.h>
 #include "string.h"
@@ -13,7 +31,7 @@ string_ptr code;
 
 
 void generator_builtin(void){
-    fprintf(stdout, "%s", BUILTIN_LENGHT);
+    fprintf(stdout, "%s", BUILTIN_LENGTH);
     fprintf(stdout, "%s", BUILTIN_SUBSTR);
     fprintf(stdout, "%s", BUILTIN_INT2DOUBLE);
     fprintf(stdout, "%s", BUILTIN_DOUBLE2INT);
@@ -26,6 +44,7 @@ void generator_builtin(void){
 }
 
 void generator_start(void){
+    code = string_init();
     GENERATE_CODE(".IFJcode23\n");
     GENERATE_CODE("JUMP $$main\n");
     GENERATE_CODE("\nLABEL $$main\n");
@@ -93,3 +112,92 @@ void generate_var_definition(item_data data){
     }
 }
 
+bool emit_function_before_params()
+{
+    EMIT_NL("CREATEFRAME")
+
+    return true;
+}
+
+bool emit_function_pass_param_push(token_t_ptr token, bool local_frame) {
+    EMIT("PUSHS ");
+    if (!emit_value_from_token(token, local_frame)) return false;
+    EMIT("\n");
+
+    return true;
+}
+
+bool emit_value_from_token(token_t_ptr token, bool local_frame) {
+    char term[MAX];
+    unsigned char c;
+    string_ptr tmp;
+    if (!(tmp = string_init())) return false;
+    switch (token->token_type) {
+        case T_INT:
+            snprintf(term, MAX, "%d", token->attribute.integer);
+            EMIT("int@");
+            EMIT(term);
+            break;
+
+        case T_DECIMAL:
+            snprintf(term, MAX, "%a", token->attribute.decimal);
+            EMIT("float@");
+            EMIT(term);
+            break;
+
+        case T_STRING:
+            for (int i = 0; (c = (unsigned char) (token->attribute.string)[i]) != '\0'; i++) {
+                if (c == '#' || c == '\\' || c <= 32 || !isprint(c)) {
+                    string_append(tmp, '\\');
+                    sprintf(term, "%03d", c);
+                    string_concat(tmp, term);
+                } else {
+                    string_append(tmp, c);
+                }
+            }
+            EMIT("string@");
+            EMIT(tmp->string);
+            break;
+        case T_KEYWORD:
+            if (token->attribute.keyword == k_nil) {
+                EMIT("nil@nil");
+            }
+            break;
+
+        case T_ID:
+        EMIT(local_frame ? "LF@" : "GF@");
+            EMIT(token->attribute.string);
+            break;
+
+        default:
+            string_free(tmp);
+            return false;
+    }
+    string_free(tmp);
+    return true;
+}
+
+bool emit_function_pass_param_count(int count)
+{
+    EMIT("DEFVAR TF@arg_count\n");
+    EMIT("MOVE TF@arg_count int@");
+    EMIT_INT(count);
+    EMIT("\n");
+
+    return true;
+}
+
+bool emit_function_call(const char* name)
+{
+    EMIT("CALL !")
+    EMIT(name)
+    EMIT("\n")
+
+    return true;
+}
+
+void codegen_flush()
+{
+    fprintf(stdout, "%s", code->string);
+    string_free(code);
+}

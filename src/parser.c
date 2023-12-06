@@ -11,6 +11,7 @@
 #include "parser.h"
 #include "table_stack.h"
 #include "semantics.h"
+#include "generator.h"
 
 #define UNUSED(x) (void)(x)
 
@@ -32,9 +33,9 @@
 
 #define INSERT_SYM() \
         bool internal_error; \
-        if(table_count_elements_in_stack(data->tableStack) == 0)\
+        if(table_count_elements_in_stack(data->table_stack) == 0)\
             return ER_INTERNAL;\
-        data->id = insert_symbol(data->tableStack->top->table,data->token_ptr->attribute.string,&internal_error);\
+        data->id = insert_symbol(data->table_stack->top->table,data->token_ptr->attribute.string,&internal_error);\
         if(!data->id){\
             if(internal_error) return ER_INTERNAL;\
         else return ER_SEMAN;\
@@ -51,17 +52,17 @@ parser_data_t *init_data()
     }
 
 
-    t_table_stack *tableStack = table_stack_init();
+    t_table_stack *table_stack = table_stack_init();
 
-    parser_data->tableStack = tableStack;
+    parser_data->table_stack = table_stack;
 
     // init global table
     hash_table *global_table = create_hash_table();
     if(global_table == NULL) {
         return NULL;
     }
-    table_stack_push(parser_data->tableStack,global_table);
-    parser_data->tableStack->top->next = NULL;
+    table_stack_push(parser_data->table_stack, global_table);
+    parser_data->table_stack->top->next = NULL;
 
     parser_data->token_ptr = NULL;
     parser_data->id = NULL;
@@ -83,8 +84,8 @@ parser_data_t *init_data()
     bool internal_error;
 
 
-    if(table_count_elements_in_stack(parser_data->tableStack) == 1){
-        hash_table *global_table = parser_data->tableStack->top->table;
+    if(table_count_elements_in_stack(parser_data->table_stack) == 1){
+        hash_table *global_table = parser_data->table_stack->top->table;
         // readString() -> str?
         if ((tmp = insert_symbol(global_table, "readString", &internal_error)) == NULL) return NULL;
         tmp->defined = true;
@@ -217,13 +218,11 @@ parser_data_t *init_data()
         strcpy(tmp->id_names[2],"endingBefore");
     }
 
-
-
     return parser_data;
 }
 
 void free_data(parser_data_t *parser_data) {
-    table_stack_free(parser_data->tableStack);
+    table_stack_free(parser_data->table_stack);
 }
 
 int analyse() {
@@ -245,13 +244,10 @@ int analyse() {
 
     generator_start();
 
-
     if ((parser_data->token_ptr = next_token(&(parser_data->line_cnt), &ret_code, &flag)) != NULL)
     {
         ret_code = program(parser_data);
     }
-
-
 
     generator_end();
 
@@ -321,24 +317,29 @@ int stm(parser_data_t *data) {
     // <stm> -> func_id( <func_params> ) \n <stm>
     // <stm> -> id = <expression> \n <stm>
     if (data->token_ptr->token_type == T_ID) {
-        if(table_count_elements_in_stack(data->tableStack) == 0)
+        if(table_count_elements_in_stack(data->table_stack) == 0)
             return ER_INTERNAL;
         symbol *idFromTable = NULL;
 
-        if((idFromTable = find_symbol_global(data->tableStack, data->token_ptr->attribute.string)) == NULL)
+        if((idFromTable = find_symbol_global(data->table_stack, data->token_ptr->attribute.string)) == NULL)
             return ER_UNDEF_VAR;
         data->id = &(idFromTable->data);
         GET_TOKEN()
         if (data->token_ptr->token_type == T_BRACKET_OPEN) {
+
+
             data->id_type = data->id;
             data->param_index = 0;
 
             CHECK_RULE(call_params)
 
+            emit_function_pass_param_count(data->param_index);
+
             if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
 
+            emit_function_call(data->id_type->id);
+
             GET_TOKEN()
-//            if (!data->eol_flag) return ER_SYNTAX;
 
             return stm(data);
         }
@@ -368,7 +369,7 @@ int stm(parser_data_t *data) {
         data->is_in_function = true;
         data->id->defined = true;
         hash_table *local_table = create_hash_table();
-        table_stack_push(data->tableStack,local_table);
+        table_stack_push(data->table_stack, local_table);
         CHECK_RULE(func_params)
         data->is_in_params = false;
 
@@ -389,7 +390,7 @@ int stm(parser_data_t *data) {
             CHECK_RULE(stm)
 
             if (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE) return ER_SYNTAX;
-            table_stack_pop(data->tableStack);
+            table_stack_pop(data->table_stack);
 
             GET_TOKEN()
 
@@ -402,7 +403,7 @@ int stm(parser_data_t *data) {
             GET_TOKEN()
             CHECK_RULE(stm)
 
-            table_stack_pop(data->tableStack);
+            table_stack_pop(data->table_stack);
 
             GET_TOKEN()
 
@@ -527,9 +528,9 @@ int condition(parser_data_t *data) {
 
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_let) {
         VERIFY_TOKEN(T_ID)
-        if(table_count_elements_in_stack(data->tableStack) == 0)
+        if(table_count_elements_in_stack(data->table_stack) == 0)
             return ER_INTERNAL;
-        if (!find_symbol(data->tableStack->top->table, data->token_ptr->attribute.string)) {
+        if (!find_symbol(data->table_stack->top->table, data->token_ptr->attribute.string)) {
             return ER_UNDEF_VAR;
         }
         GET_TOKEN()
@@ -570,16 +571,16 @@ int func_params(parser_data_t *data) {
         VERIFY_TOKEN(T_ID)
 
         // if there is function named as parameter
-        if(table_count_elements_in_stack(data->tableStack) != 2)
+        if(table_count_elements_in_stack(data->table_stack) != 2)
             return ER_INTERNAL;
-        if (find_symbol(data->tableStack->top->table, data->token_ptr->attribute.string))
+        if (find_symbol(data->table_stack->top->table, data->token_ptr->attribute.string))
             return ER_UNDEF_VAR;
 
         // if we are in definition, we need to add_LitInt_LitInt parameters to the local symtable
         bool internal_error;
-        if(table_count_elements_in_stack(data->tableStack) == 0)
+        if(table_count_elements_in_stack(data->table_stack) == 0)
             return ER_INTERNAL;
-        if (!(data->exp_type = insert_symbol(data->tableStack->top->table, data->token_ptr->attribute.string,
+        if (!(data->exp_type = insert_symbol(data->table_stack->top->table, data->token_ptr->attribute.string,
                                              &internal_error))) {
             if (internal_error) return ER_INTERNAL;
             else return ER_UNDEF_VAR;
@@ -683,9 +684,9 @@ item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibil
 
     switch(token -> token_type){
         case T_ID:
-            if(table_count_elements_in_stack(data->tableStack) == 0)
+            if(table_count_elements_in_stack(data->table_stack) == 0)
                 return IT_UNDEF;
-            symbol = find_symbol(data->tableStack->top->table, token->attribute.string);
+            symbol = find_symbol(data->table_stack->top->table, token->attribute.string);
             if (symbol == NULL){
                 *nil_possibility = false;
                 *defined = false;

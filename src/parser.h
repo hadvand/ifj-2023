@@ -11,7 +11,7 @@
 #include "scanner.h"
 #include "table_stack.h"
 #include <stdbool.h>
-#include "generator.h"
+
 
 /**
  * @brief
@@ -27,7 +27,7 @@ typedef struct {
     bool is_in_condition;       // is in if/while/then construction
     bool eol_flag;              // met EOL
 
-    t_table_stack *tableStack;
+    t_table_stack *table_stack;
 
     token_t_ptr token_ptr;           // current token
 

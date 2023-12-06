@@ -56,4 +56,20 @@ bool string_append(string_ptr string, char c)
     return true;
 }
 
+bool string_concat(string_ptr string, const char* src)
+{
+    int srclen = strlen(src);
+    while (string->last_index + srclen > string->mem_allocated - 1)
+    {
+        string->mem_allocated *= 2;
 
+        if (!(string->string = realloc(string->string, string->mem_allocated)))
+            return false;
+    }
+
+    strcat(string->string, src);
+    string->last_index += srclen;
+    string->string[string->last_index] = '\0';
+
+    return true;
+}

@@ -11,13 +11,12 @@
 #include <stdlib.h>
 
 #include "hash.h"
-//#include "parser.h"
+#include "string.h"
+#include "parser.h"
 //#include "stack.h"
 
-#define GENERATE_CODE(...) fprintf(stdout, __VA_ARGS__)
-
 // Built-in functions
-#define BUILTIN_LENGHT                                                      \
+#define BUILTIN_LENGTH                                                      \
     "\nLABEL $len"														    \
 	"\nPUSHFRAME"															\
 	"\nDEFVAR LF@%return"													\
@@ -150,17 +149,17 @@
 /**
  * @brief
  */
-void generator_start(void);
+void generator_start();
 
 /**
  * @brief
  */
-void generator_end(void);
+void generator_end();
 
 /**
  * @brief
  */
-void generator_builtin(void);
+void generator_builtin();
 
 /**
  * @brief
@@ -171,5 +170,35 @@ void generate_var_declaration(item_data data);
  * @brief
  */
 void generate_var_definition(item_data data);
+
+/**
+ * @brief
+ */
+void codegen_flush();
+
+/**
+ * @brief
+ */
+bool emit_function_before_params();
+
+/**
+ * @brief
+ */
+bool emit_value_from_token(token_t_ptr token, bool local_frame);
+
+/**
+ * @brief
+ */
+bool emit_function_pass_param_push(token_t_ptr token, bool local_frame);
+
+/**
+ * @brief
+ */
+bool emit_function_pass_param_count(int count);
+
+/**
+ * @brief
+ */
+bool emit_function_call(const char* name);
 
 #endif //GENERATOR_H

@@ -10,6 +10,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define BYTES_TO_ALLOC 9    //the longest keyword is "function", which has 8 characters
 
@@ -45,5 +46,14 @@ void string_free(string_ptr string);
  * @return true if success, false if alloc failed
  */
 bool string_append(string_ptr string, char c);
+
+/**
+ * @brief append string to the end of the string
+ *
+ * @param string pointer to string struct
+ * @param src string to be appended
+ * @return true if success, false if alloc failed
+ */
+bool string_concat(string_ptr string, const char* src);
 
 #endif

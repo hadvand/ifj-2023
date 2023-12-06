@@ -800,11 +800,12 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 }
 
 int check_param(parser_data_t* data, int position){
+    emit_function_pass_param_push(data->token_ptr, true);
     if(data->token_ptr->token_type == T_ID){
         symbol* sym = NULL;
-        if(table_count_elements_in_stack(data->tableStack) == 0)
+        if(table_count_elements_in_stack(data->table_stack) == 0)
             return ER_INTERNAL;
-        if((sym = find_symbol(data->tableStack->top->table, data->token_ptr->attribute.string)) != NULL){
+        if((sym = find_symbol(data->table_stack->top->table, data->token_ptr->attribute.string)) != NULL){
             bool param_nil_possibility = false;
             if((sym->data.type != get_type_from_params(data->id_type,position, &param_nil_possibility)
                 || sym->data.nil_possibility != param_nil_possibility)
