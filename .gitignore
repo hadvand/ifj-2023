@@ -12,6 +12,7 @@ testFile
 compiler
 generator-debug
 generator_out
+generated_code
 
 .vscode
 CMakeLists.txt
