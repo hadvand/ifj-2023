@@ -196,6 +196,78 @@ bool gen_function_call(const char* name)
     return true;
 }
 
+bool generate_stack_operation(Precedence_rules rule)
+{
+    switch (rule){
+        case NT_EQ_NT:
+            EMIT("EQS\n");
+            break;
+        case NT_NEQ_NT:
+            EMIT("EQS\n");
+            EMIT("NOTS\n");
+            break;
+        case NT_LEQ_NT:
+            EMIT("GTS\n");
+            EMIT("NOTS\n");
+            break;
+        case NT_LTN_NT:
+            EMIT("LTS\n");
+            break;
+        case NT_MEQ_NT:
+            EMIT("LTS\n");
+            EMIT("NOTS\n");
+            break;
+        case NT_MTN_NT:
+            EMIT("GTS\n");
+            break;
+        case NT_PLUS_NT:
+            EMIT("ADDS\n");
+            break;
+        case NT_MINUS_NT:
+            EMIT("SUBS\n");
+            break;
+        case NT_MUL_NT:
+            EMIT("MULS\n");
+            break;
+        case NT_DIV_NT:
+            EMIT("DIVS\n");
+            break;
+        default:
+            break;
+    }
+
+    return true;
+}
+
+bool generate_stack_push(token_t_ptr token) {
+    switch (token->token_type) {
+        case T_INT:
+        EMIT("PUSHS int@");
+            EMIT_INT(token->attribute.integer);
+            EMIT("\n");
+            break;
+        case T_DECIMAL:
+        EMIT("PUSHS float@");
+            EMIT_INT(token->attribute.decimal);
+            EMIT("\n");
+            break;
+        case T_STRING:
+        EMIT("PUSHS string@");
+            EMIT(token->attribute.string);
+            EMIT("\n");
+            break;
+        case T_ID:
+        EMIT("PUSHS LF@");
+            EMIT(token->attribute.string);
+            EMIT("\n");
+            break;
+        default:
+            break;
+    }
+
+    return true;
+}
+
 void codegen_flush()
 {
     fprintf(stdout, "%s", code->string);
