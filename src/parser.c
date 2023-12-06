@@ -319,7 +319,9 @@ int stm(parser_data_t *data) {
             CHECK_RULE(expression)
 
             data->is_in_declaration = false;
-            return stm(data);
+            if(data->eol_flag)
+                return stm(data);
+            return ER_SYNTAX;
         }
         else return ER_SYNTAX;
 
