@@ -491,7 +491,8 @@ int expression(parser_data_t* data){
 
     }while(!success);
 
-
+    if(!data->eol_flag && (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE && data->token_ptr->token_type != T_CURVED_BRACKET_OPEN))
+        return ER_SYNTAX;
 
     t_stack_elem op1;
     op1.symbol = N_TERMINAL;

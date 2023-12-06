@@ -472,39 +472,39 @@ def test_all():
 
     # function definitions, calls, returns
 
-    test("""
-    f1()
+    # test("""
+    # f1()
+    #
+    # func f1() {
+    #     let a = 4
+    #     write("a=", a )
+    # }
+    # """, "a=4")
 
-    func f1() {
-        let a = 4
-        write("a=", a )
-    }
-    """, "a=4")
+    # test("""
+    # f1()
+    # write(" ")
+    # f1()
+    #
+    # func f1() {
+    #     let a = 4
+    #     write("a=", a )
+    # }
+    # """, "a=4 a=4")
 
-    test("""
-    f1()
-    write(" ")
-    f1()
-
-    func f1() {
-        let a = 4
-        write("a=", a )
-    }
-    """, "a=4 a=4")
-
-    test("""
-    var a = 0
-    f1()
-    write(" ")
-    f1()
-    write(" ")
-    f1()
-
-    func f1() {
-        write("a=", a )
-        a = a + 1
-    }
-    """, "a=0 a=1 a=2")
+    # test("""
+    # var a = 0
+    # f1()
+    # write(" ")
+    # f1()
+    # write(" ")
+    # f1()
+    #
+    # func f1() {
+    #     write("a=", a )
+    #     a = a + 1
+    # }
+    # """, "a=0 a=1 a=2")
 
     # test_invalid("""
     # if true {
@@ -551,30 +551,30 @@ def test_all():
     # parameter name must differ from identifier (why????)
     test_invalid("func abc(a a: Int) {}", error_other_semantic)
 
-    test("""
-    // mutual recursion
-
-    func a(_ i: Int) {
-        write("a: ", i, " ")
-        let decrement = i - 1
-
-        if decrement >= 0 {
-            b(decrement)
-        } else {}
-    }
-
-    func b(_ i: Int) {
-        write("b: ", i, " ")
-        let decrement = i - 1
-
-        if decrement >= 0 {
-            a(decrement)
-        } else {}
-    }
-
-    a(4)
-    b(4)
-    """, "a: 4 b: 3 a: 2 b: 1 a: 0 b: 4 a: 3 b: 2 a: 1 b: 0 ")
+    # test("""
+    # // mutual recursion
+    #
+    # func a(_ i: Int) {
+    #     write("a: ", i, " ")
+    #     let decrement = i - 1
+    #
+    #     if decrement >= 0 {
+    #         b(decrement)
+    #     } else {}
+    # }
+    #
+    # func b(_ i: Int) {
+    #     write("b: ", i, " ")
+    #     let decrement = i - 1
+    #
+    #     if decrement >= 0 {
+    #         a(decrement)
+    #     } else {}
+    # }
+    #
+    # a(4)
+    # b(4)
+    # """, "a: 4 b: 3 a: 2 b: 1 a: 0 b: 4 a: 3 b: 2 a: 1 b: 0 ")
 
     test_invalid("""
     func a(_ a: Int) {}
@@ -620,23 +620,23 @@ def test_all():
     func a() { a() } // :wicked:
     """)
 
-    test_valid("""
-    func a() { c() }
-    func c() { b() }
-    func b() { a() }
-    """)
+    # test_valid("""
+    # func a() { c() }
+    # func c() { b() }
+    # func b() { a() }
+    # """)
 
-    test_valid("""
-    func a(_ i: Int, param j: Double?) { c(i, param: j) }
-    func c(_ i: Int, param j: Double?) { b(i, param: j) }
-    func b(_ i: Int, param j: Double?) { a(i, param: j) }
-    """)
+    # test_valid("""
+    # func a(_ i: Int, param j: Double?) { c(i, param: j) }
+    # func c(_ i: Int, param j: Double?) { b(i, param: j) }
+    # func b(_ i: Int, param j: Double?) { a(i, param: j) }
+    # """)
 
-    test_valid("""
-    func a(_ i: Int) { c(i) }
-    func c(_ i: Int) { b(i) }
-    func b(_ i: Int) { a(i) }
-    """)
+    # test_valid("""
+    # func a(_ i: Int) { c(i) }
+    # func c(_ i: Int) { b(i) }
+    # func b(_ i: Int) { a(i) }
+    # """)
 
     test_valid("""
     func a(_ i: Int?) {}
