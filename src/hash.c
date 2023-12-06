@@ -84,6 +84,8 @@ item_data* insert_symbol(hash_table* ht, char* name, bool *internal_error) {
         return NULL;
     }
 
+    newSymbol->data = create_default_item();
+
     if (!(newSymbol->data.params = (string_ptr)malloc(sizeof(string_ptr))))
     {
         free(newSymbol->name);
