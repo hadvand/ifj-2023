@@ -924,6 +924,8 @@ int check_func_call(parser_data_t *data, int position){
     GET_TOKEN()
     if(data->token_ptr->token_type != T_BRACKET_CLOSE && data->id_type->params->string == NULL)
         return ER_PARAMS;
+    else if(data->token_ptr->token_type == T_BRACKET_CLOSE && data->param_index != data->id_type->params->last_index)
+        return ER_PARAMS;
     else if(data->token_ptr->token_type == T_ID){
 
 //        printf("id_name[position]: %s AND %s\n",data->id->id_names[position],data->token_ptr->attribute.string);
@@ -951,6 +953,11 @@ int check_func_call(parser_data_t *data, int position){
     }
     else if(data->token_ptr->token_type == T_BRACKET_CLOSE && (data->id_type->params == NULL || data->id_type->params->last_index == 0))
         return ER_NONE;
+    else if(data->param_index+1 != data->id_type->params->last_index)
+        return ER_SYNTAX;
+    GET_TOKEN();
+    if(data->token_ptr->token_type == T_EOF)
+        return ER_SYNTAX;
     return ER_PARAMS;
 }
 
