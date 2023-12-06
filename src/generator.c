@@ -26,6 +26,12 @@
             EMIT(_str);\
         } while (0)
 
+#define EMIT_FL(_number) do {\
+            char _str[MAX];\
+            sprintf(_str, "%f", (_number));\
+            EMIT(_str);\
+        } while (0)
+
 #define MAX 64
 
 string_ptr code;
@@ -248,7 +254,7 @@ bool generate_stack_push(token_t_ptr token) {
             break;
         case T_DECIMAL:
         EMIT("PUSHS float@");
-            EMIT_INT(token->attribute.decimal);
+            EMIT_FL(token->attribute.decimal);
             EMIT("\n");
             break;
         case T_STRING:
