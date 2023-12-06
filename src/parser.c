@@ -734,7 +734,12 @@ item_type get_type(struct token* token, parser_data_t * data, item_data* item){
         case T_ID:
             if(table_count_elements_in_stack(data->table_stack) == 0)
                 return IT_UNDEF;
-            symbol = find_symbol_global(data->table_stack, token->attribute.string,false);
+            bool is_overlap;
+            if(data->id->id == NULL)
+                is_overlap = false;
+            else
+                is_overlap = !data->id->is_function && !strcmp(data->id->id,data->token_ptr->attribute.string);
+            symbol = find_symbol_global(data->table_stack, token->attribute.string,is_overlap);
             if (symbol == NULL){
                 item->nil_possibility = false;
                 item->defined = false;
