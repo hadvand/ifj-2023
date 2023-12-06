@@ -305,9 +305,8 @@ int expression(parser_data_t* data){
     printf("semantic analysis starts\n");
 #endif
 
-
-    if(data->id == NULL || (data->id->is_let && data->id->defined))
-        return ER_OTHER_SEM_2;
+    if((data->id->is_let && data->id->defined))
+        return ER_OTHER_SEM;
 
     stack_init(&stack);
     //init item_data
@@ -355,7 +354,7 @@ int expression(parser_data_t* data){
             case '=':
                 tmp_item.type = get_type(data->token_ptr,data,&tmp_item);
                 if(actual_symbol == IDENTIFIER && data->token_ptr->token_type == T_ID && !tmp_item.defined)
-                    return ER_UNDEF_VAR;
+                    return ER_UNDEF_VAR_OR_NOTINIT_VAR;
                 //tmp_item.it_is_nil = data->token_ptr->attribute.keyword == k_nil;
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
@@ -390,7 +389,7 @@ int expression(parser_data_t* data){
                 }
                 tmp_item.type = get_type(data->token_ptr,data,&tmp_item);
                 if(actual_symbol == IDENTIFIER && data->token_ptr->token_type == T_ID && !tmp_item.defined)
-                    return ER_UNDEF_VAR;
+                    return ER_UNDEF_VAR_OR_NOTINIT_VAR;
                 //tmp_item.it_is_nil = (data->token_ptr->attribute.keyword == k_nil || (data->id_type != NULL && data->id_type->it_is_nil));
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
@@ -440,7 +439,7 @@ int expression(parser_data_t* data){
 #ifdef SEM_DEBUG
                     printf("semantic analysis finish with error\n");
 #endif
-                    FREE(ER_SEMAN);
+                    FREE(ER_UNDEF_FUNC_OR_REDEF_VAR);
                 }
                 last_action_is_reduce = false;
                 break;
@@ -563,19 +562,19 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
     if (rule == OPERAND){
         if (operand_1->item.type == IT_UNDEF && !operand_1->item.is_function){
-            return ER_UNDEF_VAR;
+            return ER_UNDEF_VAR_OR_NOTINIT_VAR;
         }
     }
 
     if (rule == LBR_NT_RBR){
         if (operand_2->item.type == IT_UNDEF){
-            return ER_UNDEF_VAR;
+            return ER_UNDEF_VAR_OR_NOTINIT_VAR;
         }
     }
 
     if (rule != OPERAND && rule != LBR_NT_RBR && rule != NT_AS_NT){
         if (operand_1->item.type == IT_UNDEF || ( operand_3 != NULL && operand_3->item.type == IT_UNDEF)){
-            return ER_UNDEF_VAR;
+            return ER_UNDEF_VAR_OR_NOTINIT_VAR;
         }
     }
 
@@ -601,7 +600,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         case NT_MUL_NT:
 
 //            if(operand_1->item.type == IT_NIL || operand_3->item.type == IT_NIL)
-//                return ER_OTHER_SEM;
+//                return ER_INFERENCE;
             //type_final->it_is_nil = false;
             if(operand_1->item.nil_possibility || operand_3->item.nil_possibility)
                 return ER_TYPE_COMP;
@@ -688,7 +687,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
         case NT_F_UNWRAP:
 
             if (operand_1->item.type == IT_UNDEF) {
-                return ER_UNDEF_VAR;
+                return ER_UNDEF_VAR_OR_NOTINIT_VAR;
             }
             if(operand_1->item.type == IT_NIL)
                 return ER_TYPE_COMP;
@@ -770,7 +769,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             }
 
             if(operand_1->item.type == IT_UNDEF && operand_3->item.type == IT_NIL)
-                return ER_OTHER_SEM;
+                return ER_INFERENCE;
 
 //            if(operand_3->item.type == IT_NIL)
 //                operand_1->item.it_is_nil = true;
@@ -784,7 +783,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
         default:
             //todo change error;
-            return ER_OTHER_SEM;
+            return ER_INFERENCE;
 
     }
 
@@ -817,13 +816,13 @@ int check_param(parser_data_t* data, int position){
             if(sym->data.defined)
                 return ER_NONE;
             else
-                return ER_UNDEF_VAR;
+                return ER_UNDEF_VAR_OR_NOTINIT_VAR;
         }
         else{
             GET_TOKEN()
             if(data->token_ptr->token_type == T_COLON)
-                return ER_OTHER_SEM_2;
-            return ER_UNDEF_VAR;
+                return ER_OTHER_SEM;
+            return ER_UNDEF_VAR_OR_NOTINIT_VAR;
         }
 
     } else{
@@ -873,7 +872,7 @@ int check_func_call(parser_data_t *data, int position){
         if(position+1 > data->id_type->params->last_index && !its_write)
             return ER_PARAMS;
         else if(data->id_type->id_names && strcmp(data->id_type->id_names[position],"_"))
-            return ER_OTHER_SEM_2;
+            return ER_OTHER_SEM;
         return check_param(data,position);
     }
     else if(data->token_ptr->token_type == T_BRACKET_CLOSE && (data->id_type->params == NULL || data->id_type->params->last_index == 0))

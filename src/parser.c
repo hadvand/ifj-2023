@@ -37,7 +37,7 @@
         data->id = insert_symbol(data->table_stack->top->table,data->token_ptr->attribute.string,&internal_error);\
         if(!data->id){\
             if(internal_error) return ER_INTERNAL;\
-        else return ER_SEMAN;\
+        else return ER_UNDEF_FUNC_OR_REDEF_VAR;\
 }                       \
 
 
@@ -321,13 +321,13 @@ int stm(parser_data_t *data) {
         symbol *idFromTable = NULL;
 
         if((idFromTable = find_symbol_global(data->table_stack, data->token_ptr->attribute.string)) == NULL)
-            return ER_UNDEF_VAR;
+            return ER_UNDEF_VAR_OR_NOTINIT_VAR;
         data->id = &(idFromTable->data);
         GET_TOKEN()
         if (data->token_ptr->token_type == T_BRACKET_OPEN) {
 
             if(!data->id->is_function)
-                return ER_SEMAN;
+                return ER_UNDEF_FUNC_OR_REDEF_VAR;
 
             data->id_type = data->id;
             data->param_index = 0;
@@ -355,7 +355,7 @@ int stm(parser_data_t *data) {
     // <stm> -> func func_id( <func_params> ) { <stm> <return_void> } \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_func) {
         if(data->func_id != NULL)
-            return ER_OTHER_SEM_2;
+            return ER_OTHER_SEM;
         VERIFY_TOKEN(T_ID)
         data->is_in_declaration = true;
 
@@ -363,7 +363,7 @@ int stm(parser_data_t *data) {
 
         if((idFromTable = find_symbol(data->table_stack->top->table, data->token_ptr->attribute.string)) != NULL){
             if(idFromTable->data.is_function)
-                return ER_OTHER_SEM_2;
+                return ER_OTHER_SEM;
         }
 
         INSERT_SYM()
@@ -560,7 +560,7 @@ int condition(parser_data_t *data) {
         if(table_count_elements_in_stack(data->table_stack) == 0)
             return ER_INTERNAL;
         if (!find_symbol(data->table_stack->top->table, data->token_ptr->attribute.string)) {
-            return ER_UNDEF_VAR;
+            return ER_UNDEF_VAR_OR_NOTINIT_VAR;
         }
         GET_TOKEN()
         return ret_code;
@@ -602,13 +602,13 @@ int func_params(parser_data_t *data) {
 
 
             if(!strcmp(data->id->id_names[data->param_index],data->token_ptr->attribute.string)){
-                return ER_OTHER_SEM_2;
+                return ER_OTHER_SEM;
             }
             // if there is function named as parameter
             if(table_count_elements_in_stack(data->table_stack) != 2)
                 return ER_INTERNAL;
             if (find_symbol(data->table_stack->top->table, data->token_ptr->attribute.string))
-                return ER_UNDEF_VAR;
+                return ER_UNDEF_VAR_OR_NOTINIT_VAR;
 
             // if we are in definition, we need to add_LitInt_LitInt parameters to the local symtable
             bool internal_error;
@@ -617,7 +617,7 @@ int func_params(parser_data_t *data) {
             if (!(data->exp_type = insert_symbol(data->table_stack->top->table, data->token_ptr->attribute.string,
                                              &internal_error))) {
                 if (internal_error) return ER_INTERNAL;
-                else return ER_UNDEF_VAR;
+                else return ER_UNDEF_VAR_OR_NOTINIT_VAR;
             }
             data->exp_type->defined = true;
         }
@@ -694,6 +694,8 @@ int return_rule(parser_data_t *data) {
 
     if (!(data->token_ptr->token_type == T_KEYWORD && data->token_ptr->attribute.keyword == k_return)) return ER_SYNTAX;
     GET_TOKEN()
+    if(data->func_id == NULL)
+        return ER_SYNTAX;
     data->id = data->func_id;
 
     if (data->token_ptr->token_type == T_CURVED_BRACKET_CLOSE) return ER_FUNC_RETURN;
