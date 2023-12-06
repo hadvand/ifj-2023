@@ -737,8 +737,6 @@ int return_void_rule(parser_data_t *data) {
 }
 
 item_type get_type(struct token* token, parser_data_t * data, item_data* item){
-
-
     symbol* symbol;
     *item = create_default_item();
 

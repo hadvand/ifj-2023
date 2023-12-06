@@ -443,7 +443,12 @@ int expression(parser_data_t* data){
 #endif
                     FREE(ER_INTERNAL);
                 }
-                //TODO generatecode
+
+                bool is_local = table_count_elements_in_stack(data->table_stack) - 1;  // will be 0 (false), if we are in a global table
+                if (actual_symbol == IDENTIFIER) {
+                    CODEGEN(gen_check_var_defined, data->token_ptr->attribute.string, is_local)
+                }
+                CODEGEN(gen_push_token, data->token_ptr, is_local)
 
 #ifdef SEM_DEBUG
                 stack_print_all_symbols(&stack);
@@ -509,6 +514,11 @@ int expression(parser_data_t* data){
         FREE(ret_code);
     }
     *(data->id) = op1.item;
+
+    if (data->id) {
+        CODEGEN(gen_pop_expr_result, data->id->id, data->id->global ? "GF" : "LF");
+    }
+
 #ifdef SEM_DEBUG
     printf("semantic analysis finish\n");
 #endif
@@ -955,4 +965,3 @@ int check_func_call(parser_data_t *data, int position){
         return ER_NONE;
     return ER_PARAMS;
 }
-

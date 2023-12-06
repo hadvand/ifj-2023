@@ -15,6 +15,30 @@
 #include "parser.h"
 #include "semantics.h"
 
+#define GENERATE_CODE(...) fprintf(stdout, __VA_ARGS__)
+
+#define CODEGEN(_func, ...) if (!_func(__VA_ARGS__)) return ER_INTERNAL;\
+
+#define EMIT(_text)\
+        if (!string_concat(code, (_text))) {\
+            return false; } else {}\
+        codegen_flush();
+
+#define EMIT_NL(_text)\
+            EMIT(_text"\n");
+
+#define EMIT_INT(_number) do {\
+            char _str[MAX];\
+            sprintf(_str, "%d", (_number));\
+            EMIT(_str);\
+        } while (0)
+
+#define EMIT_FL(_number) do {\
+            char _str[MAX];\
+            sprintf(_str, "%f", (_number));\
+            EMIT(_str);\
+        } while (0)
+
 // Built-in functions
 #define BUILTIN_LENGTH                                                      \
     "\nLABEL $len"														    \
@@ -210,5 +234,25 @@ bool generate_stack_operation(Precedence_rules rule);
  * @brief
  */
 bool generate_stack_push(token_t_ptr token);
+
+/**
+ * @brief
+ */
+bool gen_define_var(const char* var, bool is_local_scope);
+
+/**
+ * @brief
+ */
+bool gen_check_var_defined(const char* id, bool local);
+
+/**
+ * @brief
+ */
+bool gen_push_token(token_t_ptr token, bool is_local_scope);
+
+/**
+ * @brief
+ */
+bool gen_pop_expr_result(const char* var, const char* scope);
 
 #endif //GENERATOR_H

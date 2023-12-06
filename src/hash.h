@@ -41,7 +41,6 @@ typedef struct
     bool defined;
     bool global;
     bool is_function;
-    bool global;
 } item_data;
 
 /**

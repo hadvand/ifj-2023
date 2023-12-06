@@ -9,29 +9,6 @@
 #include <stdbool.h>
 #include "string.h"
 
-
-#define GENERATE_CODE(...) fprintf(stdout, __VA_ARGS__)
-
-#define EMIT(_text)\
-        if (!string_concat(code, (_text))) {\
-            return false; } else {}\
-        codegen_flush();                    \
-
-#define EMIT_NL(_text)\
-            EMIT(_text"\n")
-
-#define EMIT_INT(_number) do {\
-            char _str[MAX];\
-            sprintf(_str, "%d", (_number));\
-            EMIT(_str)\
-        } while (0)
-
-#define EMIT_FL(_number) do {\
-            char _str[MAX];\
-            sprintf(_str, "%f", (_number));\
-            EMIT(_str)\
-        } while (0)
-
 #define MAX 64
 
 string_ptr code;
@@ -263,6 +240,48 @@ bool generate_stack_push(token_t_ptr token) {
         default:
             break;
     }
+
+    return true;
+}
+
+bool gen_check_var_defined(const char* id, bool local)
+{
+    EMIT("TYPE GF@EXPR_TYPE ")
+    EMIT(local ? "LF@" : "GF@")
+    EMIT(id)
+    EMIT_NL()
+    EMIT_NL("JUMPIFEQ !*sem_error_five GF@EXPR_TYPE string@")
+
+    return true;
+}
+
+bool gen_define_var(const char* var, bool is_local_scope)
+{
+    EMIT("DEFVAR ");
+    const char* frame = is_local_scope ? "LF" : "GF";
+    EMIT(frame);
+    EMIT("@");
+    EMIT(var);
+    EMIT("\n");
+
+    return true;
+}
+
+bool gen_push_token(token_t_ptr token, bool is_local_scope) {
+    EMIT("PUSHS ");
+    if (!gen_value_from_token(token, is_local_scope)) return false;
+    EMIT("\n");
+
+    return true;
+}
+
+bool gen_pop_expr_result(const char* var, const char* scope)
+{
+    EMIT("POPS ");
+    EMIT(scope);
+    EMIT("@");
+    EMIT(var);
+    EMIT("\n");
 
     return true;
 }
