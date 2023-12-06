@@ -126,10 +126,8 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
     unsigned quot_count = 0;
     *flag = false;
     while((c = getc(stdin))){
-        //printf("%c\n",c);
         switch(state){
             case(S_START):
-                //printf("current sym %c\n",c);
                 if(c == '\n'){
                     (*line_cnt)++;
                     *flag = true;

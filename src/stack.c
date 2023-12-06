@@ -45,14 +45,6 @@ bool stack_pop(t_stack *s)
 }
 
 
-//void symbol_stack_pop_count(Symbol_stack* s, int count)
-//{
-//    for (int i = 0; i < count; i++)
-//    {
-//        symbol_stack_pop(s);
-//    }
-//}
-
 int stack_count_elements(t_stack *s){
     int count = 0;
     t_stack_elem *tmp = s->top;

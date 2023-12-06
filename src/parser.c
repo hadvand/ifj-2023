@@ -294,7 +294,6 @@ int stm(parser_data_t *data) {
             else if (data->eol_flag) {
                 data->is_in_declaration = false;
                 if(data->id->nil_possibility) {
-                    //data->id->it_is_nil = true;
                     data->id->defined = true;
                 }
                 return stm(data);
@@ -337,7 +336,6 @@ int stm(parser_data_t *data) {
             if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
 
             GET_TOKEN()
-//            if (!data->eol_flag) return ER_SYNTAX;
 
             return stm(data);
         }
@@ -486,7 +484,6 @@ int stm(parser_data_t *data) {
         table_stack_pop(data->table_stack);
 
         GET_TOKEN()
-//        if (!data->eol_flag) return ER_SYNTAX;
 
         return stm(data);
     }
@@ -590,7 +587,7 @@ int func_params(parser_data_t *data) {
         return ER_INTERNAL;
     GET_TOKEN()
 
-    //T_ID its var_name. it is NOOOOT a var_id
+
     if(data->token_ptr->token_type == T_UNDERLINE || data->token_ptr->token_type == T_ID){
         if((data->id->id_names[data->param_index] = (char*)realloc(data->id->id_names[data->param_index],strlen(data->token_ptr->attribute.string))) == NULL)
             return ER_INTERNAL;
@@ -789,7 +786,6 @@ int insert_data_type(parser_data_t *data){
     item_data tmp_item = create_default_item();
     item_type type;
     type = get_type(data->token_ptr,data,&tmp_item);
-    //data->id->it_is_nil = false;
 
     //var declaration
     if(data->is_in_declaration && !data->is_in_function && !data->is_in_params){
