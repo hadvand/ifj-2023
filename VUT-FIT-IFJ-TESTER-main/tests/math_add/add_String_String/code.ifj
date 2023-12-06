@@ -1,5 +1,0 @@
-var x: String = "ABC"
-var y: String = "ABC"
-//concat
-var z: String = x + y
-print(z)
