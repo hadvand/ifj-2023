@@ -363,7 +363,6 @@ int expression(parser_data_t* data){
     //init item_data
     item_data tmp_item = create_default_item();
 
-    //tmp_item.it_is_nil = false;
     stack_push(&stack, tmp_item, DOLLAR);
 
     data->id_type = NULL;
@@ -406,7 +405,7 @@ int expression(parser_data_t* data){
                 tmp_item.type = get_type(data->token_ptr,data,&tmp_item);
                 if(actual_symbol == IDENTIFIER && data->token_ptr->token_type == T_ID && !tmp_item.defined)
                     return ER_UNDEF_VAR_OR_NOTINIT_VAR;
-                //tmp_item.it_is_nil = data->token_ptr->attribute.keyword == k_nil;
+
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
 #ifdef SEM_DEBUG
@@ -441,7 +440,6 @@ int expression(parser_data_t* data){
                 tmp_item.type = get_type(data->token_ptr,data,&tmp_item);
                 if(actual_symbol == IDENTIFIER && data->token_ptr->token_type == T_ID && !tmp_item.defined)
                     return ER_UNDEF_VAR_OR_NOTINIT_VAR;
-                //tmp_item.it_is_nil = (data->token_ptr->attribute.keyword == k_nil || (data->id_type != NULL && data->id_type->it_is_nil));
                 if(!stack_push(&stack, tmp_item,actual_symbol))
                 {
 #ifdef SEM_DEBUG
@@ -521,7 +519,8 @@ int expression(parser_data_t* data){
     *(data->id) = op1.item;
 
     if (data->id) {
-        CODEGEN(gen_pop_expr_result, data->id->id, data->id->global ? "GF" : "LF");
+        if(data->id->type != IT_BOOL)
+            CODEGEN(gen_pop_expr_result, data->id->id, data->id->global ? "GF" : "LF");
     }
 
 #ifdef SEM_DEBUG
@@ -633,8 +632,6 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                     item_data *type_final){
 
     type_final->type = IT_UNDEF;
-    //bool operand_1_to_int = false;
-    //bool operand_3_to_int = false;
     bool operand_1_to_double = false;
     bool operand_3_to_double = false;
 
@@ -662,14 +659,12 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             type_final->nil_possibility = operand_1->item.nil_possibility;
             type_final->defined = operand_1->item.defined;
             type_final->is_function = operand_1->item.is_function;
-            //type_final->it_is_nil = operand_1->item.it_is_nil;
             break;
 
         case LBR_NT_RBR:
             type_final->type = operand_2->item.type;
             type_final->nil_possibility = operand_2->item.nil_possibility;
             type_final->defined = true;
-            //type_final->it_is_nil = operand_2->item.it_is_nil;
             break;
 
         case NT_DIV_NT:
@@ -679,7 +674,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
 //            if(operand_1->item.type == IT_NIL || operand_3->item.type == IT_NIL)
 //                return ER_INFERENCE;
-            //type_final->it_is_nil = false;
+
             if(operand_1->item.nil_possibility || operand_3->item.nil_possibility)
                 return ER_TYPE_COMP;
             // concatenation
@@ -724,7 +719,7 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             }
 
             break;
-            // dealing with ?? monster
+            // dealing with ??
         case NT_COALESCE_NT:
 
             if(operand_1->item.type != operand_3->item.type){
@@ -736,7 +731,6 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                     type_final->type = IT_DOUBLE;
                 }
                 else if(operand_1->item.type == IT_NIL){
-                    //if(operand_3->item.type == IT_NIL)
                     type_final->type = operand_3->item.type;
                 }
                 else
@@ -750,18 +744,8 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                     return ER_TYPE_COMP;
             }
 
-//            if (operand_1->item.type == IT_UNDEF && operand_3->item.type == IT_NIL) {
-//                // Operand_1 is undefined, but Operand_3 is nil
-//                type_final->type = IT_NIL;
-//            } else if (operand_1->item.type == IT_UNDEF) {
-//                // Operand_1 is undefined
-//                type_final->type = operand_3->item.type;
-//            } else {
-//                // Operand_1 is defined
-//                type_final->type = operand_1->item.type;
-//            }
             break;
-            //dealing with ! monster
+            //dealing with !
         case NT_F_UNWRAP:
 
             if (operand_1->item.type == IT_UNDEF) {
@@ -773,8 +757,6 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             type_final->nil_possibility = false;
             type_final->defined = true;
             type_final->type = operand_1->item.type;
-
-            //type_final->it_is_nil = operand_2->item.it_is_nil;
             break;
         case NT_EQ_NT:
         case NT_NEQ_NT:
@@ -788,7 +770,6 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
 
             type_final->type = IT_BOOL;
             type_final->nil_possibility = false;
-            //type_final->it_is_nil = false;
             type_final->defined = true;
             break;
         case NT_LEQ_NT:
@@ -811,16 +792,9 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
                 return ER_TYPE_COMP;
             }
 
-//            if (operand_1->item.type == IT_STRING) {
-//                if (rule == NT_LEQ_NT || rule == NT_MEQ_NT) {
-//                    // <= and >= are not supported for strings for some reason
-//                    return ER_TYPE_COMP;
-//                }
-//            }
 
             type_final->type = IT_BOOL;
             type_final->nil_possibility = false;
-            //type_final->it_is_nil = false;
             type_final->defined = true;
             break;
         case NT_AS_NT:
@@ -849,9 +823,6 @@ static int check_semantics(Precedence_rules rule, t_stack_elem* operand_1, t_sta
             if(operand_1->item.type == IT_UNDEF && operand_3->item.type == IT_NIL)
                 return ER_INFERENCE;
 
-//            if(operand_3->item.type == IT_NIL)
-//                operand_1->item.it_is_nil = true;
-            //type_final->type = operand_3->item.type;
             if(operand_1->item.type == IT_UNDEF){
                 operand_1->item.type = operand_3->item.type;
                 operand_1->item.nil_possibility = operand_3->item.nil_possibility;
@@ -936,8 +907,6 @@ int check_param(parser_data_t* data, int position){
  */
 int check_func_call(parser_data_t *data, int position){
     int ret_code;
-//    if(position >= data->id_type->params->last_index)
-//        return ER_PARAMS;
     bool its_write = !strcmp(data->id_type->id,"write");
     GET_TOKEN()
     if(data->token_ptr->token_type != T_BRACKET_CLOSE && data->id_type->params->string == NULL)
@@ -946,7 +915,6 @@ int check_func_call(parser_data_t *data, int position){
         return ER_PARAMS;
     else if(data->token_ptr->token_type == T_ID){
 
-//        printf("id_name[position]: %s AND %s\n",data->id->id_names[position],data->token_ptr->attribute.string);
         if(data->id_type->id_names && !strcmp(data->id_type->id_names[position],data->token_ptr->attribute.string)){
             //name_id : id/const
             VERIFY_TOKEN(T_COLON)
