@@ -13,7 +13,7 @@
 #include "hash.h"
 #include "string.h"
 #include "parser.h"
-//#include "stack.h"
+#include "semantics.h"
 
 // Built-in functions
 #define BUILTIN_LENGTH                                                      \
@@ -200,5 +200,15 @@ bool gen_function_pass_param_count(int count);
  * @brief
  */
 bool gen_function_call(const char* name);
+
+/**
+ * @brief
+ */
+bool generate_stack_operation(Precedence_rules rule);
+
+/**
+ * @brief
+ */
+bool generate_stack_push(token_t_ptr token);
 
 #endif //GENERATOR_H
