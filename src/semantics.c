@@ -8,6 +8,8 @@
 #include "semantics.h"
 #include "stack.h"
 #include "error.h"
+#include "generator.h"
+#include "stdlib.h"
 
 #define TABLE_SIZE 16
 
@@ -327,6 +329,11 @@ int reduce(){
 #endif
             return ret_code;
         }
+        if(rule == NT_PLUS_NT && final_item.type == IT_STRING)
+            gen_concat_stack_strings();
+        else
+            gen_stack_operation(rule);
+
         for (int i = count_symbols_before_stop + 1; i > 0 ; i--) {
             stack_pop(&stack);
         }
@@ -442,7 +449,11 @@ int expression(parser_data_t* data){
 #endif
                     FREE(ER_INTERNAL);
                 }
-                //TODO generatecode
+
+                if (actual_symbol == IDENTIFIER) {
+                    CODEGEN(gen_push_token, data->token_ptr, !stack.top->item.global)
+                }
+
 
 #ifdef SEM_DEBUG
                 stack_print_all_symbols(&stack);
@@ -491,8 +502,7 @@ int expression(parser_data_t* data){
 
     }while(!success);
 
-    if(!data->eol_flag && (data->token_ptr->token_type != T_CURVED_BRACKET_CLOSE && data->token_ptr->token_type != T_CURVED_BRACKET_OPEN))
-        return ER_SYNTAX;
+    if (ret_code == 2) return ret_code;
 
     t_stack_elem op1;
     op1.symbol = N_TERMINAL;
@@ -509,6 +519,11 @@ int expression(parser_data_t* data){
         FREE(ret_code);
     }
     *(data->id) = op1.item;
+
+    if (data->id) {
+        CODEGEN(gen_pop_expr_result, data->id->id, data->id->global ? "GF" : "LF");
+    }
+
 #ifdef SEM_DEBUG
     printf("semantic analysis finish\n");
 #endif
@@ -882,8 +897,10 @@ int check_param(parser_data_t* data, int position){
                 && data->id_type->type != IT_ANY){
                 return ER_PARAMS;
             }
-            if(sym->data.defined)
+            if(sym->data.defined) {
+                gen_function_pass_param_push(data->token_ptr, !sym->data.global);
                 return ER_NONE;
+            }
             else
                 return ER_UNDEF_VAR_OR_NOTINIT_VAR;
         }

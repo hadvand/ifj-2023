@@ -11,17 +11,9 @@
 #include "parser.h"
 #include "table_stack.h"
 #include "semantics.h"
+#include "generator.h"
 
 #define UNUSED(x) (void)(x)
-
-#define INSERT_VAR() \
-            INSERT_SYM()\
-            if(table_count_elements_in_stack(data->table_stack) == 1)\
-                data->id->global = true;\
-            else\
-                data->id->global = false;\
-            data->id->defined = false;\
-            data->id->is_let = is_let;\
 
 #define GET_TOKEN() \
         if ((data->token_ptr = next_token(&(data->line_cnt), &ret_code, &(data->eol_flag))) == NULL) {\
@@ -69,7 +61,7 @@ parser_data_t *init_data()
     if(global_table == NULL) {
         return NULL;
     }
-    table_stack_push(parser_data->table_stack,global_table);
+    table_stack_push(parser_data->table_stack, global_table);
     parser_data->table_stack->top->next = NULL;
 
     parser_data->token_ptr = NULL;
@@ -226,8 +218,6 @@ parser_data_t *init_data()
         strcpy(tmp->id_names[2],"endingBefore");
     }
 
-
-
     return parser_data;
 }
 
@@ -252,10 +242,14 @@ int analyse() {
 
     parser_data->line_cnt = 1;
 
+    generator_start();
+
     if ((parser_data->token_ptr = next_token(&(parser_data->line_cnt), &ret_code, &flag)) != NULL)
     {
         ret_code = program(parser_data);
     }
+
+    generator_end();
 
     string_free(string);
     free_data(parser_data);
@@ -283,6 +277,7 @@ int stm(parser_data_t *data) {
     // <stm> -> var + let id = <expression> \n <stm>
     if (data->token_ptr->token_type == T_KEYWORD && ( data->token_ptr->attribute.keyword == k_var || (is_let = data->token_ptr->attribute.keyword == k_let))) {
         data->is_in_declaration = true;
+
         VERIFY_TOKEN(T_ID)
         INSERT_SYM()
         if(table_count_elements_in_stack(data->table_stack) == 1)
@@ -291,6 +286,8 @@ int stm(parser_data_t *data) {
             data->id->global = false;
         data->id->defined = false;
         data->id->is_let = is_let;
+
+        gen_define_var(data->id->id,!data->id->global);
         GET_TOKEN()
         if (data->token_ptr->token_type == T_COLON) {
             GET_TOKEN()
@@ -350,12 +347,17 @@ int stm(parser_data_t *data) {
             data->id_type = data->id;
             data->param_index = 0;
 
+            gen_function_before_params();
+
             CHECK_RULE(call_params)
+
+            gen_function_pass_param_count(data->param_index+1);
 
             if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
 
+            gen_function_call(data->id_type->id);
+
             GET_TOKEN()
-//            if (!data->eol_flag) return ER_SYNTAX;
 
             return stm(data);
         }
@@ -399,7 +401,7 @@ int stm(parser_data_t *data) {
         data->is_in_function = true;
         data->id->defined = true;
         hash_table *local_table = create_hash_table();
-        table_stack_push(data->table_stack,local_table);
+        table_stack_push(data->table_stack, local_table);
         CHECK_RULE(func_params)
         data->is_in_params = false;
 
@@ -748,8 +750,6 @@ int return_void_rule(parser_data_t *data) {
 }
 
 item_type get_type(struct token* token, parser_data_t * data, item_data* item){
-
-
     symbol* symbol;
     *item = create_default_item();
 

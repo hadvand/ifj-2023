@@ -1,7 +1,7 @@
 /**
  * @file generator.h
  * @author Neonila Mashlai (xmashl00)
- * @author Oleg Borsh (xborsh00)
+ * @author Oleg Borshch (xborsh00)
  * @brief code generation
  */
 #ifndef GENERATOR_H
@@ -11,13 +11,36 @@
 #include <stdlib.h>
 
 #include "hash.h"
-//#include "parser.h"
-//#include "stack.h"
+#include "string.h"
+#include "parser.h"
+#include "semantics.h"
 
 #define GENERATE_CODE(...) fprintf(stdout, __VA_ARGS__)
 
+#define CODEGEN(_func, ...) if (!_func(__VA_ARGS__)) return ER_INTERNAL;\
+
+#define EMIT(_text)\
+        if (!string_concat(code, (_text))) {\
+            return false; } else {}\
+        codegen_flush();
+
+#define EMIT_NL(_text)\
+            EMIT(_text"\n");
+
+#define EMIT_INT(_number) do {\
+            char _str[MAX];\
+            sprintf(_str, "%d", (_number));\
+            EMIT(_str);\
+        } while (0)
+
+#define EMIT_FL(_number) do {\
+            char _str[MAX];\
+            sprintf(_str, "%f", (_number));\
+            EMIT(_str);\
+        } while (0)
+
 // Built-in functions
-#define BUILTIN_LENGHT                                                      \
+#define BUILTIN_LENGTH                                                      \
     "\nLABEL $len"														    \
 	"\nPUSHFRAME"															\
 	"\nDEFVAR LF@%return"													\
@@ -86,7 +109,7 @@
     "\nDEFVAR LF@%return"													\
     "\nREAD LF@%return string"												\
     "\nPOPFRAME"															\
-    "\nRETURN\n"                                                             \
+    "\nRETURN\n"                                                            \
 
 #define BUILTIN_READINT                                                     \
     "\nLABEL $readInt"														\
@@ -105,11 +128,24 @@
     "\nRETURN\n"                                                             \
 
 #define BUILTIN_WRITE                                                       \
-    "\nLABEL $write"                                                        \
-    "\nPUSHFRAME"      \
-    "\nWRITE LF@%0"    \
-    "\nPOPFRAME"       \
-    "\nRETURN\n"         \
+    "\nLABEL $write\n"                                                        \
+    "PUSHFRAME\n"                               \
+	"DEFVAR LF@to_write\n"                      \
+	"DEFVAR LF@type\n"                          \
+	"TYPE LF@type LF@arg_count\n"                  \
+	"JUMPIFNEQ !write_end LF@type string@int\n" \
+	"DEFVAR LF@cond\n"                          \
+	"LT LF@cond LF@arg_count int@1\n"              \
+	"JUMPIFEQ !write_end LF@cond bool@true\n"   \
+	"LABEL !write_loop\n"                       \
+	"POPS LF@to_write\n"                          \
+	"WRITE LF@to_write\n"                         \
+	"SUB LF@arg_count LF@arg_count int@1\n"           \
+	"GT LF@cond LF@arg_count int@0\n"              \
+	"JUMPIFEQ !write_loop LF@cond bool@true\n"  \
+	"LABEL !write_end\n"                        \
+	"POPFRAME\n"                                \
+	"RETURN\n"                                  \
 
 #define BUILTIN_ORD \
     "\nLABEL $ord" \
@@ -123,31 +159,31 @@
 	"\nLABEL $chr"															\
 	"\nPUSHFRAME"															\
 	"\nDEFVAR LF@%return"													\
-	"\nMOVE LF@%return string@"											\
-	"\nDEFVAR LF@condition"												\
-	"\nLT LF@condition LF@%0 int@0"										\
-	"\nJUMPIFEQ $ret LF@condition bool@true"						\
+	"\nMOVE LF@%return string@"											    \
+	"\nDEFVAR LF@condition"												    \
+	"\nLT LF@condition LF@%0 int@0"										    \
+	"\nJUMPIFEQ $ret LF@condition bool@true"						        \
 	"\nGT LF@condition LF@%0 int@255"										\
-	"\nJUMPIFEQ $ret LF@condition bool@true"						\
+	"\nJUMPIFEQ $ret LF@condition bool@true"						        \
 	"\nINT2CHAR LF@%return LF@%0"											\
-	"\nLABEL $ret"													\
+	"\nLABEL $ret"													        \
 	"\nPOPFRAME"															\
 	"\nRETURN\n\n"
 
 /**
  * @brief
  */
-void generator_start(void);
+bool generator_start();
 
 /**
  * @brief
  */
-void generator_end(void);
+bool generator_end();
 
 /**
  * @brief
  */
-void generator_builtin(void);
+void generator_builtin();
 
 /**
  * @brief
@@ -158,5 +194,55 @@ void generate_var_declaration(item_data data);
  * @brief
  */
 void generate_var_definition(item_data data);
+
+/**
+ * @brief
+ */
+void codegen_flush();
+
+/**
+ * @brief
+ */
+bool gen_function_before_params();
+
+/**
+ * @brief
+ */
+bool gen_value_from_token(token_t_ptr token, bool local_frame);
+
+/**
+ * @brief
+ */
+bool gen_function_pass_param_push(token_t_ptr token, bool local_frame);
+
+/**
+ * @brief
+ */
+bool gen_function_pass_param_count(int count);
+
+/**
+ * @brief
+ */
+bool gen_function_call(const char* name);
+
+/**
+ * @brief
+ */
+bool gen_stack_operation(Precedence_rules rule);
+
+/**
+ * @brief
+ */
+bool generate_stack_push(token_t_ptr token, bool is_local);
+
+bool gen_check_var_defined(token_t_ptr token);
+
+bool gen_push_token(token_t_ptr token, bool is_local_scope);
+
+bool gen_pop_expr_result(const char* var, const char* scope);
+
+bool gen_define_var(const char* var, bool is_local);
+
+bool gen_concat_stack_strings();
 
 #endif //GENERATOR_H
