@@ -56,4 +56,6 @@ bool string_append(string_ptr string, char c);
  */
 bool string_concat(string_ptr string, const char* src);
 
+void string_clear(string_ptr str);
+
 #endif

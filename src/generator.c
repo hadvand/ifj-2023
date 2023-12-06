@@ -15,21 +15,21 @@
 #define EMIT(_text)\
         if (!string_concat(code, (_text))) {\
             return false; } else {}\
-        codegen_flush();
+        codegen_flush();                    \
 
 #define EMIT_NL(_text)\
-            EMIT(_text"\n");
+            EMIT(_text"\n")
 
 #define EMIT_INT(_number) do {\
             char _str[MAX];\
             sprintf(_str, "%d", (_number));\
-            EMIT(_str);\
+            EMIT(_str)\
         } while (0)
 
 #define EMIT_FL(_number) do {\
             char _str[MAX];\
             sprintf(_str, "%f", (_number));\
-            EMIT(_str);\
+            EMIT(_str)\
         } while (0)
 
 #define MAX 64
@@ -49,38 +49,31 @@ void generator_builtin(void){
     fprintf(stdout, "%s", BUILTIN_CHR);
 }
 
-void generator_start(void){
-    code = string_init();
-    GENERATE_CODE(".IFJcode23\n");
-    GENERATE_CODE("JUMP $$main\n");
-    GENERATE_CODE("\nLABEL $$main\n");
-    GENERATE_CODE("CREATEFRAME\n");
-    GENERATE_CODE("PUSHFRAME\n");
-}
-
-void generator_end(void){
-    GENERATE_CODE("POPFRAME\n");
-    GENERATE_CODE("CLEARS\n");
-}
-
-bool main_scope_start()
+void codegen_flush()
 {
-    GENERATE_CODE("\n# Main scope starts");
+    fprintf(stdout, "%s", code->string);
+    string_clear(code);
+}
 
-    GENERATE_CODE("LABEL $$main");
-    GENERATE_CODE("CREATEFRAME");
-    GENERATE_CODE("PUSHFRAME");
+bool generator_start(void){
+    code = string_init();
+    EMIT(".IFJcode23\n")
+    EMIT("JUMP $$main\n")
+
+    generator_builtin();
+
+    EMIT("\nLABEL $$main\n")
+    EMIT("CREATEFRAME\n")
+    EMIT("PUSHFRAME\n")
 
     return true;
 }
 
+bool generator_end(void){
+    EMIT("POPFRAME\n")
+    EMIT("CLEARS\n")
 
-bool main_scope_end()
-{
-    GENERATE_CODE("# Main scope ends ");
-
-    GENERATE_CODE("POPFRAME");
-    GENERATE_CODE("CLEARS");
+    codegen_flush();
 
     return true;
 }
@@ -195,7 +188,7 @@ bool gen_function_pass_param_count(int count)
 
 bool gen_function_call(const char* name)
 {
-    EMIT("CALL !")
+    EMIT("CALL $")
     EMIT(name)
     EMIT("\n")
 
@@ -274,8 +267,4 @@ bool generate_stack_push(token_t_ptr token) {
     return true;
 }
 
-void codegen_flush()
-{
-    fprintf(stdout, "%s", code->string);
-    string_free(code);
-}
+
