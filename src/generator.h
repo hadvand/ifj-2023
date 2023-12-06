@@ -179,26 +179,26 @@ void codegen_flush();
 /**
  * @brief
  */
-bool emit_function_before_params();
+bool gen_function_before_params();
 
 /**
  * @brief
  */
-bool emit_value_from_token(token_t_ptr token, bool local_frame);
+bool gen_value_from_token(token_t_ptr token, bool local_frame);
 
 /**
  * @brief
  */
-bool emit_function_pass_param_push(token_t_ptr token, bool local_frame);
+bool gen_function_pass_param_push(token_t_ptr token, bool local_frame);
 
 /**
  * @brief
  */
-bool emit_function_pass_param_count(int count);
+bool gen_function_pass_param_count(int count);
 
 /**
  * @brief
  */
-bool emit_function_call(const char* name);
+bool gen_function_call(const char* name);
 
 #endif //GENERATOR_H

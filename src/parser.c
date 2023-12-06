@@ -333,11 +333,11 @@ int stm(parser_data_t *data) {
 
             CHECK_RULE(call_params)
 
-            emit_function_pass_param_count(data->param_index);
+            gen_function_pass_param_count(data->param_index);
 
             if (data->token_ptr->token_type != T_BRACKET_CLOSE) return ER_SYNTAX;
 
-            emit_function_call(data->id_type->id);
+            gen_function_call(data->id_type->id);
 
             GET_TOKEN()
 

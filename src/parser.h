@@ -14,7 +14,7 @@
 
 
 /**
- * @brief
+ * @brief internal parser data representation
  */
 typedef struct {
     int line_cnt;               // line counter
@@ -38,87 +38,77 @@ typedef struct {
 } parser_data_t;
 
 /**
- * @brief
+ * @brief initialization of parser data
  */
 parser_data_t *init_data();
 
 /**
- * @brief
+ * @brief destruction of parser data
  */
 void free_data(parser_data_t *data);
 
 /**
- * @brief
+ * @brief main function that launches the whole compiling process
  */
 int analyse();
 
 /**
- * @brief
+ * @brief program rule
  */
 int program(parser_data_t *data);
 
 /**
- * @brief
+ * @brief stm rule
  */
 int stm(parser_data_t *data);
 
 /**
- * @brief
+ * @brief stm_not_null rule
  */
 int stm_not_null(parser_data_t *data);
 
 /**
- * @brief
+ * @brief condition rule
  */
 int condition(parser_data_t *data);
 
 /**
- * @brief
- */
-int func(parser_data_t *data);
-
-/**
- * @brief
+ * @brief func_params rule
  */
 int func_params(parser_data_t *data);
 
 /**
- * @brief
+ * @brief func_params_not_null rule
  */
 int func_params_not_null(parser_data_t *data);
 
 /**
- * @brief
+ * @brief var_type rule
  */
 int var_type(parser_data_t *data);
 
 /**
- * @brief
+ * @brief return rule
  */
 int return_rule(parser_data_t *data);
 
 /**
- * @brief
+ * @brief return_void rule
  */
 int return_void_rule(parser_data_t *data);
 
 /**
- * @brief
- */
-int nil_flag(parser_data_t *data);
-
-/**
- * @brief
+ * @brief call_params rule
  */
 int call_params(parser_data_t *data);
 
 /**
- * @brief
+ * @brief call_params_n rule
  */
 int call_params_n(parser_data_t *data);
 
 /**
- * @brief
+ * @brief token type getter
  */
 item_type get_type(struct token* token, parser_data_t * data, bool* nil_possibility, bool* defined);
 

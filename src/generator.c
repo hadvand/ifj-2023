@@ -112,22 +112,22 @@ void generate_var_definition(item_data data){
     }
 }
 
-bool emit_function_before_params()
+bool gen_function_before_params()
 {
     EMIT_NL("CREATEFRAME")
 
     return true;
 }
 
-bool emit_function_pass_param_push(token_t_ptr token, bool local_frame) {
+bool gen_function_pass_param_push(token_t_ptr token, bool local_frame) {
     EMIT("PUSHS ");
-    if (!emit_value_from_token(token, local_frame)) return false;
+    if (!gen_value_from_token(token, local_frame)) return false;
     EMIT("\n");
 
     return true;
 }
 
-bool emit_value_from_token(token_t_ptr token, bool local_frame) {
+bool gen_value_from_token(token_t_ptr token, bool local_frame) {
     char term[MAX];
     unsigned char c;
     string_ptr tmp;
@@ -177,7 +177,7 @@ bool emit_value_from_token(token_t_ptr token, bool local_frame) {
     return true;
 }
 
-bool emit_function_pass_param_count(int count)
+bool gen_function_pass_param_count(int count)
 {
     EMIT("DEFVAR TF@arg_count\n");
     EMIT("MOVE TF@arg_count int@");
@@ -187,7 +187,7 @@ bool emit_function_pass_param_count(int count)
     return true;
 }
 
-bool emit_function_call(const char* name)
+bool gen_function_call(const char* name)
 {
     EMIT("CALL !")
     EMIT(name)
