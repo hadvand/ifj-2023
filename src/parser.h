@@ -63,11 +63,6 @@ int program(parser_data_t *data);
 int stm(parser_data_t *data);
 
 /**
- * @brief stm_not_null rule
- */
-int stm_not_null(parser_data_t *data);
-
-/**
  * @brief condition rule
  */
 int condition(parser_data_t *data);
