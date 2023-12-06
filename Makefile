@@ -44,4 +44,4 @@ compiler: $(PARSER_PROGS) $(PROGS) $(GENERATOR_PROGS) src/main.c
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 
 clean:
-	rm -rf *.o scanner-build parser-build scanner_tests semantic-build semantic-tests scanner_test parser-debug compiler
+	rm -rf *.o scanner-build parser-build semantic-build semantic-tests scanner_test parser-debug compiler generator-tests main

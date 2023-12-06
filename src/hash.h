@@ -39,6 +39,7 @@ typedef struct
     bool is_let;
     //bool it_is_nil;
     bool defined;
+    bool global;
     bool is_function;
 } item_data;
 
