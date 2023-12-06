@@ -126,7 +126,7 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
     unsigned quot_count = 0;
     *flag = false;
     while((c = getc(stdin))){
-        //todo 2 more tokens missing
+        //printf("%c\n",c);
         switch(state){
             case(S_START):
                 //printf("current sym %c\n",c);
@@ -736,7 +736,9 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     return NULL;
                 }
             case(S_MULTILINE_OPEN):
-                if(c == '\n'){
+                if(c == 13)
+                    continue;
+                else if(c == '\n'){
                     state = S_MULTILINE_START;
                     (*line_cnt)++;
                     continue;
@@ -765,6 +767,8 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     return NULL;
                 }
             case(S_MULTILINE_LINE):
+                if(c == 13)
+                    continue;
                 if(c == '\n'){
                     state = S_MULTILINE_START;
                     if(!string_append(additional_string,c)){
