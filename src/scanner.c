@@ -524,7 +524,9 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     if(keyword_control(token,additional_string))
                         single_token(token,*line_cnt,T_KEYWORD,additional_string);
                     else{
-                        if((token->attribute.string =  (char *) realloc(token->attribute.string,additional_string->mem_allocated)) == NULL)
+                        token->attribute.string = malloc(sizeof (char)*additional_string->mem_allocated);
+
+                        if(token->attribute.string == NULL)
                             scanning_finish_with_error(token,additional_string,err_type,ER_INTERNAL);
                         strcpy(token->attribute.string,additional_string->string);
                         single_token(token,*line_cnt,T_ID,additional_string);
@@ -727,8 +729,14 @@ token_t_ptr next_token(int *line_cnt, int* err_type, bool* flag){
                     ungetc(c,stdin);
                     if(additional_string->string == NULL)
                         token->attribute.string = "";
-                    else
-                        token->attribute.string = additional_string->string;
+                    else{
+                        token->attribute.string = malloc(sizeof (char)*additional_string->mem_allocated+1);
+                        if(token->attribute.string == NULL)
+                            scanning_finish_with_error(token,additional_string,err_type,ER_INTERNAL);
+                        strcpy(token->attribute.string,additional_string->string);
+                    }
+
+                        //token->attribute.string = additional_string->string;
                     single_token(token,*line_cnt,T_STRING,additional_string);
                     return token;
                 }

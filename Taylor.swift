@@ -1,4 +1,6 @@
-    let a = 45 > 3
-    if a {
+    let a: Int? = 5
+    if let a {
+        let a = "shadowing"
         write(a)
-    } else {}
+    } else {
+    }

@@ -775,6 +775,7 @@ item_type get_type(struct token* token, parser_data_t * data, item_data* item){
             item->defined = symbol->data.defined;
             item->is_function = symbol->data.is_function;
             item->is_let = symbol->data.is_let;
+            item->global = symbol->data.global;
             return symbol->data.type;
         case T_INT:
             item->defined = false;

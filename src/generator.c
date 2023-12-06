@@ -67,29 +67,6 @@ void generate_var_declaration(item_data data){
     }
 }
 
-void generate_var_definition(item_data data){
-    if(data.global){
-        GENERATE_CODE("MOVE GF@%s ", data.id);
-    }else{
-        GENERATE_CODE("MOVE LF@%s ", data.id);
-    }
-    switch(data.type){
-        case IT_DOUBLE:
-            GENERATE_CODE("float@0.0\n");
-            break;
-        case IT_INT:
-            GENERATE_CODE("int@0\n");
-            break;
-        case IT_STRING:
-            GENERATE_CODE("string@\n");
-            break;
-        case IT_NIL:
-            GENERATE_CODE("nil@nil\n");
-            break;
-        default:
-            break;
-    }
-}
 
 bool gen_function_before_params()
 {
@@ -238,66 +215,6 @@ bool gen_stack_operation(Precedence_rules rule)
         default:
             break;
     }
-
-    return true;
-}
-
-bool generate_stack_push(token_t_ptr token, bool is_local) {
-    switch (token->token_type) {
-        case T_INT:
-        EMIT("PUSHS int@");
-            EMIT_INT(token->attribute.integer);
-            EMIT("\n");
-            break;
-        case T_DECIMAL:
-        EMIT("PUSHS float@");
-            EMIT_FL(token->attribute.decimal);
-            EMIT("\n");
-            break;
-        case T_STRING:
-        EMIT("PUSHS string@");
-            EMIT(token->attribute.string);
-            EMIT("\n");
-            break;
-        case T_ID:
-            EMIT("PUSHS LF@");
-            if(is_local){
-                EMIT("LF@");
-            }
-            else{
-                EMIT("GF@");
-            }
-            EMIT(token->attribute.string);
-            EMIT("\n");
-            break;
-        default:
-            break;
-    }
-
-    return true;
-}
-
-bool gen_check_var_defined(token_t_ptr token)
-{
-    EMIT("PUSHS ")
-
-    char result[64];
-
-    switch (token->token_type) {
-        case T_INT:
-            sprintf(result, "%d", token->attribute.integer);
-            EMIT("int@")
-            EMIT(result)
-            EMIT("\n")
-            break;
-        default:
-            string_clear(code);
-            return false;
-    }
-
-    string_clear(code);
-    return true;
-
 
     return true;
 }
