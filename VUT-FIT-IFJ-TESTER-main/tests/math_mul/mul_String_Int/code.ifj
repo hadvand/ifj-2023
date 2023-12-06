@@ -1,4 +1,0 @@
-var x: String = "ABC"
-var y: Int = 1
-var z: String = x * y
-print(z)

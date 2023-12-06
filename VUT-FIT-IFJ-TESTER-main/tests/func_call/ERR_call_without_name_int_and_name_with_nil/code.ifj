@@ -1,5 +1,0 @@
-func test_func(_ a: Int?, _ b: Int?) -> Int?{
-    return a
-}
-let ggwp: Int? = nil
-test_func(ggwp,of:nil)

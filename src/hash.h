@@ -40,6 +40,7 @@ typedef struct
     //bool it_is_nil;
     bool defined;
     bool is_function;
+    bool global;
 } item_data;
 
 /**
