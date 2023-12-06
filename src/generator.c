@@ -5,6 +5,11 @@
  * @brief code generation
  */
 
+#include "generator.h"
+#include <stdbool.h>
+#include "string.h"
+
+
 #define GENERATE_CODE(...) fprintf(stdout, __VA_ARGS__)
 
 #define EMIT(_text)\
@@ -23,12 +28,7 @@
 
 #define MAX 64
 
-#include "generator.h"
-#include <stdbool.h>
-#include "string.h"
-
 string_ptr code;
-
 
 void generator_builtin(void){
     fprintf(stdout, "%s", BUILTIN_LENGTH);

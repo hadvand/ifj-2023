@@ -8,6 +8,7 @@
 #include "semantics.h"
 #include "stack.h"
 #include "error.h"
+#include "generator.h"
 
 #define TABLE_SIZE 16
 
